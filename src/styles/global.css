@@ -1,0 +1,179 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap");
+
+:root {
+	/* Neo-brutalist color palette */
+	--color-primary: #ff3366;
+	--color-secondary: #00ff88;
+	--color-accent: #3366ff;
+	--color-success: #00cc66;
+	--color-warning: #ffcc00;
+	--color-danger: #ff3366;
+
+	--color-bg: #ffffff;
+	--color-surface: #ffffff;
+	--color-text: #000000;
+	--color-text-muted: #555555;
+	--color-border: #000000;
+
+	/* Bold shadows for neo-brutalist effect */
+	--shadow-sm: 4px 4px 0px #000000;
+	--shadow-md: 6px 6px 0px #000000;
+	--shadow-lg: 8px 8px 0px #000000;
+	--shadow-hover: 2px 2px 0px #000000;
+
+	--border-radius: 0px;
+	--border-width: 4px;
+	--font-size-xs: 0.75rem;
+	--font-size-sm: 0.875rem;
+	--font-size-base: 1rem;
+	--font-size-lg: 1.125rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.5rem;
+	--font-size-3xl: 2rem;
+	--font-size-4xl: 2.5rem;
+}
+
+[data-theme="dark"] {
+	--color-bg: #000000;
+	--color-surface: #111111;
+	--color-text: #ffffff;
+	--color-text-muted: #cccccc;
+	--color-border: #ffffff;
+	--shadow-sm: 4px 4px 0px #ffffff;
+	--shadow-md: 6px 6px 0px #ffffff;
+	--shadow-lg: 8px 8px 0px #ffffff;
+	--shadow-hover: 2px 2px 0px #ffffff;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "JetBrains Mono", monospace;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	margin: 0;
+	padding: 0;
+	line-height: 1.4;
+	font-weight: 700;
+	transition: all 0.2s ease;
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+
+/* Neo-brutalist button */
+.btn {
+	font-family: inherit;
+	font-weight: 800;
+	font-size: var(--font-size-base);
+	padding: 1rem 2rem;
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--border-radius);
+	background: var(--color-primary);
+	color: white;
+	cursor: pointer;
+	transition: all 0.1s ease;
+	text-decoration: none;
+	display: inline-block;
+	box-shadow: var(--shadow-md);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	position: relative;
+}
+
+.btn:hover {
+	transform: translate(-2px, -2px);
+	box-shadow: var(--shadow-lg);
+}
+
+.btn:active {
+	transform: translate(2px, 2px);
+	box-shadow: var(--shadow-hover);
+}
+
+/* Neo-brutalist card */
+.card {
+	background: var(--color-surface);
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--border-radius);
+	padding: 2rem;
+	box-shadow: var(--shadow-md);
+	transition: all 0.1s ease;
+	position: relative;
+}
+
+.card:hover {
+	transform: translate(-2px, -2px);
+	box-shadow: var(--shadow-lg);
+}
+
+/* Neo-brutalist input styles */
+input[type="range"] {
+	appearance: none;
+	width: 100%;
+	height: 12px;
+	background: var(--color-bg);
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--border-radius);
+	outline: none;
+	cursor: pointer;
+	box-shadow: var(--shadow-sm);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	appearance: none;
+	width: 32px;
+	height: 32px;
+	background: var(--color-primary);
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	box-shadow: var(--shadow-sm);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: var(--shadow-md);
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 800;
+	line-height: 1.2;
+	margin: 0;
+}
+
+h1 {
+	font-size: var(--font-size-4xl);
+}
+h2 {
+	font-size: var(--font-size-3xl);
+}
+h3 {
+	font-size: var(--font-size-2xl);
+}
+
+/* Neo-brutalist animations */
+@keyframes neo-bounce {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-4px);
+	}
+}
+
+.neo-bounce {
+	animation: neo-bounce 0.6s ease-in-out;
+}

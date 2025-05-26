@@ -1,16 +1,145 @@
 ---
-
+// filepath: c:\_CODE\sites\cruxcalc\src\pages\index.astro
+import Layout from "../layouts/Layout.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="CruxCalc - Modern Health & Fitness Calculators">
+	<section class="hero">
+		<div class="container">
+			<h1 class="hero-title">Modern Health & Fitness Calculators</h1>
+			<p class="hero-subtitle">
+				Accurate calculations with an engaging, modern interface. No more outdated calculator
+				websites.
+			</p>
+		</div>
+	</section>
+
+	<section class="calculators">
+		<div class="container">
+			<div class="calculator-grid">
+				<a href="/bmi" class="calculator-card">
+					<div class="calculator-icon">📊</div>
+					<h3>BMI Calculator</h3>
+					<p>Calculate your Body Mass Index with visual range indicators</p>
+					<div class="calculator-status">Available</div>
+				</a>
+
+				<div class="calculator-card coming-soon">
+					<div class="calculator-icon">🔥</div>
+					<h3>BMR Calculators</h3>
+					<p>Harris-Benedict, Mifflin-St Jeor, and Katch-McArdle formulas</p>
+					<div class="calculator-status">Coming Soon</div>
+				</div>
+
+				<div class="calculator-card coming-soon">
+					<div class="calculator-icon">💪</div>
+					<h3>Muscle Potential</h3>
+					<p>Casey Butt's formulas for maximum muscle potential</p>
+					<div class="calculator-status">Coming Soon</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.hero {
+		background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+		color: white;
+		padding: 4rem 0;
+		text-align: center;
+	}
+
+	.hero-title {
+		font-size: 3rem;
+		font-weight: 800;
+		margin: 0 0 1rem 0;
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.hero-subtitle {
+		font-size: 1.25rem;
+		margin: 0;
+		opacity: 0.9;
+	}
+
+	.calculators {
+		padding: 4rem 0;
+	}
+
+	.calculator-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+
+	.calculator-card {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 2rem;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.calculator-card:hover {
+		transform: translateY(-4px);
+		box-shadow: var(--shadow-lg);
+		border-color: var(--color-primary);
+	}
+
+	.calculator-card.coming-soon {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.calculator-card.coming-soon:hover {
+		transform: none;
+		box-shadow: var(--shadow-sm);
+		border-color: var(--color-border);
+	}
+
+	.calculator-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.calculator-card h3 {
+		margin: 0 0 1rem 0;
+		font-weight: 700;
+		color: var(--color-primary);
+	}
+
+	.calculator-card p {
+		margin: 0 0 1rem 0;
+		color: var(--color-text-muted);
+	}
+
+	.calculator-status {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: calc(var(--border-radius) / 2);
+		font-size: 0.875rem;
+		font-weight: 700;
+		background: var(--color-success);
+		color: white;
+	}
+
+	.coming-soon .calculator-status {
+		background: var(--color-warning);
+	}
+
+	@media (max-width: 768px) {
+		.hero-title {
+			font-size: 2rem;
+		}
+
+		.calculator-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
