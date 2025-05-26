@@ -130,8 +130,16 @@ import Layout from "../layouts/Layout.astro";
 						</div>
 					</div>
 				</div>
-
 				<div class="calculator-results">
+					<div class="result-card">
+						<h3>Maximum Lean Body Mass</h3>
+						<div class="result-value">
+							<span id="max-lean-number">167</span>
+							<span class="result-unit" id="lean-unit">lbs (76 kg)</span>
+						</div>
+						<p class="result-description">Muscle + organs + bones (fat-free mass)</p>
+					</div>
+
 					<div class="result-card">
 						<h3>Maximum Body Weight</h3>
 						<div class="result-value">
@@ -141,15 +149,6 @@ import Layout from "../layouts/Layout.astro";
 						<p class="result-description">
 							At <span id="target-bf-text">10</span>% body fat
 						</p>
-					</div>
-
-					<div class="result-card">
-						<h3>Maximum Lean Body Mass</h3>
-						<div class="result-value">
-							<span id="max-lean-number">167</span>
-							<span class="result-unit" id="lean-unit">lbs (76 kg)</span>
-						</div>
-						<p class="result-description">Total muscle + organs + bones</p>
 					</div>
 
 					<div class="body-parts-results">
@@ -181,14 +180,15 @@ import Layout from "../layouts/Layout.astro";
 							</div>
 						</div>
 					</div>
-
 					<div class="formula-info">
 						<h4>Casey Butt's Formula</h4>
-						<p id="formula-text">Max Weight = (H^1.5 × (√W + √A) × BF%) = 185 lbs</p>
+						<p id="formula-text">LBM = H^1.5 × (√(W × A) / 22.67) × (1.12 - 0.004 × BF%)</p>
 						<p class="formula-note">
-							These calculations are based on Casey Butt's research into the maximum muscular
-							potential of natural bodybuilders. Results represent theoretical maximums achievable
-							with optimal training, nutrition, and genetics over many years.
+							Casey Butt's scientifically-derived formula calculates maximum natural lean body mass
+							based on bone structure (wrist/ankle) and height. The formula was developed from
+							measurements of elite natural bodybuilders at their competitive peak. LBM = Lean Body
+							Mass, which excludes body fat. Total weight is calculated by dividing LBM by (1 - body
+							fat %).
 						</p>
 					</div>
 				</div>
@@ -591,27 +591,27 @@ import Layout from "../layouts/Layout.astro";
 		} else {
 			ankleInInches = parseFloat(ankleCm?.value || "21.6") / 2.54;
 		}
-
 		// Get body fat percentage
 		bodyFatPercent = parseFloat(bodyFat?.value || "10") / 100;
 
-		// Casey Butt's formula for maximum body weight
-		// Max Body Weight = Height^1.5 × (√Wrist + √Ankle) × lean body mass coefficient
-		// Simplified version: approximately 5.3 × Height^1.5 × (√Wrist + √Ankle) / (1 + bodyFat%)
+		// Casey Butt's formula for maximum lean body mass
+		// LBM = H^1.5 × (√(W × A) / 22.67) × (1.12 - 0.004 × BF%)
+		// Where H = height, W = wrist, A = ankle, BF% = body fat percentage
 
 		const heightFactor = Math.pow(heightInInches, 1.5);
-		const boneFactor = Math.sqrt(wristInInches) + Math.sqrt(ankleInInches);
-		const maxWeightLbs = (heightFactor * boneFactor * 5.3) / (1 + bodyFatPercent * 2);
+		const boneFactor = Math.sqrt(wristInInches * ankleInInches) / 22.67;
+		const bodyFatFactor = 1.12 - 0.004 * (bodyFatPercent * 100);
 
-		const maxLeanMassLbs = maxWeightLbs * (1 - bodyFatPercent);
+		const maxLeanMassLbs = heightFactor * boneFactor * bodyFatFactor;
+		const maxWeightLbs = maxLeanMassLbs / (1 - bodyFatPercent);
 
-		// Calculate individual body part measurements
-		const maxArmsInches = wristInInches + 10;
-		const maxForearmsInches = wristInInches + 6;
+		// Casey Butt's body part measurements based on bone structure
+		const maxArmsInches = wristInInches + 10.5;
+		const maxForearmsInches = wristInInches + 6.0;
 		const maxNeckInches = wristInInches + 8.5;
-		const maxChestInches = heightInInches * 0.75 + wristInInches * 0.8;
-		const maxThighsInches = ankleInInches + 15;
-		const maxCalvesInches = ankleInInches + 6.5;
+		const maxChestInches = wristInInches * 6.5;
+		const maxThighsInches = ankleInInches + 14.0;
+		const maxCalvesInches = ankleInInches + 6.0;
 
 		return {
 			maxWeightLbs,
@@ -633,10 +633,9 @@ import Layout from "../layouts/Layout.astro";
 		const results = calculateMusclePotential();
 		const maxWeightKg = results.maxWeightLbs * 0.453592;
 		const maxLeanKg = results.maxLeanMassLbs * 0.453592;
-
-		// Update weight displays
-		if (maxWeightNumber) maxWeightNumber.textContent = Math.round(results.maxWeightLbs).toString();
+		// Update displays (lean mass first, then total weight)
 		if (maxLeanNumber) maxLeanNumber.textContent = Math.round(results.maxLeanMassLbs).toString();
+		if (maxWeightNumber) maxWeightNumber.textContent = Math.round(results.maxWeightLbs).toString();
 
 		// Update weight units
 		const weightUnit = document.getElementById("weight-unit");
@@ -663,11 +662,9 @@ import Layout from "../layouts/Layout.astro";
 		document.getElementById("max-thighs").textContent =
 			`${(results.maxThighsInches * convert).toFixed(1)} ${displayUnit}`;
 		document.getElementById("max-calves").textContent =
-			`${(results.maxCalvesInches * convert).toFixed(1)} ${displayUnit}`;
-
-		// Update formula display
+			`${(results.maxCalvesInches * convert).toFixed(1)} ${displayUnit}`; // Update formula display
 		if (formulaText) {
-			formulaText.textContent = `Max Weight = (${results.heightInInches.toFixed(1)}^1.5 × (√${results.wristInInches.toFixed(1)} + √${results.ankleInInches.toFixed(1)}) × BF factor) = ${Math.round(results.maxWeightLbs)} lbs`;
+			formulaText.textContent = `LBM = ${results.heightInInches.toFixed(1)}^1.5 × (√(${results.wristInInches.toFixed(1)} × ${results.ankleInInches.toFixed(1)}) / 22.67) × (1.12 - 0.004 × ${(results.bodyFatPercent * 100).toFixed(1)}) = ${Math.round(results.maxLeanMassLbs)} lbs`;
 		}
 
 		// Save values after calculation
