@@ -1,9 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 128 128">
-    <path d="M50.4 78.5a75.1 75.1 0 0 0-28.5 6.9l24.2-65.7c.7-2 1.9-3.2 3.4-3.2h29c1.5 0 2.7 1.2 3.4 3.2l24.2 65.7s-11.6-7-28.5-7L67 45.5c-.4-1.7-1.6-2.8-2.9-2.8-1.3 0-2.5 1.1-2.9 2.7L50.4 78.5Zm-1.1 28.2Zm-4.2-20.2c-2 6.6-.6 15.8 4.2 20.2a17.5 17.5 0 0 1 .2-.7 5.5 5.5 0 0 1 5.7-4.5c2.8.1 4.3 1.5 4.7 4.7.2 1.1.2 2.3.2 3.5v.4c0 2.7.7 5.2 2.2 7.4a13 13 0 0 0 5.7 4.9v-.3l-.2-.3c-1.8-5.6-.5-9.5 4.4-12.8l1.5-1a73 73 0 0 0 3.2-2.2 16 16 0 0 0 6.8-11.4c.3-2 .1-4-.6-6l-.8.6-1.6 1a37 37 0 0 1-22.4 2.7c-5-.7-9.7-2-13.2-6.2Z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <!-- Bold shadow for neo-brutalist effect -->
+    <rect x="24" y="20" width="88" height="96" rx="4" fill="#000"/>
+    
+    <!-- Calculator body with neo-brutalist design -->
+    <rect x="20" y="16" width="88" height="96" rx="4" stroke="#000" stroke-width="4" fill="#f5f5dc"/>
+    
+    <!-- Calculator screen -->
+    <rect x="28" y="24" width="72" height="20" rx="2" stroke="#000" stroke-width="2" fill="#ffffff"/>
+    
+    <!-- Dumbbell icon in screen -->
+    <g transform="translate(64, 34)">
+        <!-- Dumbbell weights -->
+        <rect x="-16" y="-3" width="6" height="6" fill="#ff3366"/>
+        <rect x="10" y="-3" width="6" height="6" fill="#ff3366"/>
+        <!-- Dumbbell bar -->
+        <rect x="-10" y="-1" width="20" height="2" fill="#000"/>
+    </g>
+    
+    <!-- Calculator buttons grid -->
+    <!-- Row 1 -->
+    <rect x="32" y="52" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="48" y="52" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="64" y="52" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="80" y="52" width="12" height="10" stroke="#000" stroke-width="1" fill="#00ff88"/>
+    
+    <!-- Row 2 -->
+    <rect x="32" y="66" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="48" y="66" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="64" y="66" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="80" y="66" width="12" height="10" stroke="#000" stroke-width="1" fill="#00ff88"/>
+    
+    <!-- Row 3 -->
+    <rect x="32" y="80" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="48" y="80" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="64" y="80" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="80" y="80" width="12" height="10" stroke="#000" stroke-width="1" fill="#00ff88"/>
+    
+    <!-- Row 4 -->
+    <rect x="32" y="94" width="28" height="10" stroke="#000" stroke-width="1" fill="#ff3366"/>
+    <rect x="64" y="94" width="12" height="10" stroke="#000" stroke-width="1" fill="#ffffff"/>
+    <rect x="80" y="94" width="12" height="10" stroke="#000" stroke-width="1" fill="#00ff88"/>
+    
+    <!-- Muscle flex icons on sides -->
+    <path d="M8 60 Q12 58 16 60 Q12 68 8 66 Z" fill="#3366ff" stroke="#000" stroke-width="1"/>
+    <path d="M120 60 Q116 58 112 60 Q116 68 120 66 Z" fill="#3366ff" stroke="#000" stroke-width="1"/>
+    
     <style>
-        path { fill: #000; }
+        /* Dark mode support */
         @media (prefers-color-scheme: dark) {
-            path { fill: #FFF; }
+            rect[fill="#f5f5dc"] { fill: #2f3349; }
+            rect[fill="#ffffff"] { fill: #111111; }
+            rect[stroke="#000"] { stroke: #ffffff; }
+            path[stroke="#000"] { stroke: #ffffff; }
+            rect[fill="#000"]:first-child { fill: #ffffff; }
         }
     </style>
 </svg>

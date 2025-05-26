@@ -1,15 +1,19 @@
 ---
 // filepath: c:\_CODE\sites\cruxcalc\src\layouts\Layout.astro
+import Footer from "../components/Footer.astro";
+
 export interface Props {
 	title: string;
 	description?: string;
 }
 
-const { title, description = "Modern health and fitness calculators with engaging design." } =
-	Astro.props;
+const { title, description = "Health and fitness calculators with engaging design." } = Astro.props;
 
 // Get current page path to highlight active nav link
 const currentPath = Astro.url.pathname;
+
+// Check if user is on any BMR page
+const isBMRPage = currentPath.includes("/bmr-");
 ---
 
 <!doctype html>
@@ -32,11 +36,32 @@ const currentPath = Astro.url.pathname;
 						<a href="/bmi" class={`nav-link ${currentPath === "/bmi" ? "nav-link-active" : ""}`}
 							>BMI</a
 						>
-						<a
-							href="/bmr-harris-benedict"
-							class={`nav-link ${currentPath === "/bmr-harris-benedict" ? "nav-link-active" : ""}`}
-							>BMR</a
-						>
+						<div class={`nav-dropdown ${isBMRPage ? "nav-dropdown-active" : ""}`}>
+							<button class="nav-dropdown-toggle">
+								BMR
+								<span class="dropdown-arrow">▼</span>
+							</button>
+							<div class="nav-dropdown-menu">
+								<a
+									href="/bmr-harris-benedict"
+									class={`nav-dropdown-link ${currentPath === "/bmr-harris-benedict" ? "nav-dropdown-link-active" : ""}`}
+								>
+									Harris-Benedict
+								</a>
+								<a
+									href="/bmr-mifflin-st-jeor"
+									class={`nav-dropdown-link ${currentPath === "/bmr-mifflin-st-jeor" ? "nav-dropdown-link-active" : ""}`}
+								>
+									Mifflin-St Jeor
+								</a>
+								<a
+									href="/bmr-katch-mcardle"
+									class={`nav-dropdown-link ${currentPath === "/bmr-katch-mcardle" ? "nav-dropdown-link-active" : ""}`}
+								>
+									Katch-McArdle
+								</a>
+							</div>
+						</div>
 						<a
 							href="/muscle-potential"
 							class={`nav-link ${currentPath === "/muscle-potential" ? "nav-link-active" : ""}`}
@@ -47,19 +72,11 @@ const currentPath = Astro.url.pathname;
 				</nav>
 			</div>
 		</header>
-
 		<main>
 			<slot />
 		</main>
 
-		<footer class="footer">
-			<div class="container">
-				<p>
-					<strong>Medical Disclaimer:</strong> These calculators are for educational purposes only and
-					should not replace professional medical advice.
-				</p>
-			</div>
-		</footer>
+		<Footer />
 
 		<style>
 			@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap");
@@ -191,8 +208,109 @@ const currentPath = Astro.url.pathname;
 				box-shadow: var(--shadow-sm);
 				transform: translate(-1px, -1px);
 			}
-
 			.nav-link-active:hover {
+				background: var(--color-primary);
+				color: white;
+			}
+
+			/* Dropdown Styles */
+			.nav-dropdown {
+				position: relative;
+				display: inline-block;
+			}
+
+			.nav-dropdown-toggle {
+				background: none;
+				border: none;
+				color: var(--color-text);
+				font-weight: 700;
+				padding: 0.5rem 1rem;
+				border-radius: var(--border-radius);
+				transition: all 0.2s ease;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+
+			.nav-dropdown-toggle:hover {
+				background: var(--color-primary);
+				color: white;
+				transform: translate(-1px, -1px);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.nav-dropdown-active .nav-dropdown-toggle {
+				background: var(--color-surface);
+				border: var(--border-width) solid var(--color-primary);
+				color: var(--color-primary);
+				box-shadow: var(--shadow-sm);
+				transform: translate(-1px, -1px);
+			}
+
+			.nav-dropdown-active .nav-dropdown-toggle:hover {
+				background: var(--color-primary);
+				color: white;
+			}
+
+			.dropdown-arrow {
+				font-size: 0.8rem;
+				transition: transform 0.2s ease;
+			}
+
+			.nav-dropdown.open .dropdown-arrow {
+				transform: rotate(180deg);
+			}
+
+			.nav-dropdown-menu {
+				position: absolute;
+				top: 100%;
+				left: 0;
+				background: var(--color-surface);
+				border: var(--border-width) solid var(--color-border);
+				border-radius: var(--border-radius);
+				box-shadow: var(--shadow-lg);
+				opacity: 0;
+				visibility: hidden;
+				transform: translateY(-10px);
+				transition: all 0.2s ease;
+				min-width: 180px;
+				z-index: 1000;
+			}
+
+			.nav-dropdown.open .nav-dropdown-menu {
+				opacity: 1;
+				visibility: visible;
+				transform: translateY(0);
+			}
+
+			.nav-dropdown-link {
+				display: block;
+				text-decoration: none;
+				color: var(--color-text);
+				padding: 0.75rem 1rem;
+				font-weight: 600;
+				transition: all 0.2s ease;
+				border-bottom: 2px solid var(--color-border);
+			}
+
+			.nav-dropdown-link:last-child {
+				border-bottom: none;
+			}
+
+			.nav-dropdown-link:hover {
+				background: var(--color-primary);
+				color: white;
+				transform: translate(-2px, -2px);
+			}
+
+			.nav-dropdown-link-active {
+				background: var(--color-secondary);
+				color: var(--color-text);
+				font-weight: 700;
+			}
+
+			.nav-dropdown-link-active:hover {
 				background: var(--color-primary);
 				color: white;
 			}
@@ -205,20 +323,9 @@ const currentPath = Astro.url.pathname;
 				transition: all 0.2s ease;
 				border-radius: var(--border-radius);
 			}
-
 			.theme-toggle:hover {
 				background: var(--color-bg);
 				transform: scale(1.1);
-			}
-
-			.footer {
-				background: var(--color-surface);
-				border-top: var(--border-width) solid var(--color-border);
-				padding: 2rem 0;
-				margin-top: 4rem;
-				text-align: center;
-				font-size: 0.875rem;
-				color: var(--color-text-muted);
 			}
 
 			@media (max-width: 768px) {
@@ -231,9 +338,21 @@ const currentPath = Astro.url.pathname;
 					flex-wrap: wrap;
 					justify-content: center;
 				}
+
+				.nav-dropdown-menu {
+					position: fixed;
+					top: auto;
+					left: 50%;
+					transform: translateX(-50%);
+					width: 90%;
+					max-width: 300px;
+				}
+
+				.nav-dropdown.open .nav-dropdown-menu {
+					transform: translateX(-50%) translateY(0);
+				}
 			}
 		</style>
-
 		<script>
 			// Theme toggle functionality
 			const themeToggle = document.getElementById("theme-toggle");
@@ -254,6 +373,75 @@ const currentPath = Astro.url.pathname;
 					themeToggle.textContent = newTheme === "dark" ? "☀️" : "🌙";
 				});
 			}
+
+			// Dropdown functionality
+			document.addEventListener("DOMContentLoaded", () => {
+				const dropdown = document.querySelector(".nav-dropdown");
+				const dropdownToggle = document.querySelector(".nav-dropdown-toggle");
+				const dropdownMenu = document.querySelector(".nav-dropdown-menu");
+				if (dropdown && dropdownToggle && dropdownMenu) {
+					// Toggle dropdown on click
+					dropdownToggle.addEventListener("click", (e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						dropdown.classList.toggle("open");
+					});
+
+					// Handle keyboard navigation
+					dropdownToggle.addEventListener("keydown", (e) => {
+						const keyEvent = e as KeyboardEvent;
+						if (keyEvent.key === "Enter" || keyEvent.key === " ") {
+							e.preventDefault();
+							dropdown.classList.toggle("open");
+						} else if (keyEvent.key === "ArrowDown") {
+							e.preventDefault();
+							dropdown.classList.add("open");
+							const firstLink = dropdownMenu.querySelector(".nav-dropdown-link") as HTMLElement;
+							if (firstLink) firstLink.focus();
+						}
+					});
+
+					// Handle navigation within dropdown
+					dropdownMenu.addEventListener("keydown", (e) => {
+						const keyEvent = e as KeyboardEvent;
+						const links = Array.from(
+							dropdownMenu.querySelectorAll(".nav-dropdown-link")
+						) as HTMLElement[];
+						const currentIndex = links.indexOf(document.activeElement as HTMLElement);
+
+						if (keyEvent.key === "ArrowDown") {
+							e.preventDefault();
+							const nextIndex = (currentIndex + 1) % links.length;
+							links[nextIndex]?.focus();
+						} else if (keyEvent.key === "ArrowUp") {
+							e.preventDefault();
+							const prevIndex = currentIndex > 0 ? currentIndex - 1 : links.length - 1;
+							links[prevIndex]?.focus();
+						} else if (keyEvent.key === "Escape") {
+							e.preventDefault();
+							dropdown.classList.remove("open");
+							(dropdownToggle as HTMLElement).focus();
+						}
+					}); // Close dropdown when clicking outside
+					document.addEventListener("click", (e) => {
+						if (!dropdown.contains(e.target as Node)) {
+							dropdown.classList.remove("open");
+						}
+					});
+
+					// Close dropdown when pressing Escape
+					document.addEventListener("keydown", (e) => {
+						if (e.key === "Escape") {
+							dropdown.classList.remove("open");
+						}
+					});
+
+					// Prevent dropdown from closing when clicking inside the menu
+					dropdownMenu.addEventListener("click", (e) => {
+						e.stopPropagation();
+					});
+				}
+			});
 		</script>
 	</body>
 </html>

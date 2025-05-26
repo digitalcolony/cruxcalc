@@ -411,13 +411,20 @@ import Layout from "../layouts/Layout.astro";
 		// Convert lean mass for display
 		const leanMassLbs = leanMass * 2.20462;
 
-		if (leanMassNumber) leanMassNumber.textContent = Math.round(leanMass).toString();
 		if (bmrNumber) bmrNumber.textContent = Math.round(bmr).toLocaleString();
 
-		// Update lean mass unit display
+		// Update lean mass display based on current weight unit
 		const leanMassUnit = document.querySelector("#lean-mass-number + .result-unit");
-		if (leanMassUnit) {
-			leanMassUnit.textContent = `kg (${Math.round(leanMassLbs)} lbs)`;
+		if (leanMassNumber && leanMassUnit) {
+			if (currentWeightUnit === "imperial") {
+				// Show lbs as primary, kg as secondary
+				leanMassNumber.textContent = Math.round(leanMassLbs).toString();
+				leanMassUnit.textContent = `lbs (${Math.round(leanMass)} kg)`;
+			} else {
+				// Show kg as primary, lbs as secondary
+				leanMassNumber.textContent = Math.round(leanMass).toString();
+				leanMassUnit.textContent = `kg (${Math.round(leanMassLbs)} lbs)`;
+			}
 		}
 
 		// Update formula display
