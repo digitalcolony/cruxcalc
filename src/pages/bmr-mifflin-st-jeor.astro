@@ -1,21 +1,38 @@
 ---
-// filepath: c:\_CODE\sites\cruxcalc\src\pages\bmi.astro
 import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout
-	title="BMI Calculator - CruxCalc"
-	description="Calculate your Body Mass Index with our modern, interactive BMI calculator. Real-time results with visual indicators."
+	title="Mifflin-St Jeor BMR Calculator - CruxCalc"
+	description="Calculate your Basal Metabolic Rate using the Mifflin-St Jeor formula. More accurate than Harris-Benedict for modern populations."
 >
 	<section class="calculator-page">
 		<div class="container">
 			<div class="calculator-header">
-				<h1>BMI Calculator</h1>
-				<p>Calculate your Body Mass Index with real-time visual feedback</p>
+				<h1>Mifflin-St Jeor BMR Calculator</h1>
+				<p>Calculate your Basal Metabolic Rate using the more accurate Mifflin-St Jeor formula</p>
 			</div>
 
 			<div class="calculator-layout">
 				<div class="calculator-inputs">
+					<div class="input-group">
+						<label for="gender">Gender</label>
+						<div class="gender-toggle">
+							<button class="gender-btn active" data-gender="male">Male</button>
+							<button class="gender-btn" data-gender="female">Female</button>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label for="age">Age</label>
+						<div class="input-container">
+							<input type="range" id="age" min="15" max="80" value="30" />
+							<div class="input-display">
+								<span id="age-display">30</span> years
+							</div>
+						</div>
+					</div>
+
 					<div class="input-group">
 						<label for="height">Height</label>
 						<div class="unit-toggle">
@@ -73,40 +90,60 @@ import Layout from "../layouts/Layout.astro";
 							</div>
 						</div>
 					</div>
+					<div class="input-group">
+						<label for="activity">Activity Level</label>
+						<div class="activity-selector">
+							<button class="activity-btn active" data-multiplier="1.2">
+								<strong>Sedentary</strong>
+								<span>Little to no exercise</span>
+							</button>
+							<button class="activity-btn" data-multiplier="1.375">
+								<strong>Lightly Active</strong>
+								<span>Light exercise 1-3 days/week</span>
+							</button>
+							<button class="activity-btn" data-multiplier="1.55">
+								<strong>Moderately Active</strong>
+								<span>Moderate exercise 3-5 days/week</span>
+							</button>
+							<button class="activity-btn" data-multiplier="1.725">
+								<strong>Very Active</strong>
+								<span>Heavy exercise 6-7 days/week</span>
+							</button>
+							<button class="activity-btn" data-multiplier="1.9">
+								<strong>Extremely Active</strong>
+								<span>Physical job + exercise</span>
+							</button>
+						</div>
+					</div>
 				</div>
 
 				<div class="calculator-results">
-					<div class="result-display">
-						<div class="bmi-value">
-							<span id="bmi-number">22.8</span>
-							<span class="bmi-unit">BMI</span>
+					<div class="result-card">
+						<h3>Basal Metabolic Rate (BMR)</h3>
+						<div class="result-value">
+							<span id="bmr-number">1,685</span>
+							<span class="result-unit">calories/day</span>
 						</div>
-						<div class="bmi-category" id="bmi-category">Normal Weight</div>
+						<p class="result-description">Energy needed for basic bodily functions at rest</p>
 					</div>
 
-					<div class="bmi-scale">
-						<div class="scale-bar">
-							<div class="scale-segment underweight">
-								<span>Under<br />weight</span>
-							</div>
-							<div class="scale-segment normal">
-								<span>Normal</span>
-							</div>
-							<div class="scale-segment overweight">
-								<span>Over<br />weight</span>
-							</div>
-							<div class="scale-segment obese">
-								<span>Obese</span>
-							</div>
+					<div class="result-card">
+						<h3>Total Daily Energy Expenditure (TDEE)</h3>
+						<div class="result-value">
+							<span id="tdee-number">2,022</span>
+							<span class="result-unit">calories/day</span>
 						</div>
-						<div class="scale-indicator" id="scale-indicator"></div>
+						<p class="result-description">Total calories needed including activity level</p>
 					</div>
 
-					<div class="bmi-info">
-						<h3>Understanding Your BMI</h3>
-						<p id="bmi-explanation">
-							Your BMI falls within the normal weight range. This suggests a healthy weight for your
-							height.
+					<div class="formula-info">
+						<h4>Mifflin-St Jeor Formula</h4>
+						<p id="formula-text">
+							BMR = (10 × 73kg) + (6.25 × 173cm) - (5 × 30y) + 5 = 1,685 cal/day
+						</p>
+						<p class="formula-note">
+							The Mifflin-St Jeor equation is considered more accurate than Harris-Benedict for most
+							people in modern populations.
 						</p>
 					</div>
 				</div>
@@ -117,7 +154,8 @@ import Layout from "../layouts/Layout.astro";
 
 <style>
 	.calculator-page {
-		padding: 2rem 0 4rem 0;
+		padding: 2rem 0 4rem;
+		min-height: 100vh;
 	}
 
 	.calculator-header {
@@ -168,6 +206,35 @@ import Layout from "../layouts/Layout.astro";
 		color: var(--color-text);
 	}
 
+	/* Gender Toggle */
+	.gender-toggle {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.gender-btn {
+		flex: 1;
+		padding: 0.75rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-background);
+		color: var(--color-text);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 500;
+	}
+
+	.gender-btn:hover {
+		border-color: var(--color-primary);
+	}
+
+	.gender-btn.active {
+		background: var(--color-primary);
+		color: white;
+		border-color: var(--color-primary);
+	}
+
 	/* Unit Toggle */
 	.unit-toggle {
 		display: flex;
@@ -198,6 +265,15 @@ import Layout from "../layouts/Layout.astro";
 		border-color: var(--color-primary);
 	}
 
+	/* Input Controls */
+	.input-container {
+		margin-bottom: 1rem;
+	}
+
+	.input-container:last-child {
+		margin-bottom: 0;
+	}
+
 	.height-inputs {
 		display: flex;
 		gap: 1rem;
@@ -205,14 +281,6 @@ import Layout from "../layouts/Layout.astro";
 
 	.height-inputs.metric {
 		display: block;
-	}
-
-	.input-container {
-		margin-bottom: 1rem;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
 	}
 
 	.input-display {
@@ -251,6 +319,55 @@ import Layout from "../layouts/Layout.astro";
 		border: none;
 		box-shadow: var(--shadow-sm);
 	}
+	/* Activity Selector */
+	.activity-selector {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.activity-btn {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 1rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		background: var(--color-background);
+		text-align: left;
+		width: 100%;
+	}
+
+	.activity-btn:hover {
+		border-color: var(--color-primary);
+		background: var(--color-surface);
+	}
+
+	.activity-btn.active {
+		background: var(--color-primary);
+		color: white;
+		border-color: var(--color-primary);
+	}
+
+	.activity-btn strong {
+		color: var(--color-text);
+		font-weight: 600;
+	}
+
+	.activity-btn.active strong {
+		color: white;
+	}
+
+	.activity-btn span {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	.activity-btn.active span {
+		color: rgba(255, 255, 255, 0.8);
+	}
 
 	/* Results */
 	.calculator-results {
@@ -259,7 +376,7 @@ import Layout from "../layouts/Layout.astro";
 		gap: 1.5rem;
 	}
 
-	.result-display {
+	.result-card {
 		background: var(--color-surface);
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius-lg);
@@ -267,11 +384,18 @@ import Layout from "../layouts/Layout.astro";
 		text-align: center;
 	}
 
-	.bmi-value {
+	.result-card h3 {
+		margin: 0 0 1rem 0;
+		color: var(--color-text);
+		font-size: 1.25rem;
+		font-weight: 600;
+	}
+
+	.result-value {
 		margin-bottom: 1rem;
 	}
 
-	.bmi-value span:first-child {
+	.result-value span:first-child {
 		font-size: 2.5rem;
 		font-weight: 700;
 		color: var(--color-primary);
@@ -279,95 +403,43 @@ import Layout from "../layouts/Layout.astro";
 		line-height: 1;
 	}
 
-	.bmi-unit {
+	.result-unit {
 		color: var(--color-text-muted);
 		font-size: 1rem;
 		font-weight: 500;
 	}
 
-	.bmi-category {
-		font-size: 1.125rem;
-		font-weight: 600;
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--border-radius);
-		background: var(--color-success);
-		color: white;
-		display: inline-block;
-		margin-bottom: 1rem;
-	}
-
-	.bmi-scale {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		position: relative;
-	}
-
-	.scale-bar {
-		display: flex;
-		height: 60px;
-		border-radius: var(--border-radius);
-		overflow: hidden;
-		margin-bottom: 1.5rem;
-	}
-
-	.scale-segment {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-weight: 600;
+	.result-description {
+		color: var(--color-text-muted);
+		margin: 0;
 		font-size: 0.875rem;
-		text-align: center;
-		position: relative;
 	}
 
-	.scale-segment.underweight {
-		background: #3366ff;
-	}
-	.scale-segment.normal {
-		background: var(--color-success);
-	}
-	.scale-segment.overweight {
-		background: var(--color-warning);
-	}
-	.scale-segment.obese {
-		background: var(--color-danger);
-	}
-
-	.scale-indicator {
-		position: absolute;
-		bottom: 1rem;
-		width: 0;
-		height: 0;
-		border-left: 10px solid transparent;
-		border-right: 10px solid transparent;
-		border-bottom: 12px solid var(--color-text);
-		transform: translateX(-50%);
-		transition: left 0.3s ease;
-	}
-
-	.bmi-info {
+	.formula-info {
 		background: var(--color-background);
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
 	}
 
-	.bmi-info h3 {
+	.formula-info h4 {
 		margin: 0 0 0.75rem 0;
 		color: var(--color-text);
 		font-size: 1rem;
 		font-weight: 600;
 	}
 
-	.bmi-info p {
-		margin: 0;
+	.formula-info p {
+		margin: 0 0 0.5rem 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
-		line-height: 1.5;
+		font-family: "Courier New", monospace;
+	}
+
+	.formula-info .formula-note {
+		margin-top: 1rem;
+		font-family: inherit;
+		font-style: italic;
 	}
 
 	/* Mobile Responsiveness */
@@ -386,7 +458,7 @@ import Layout from "../layouts/Layout.astro";
 			gap: 1rem;
 		}
 
-		.bmi-value span:first-child {
+		.result-value span:first-child {
 			font-size: 2rem;
 		}
 	}
@@ -397,33 +469,46 @@ import Layout from "../layouts/Layout.astro";
 
 	// Load shared values on page load
 	const values = sharedValues.load();
+	let currentGender = values.gender;
 	let currentHeightUnit = values.heightUnit;
 	let currentWeightUnit = values.weightUnit;
+	let currentActivityMultiplier = 1.2;
 
 	// Get DOM elements
+	const age = document.getElementById("age");
 	const heightFeet = document.getElementById("height-feet");
 	const heightInches = document.getElementById("height-inches");
 	const heightCm = document.getElementById("height-cm");
 	const weightLbs = document.getElementById("weight-lbs");
 	const weightKg = document.getElementById("weight-kg");
 
+	const ageDisplay = document.getElementById("age-display");
 	const heightFeetDisplay = document.getElementById("height-feet-display");
 	const heightInchesDisplay = document.getElementById("height-inches-display");
 	const heightCmDisplay = document.getElementById("height-cm-display");
 	const weightLbsDisplay = document.getElementById("weight-lbs-display");
 	const weightKgDisplay = document.getElementById("weight-kg-display");
-	const bmiNumber = document.getElementById("bmi-number");
-	const bmiCategory = document.getElementById("bmi-category");
-	const bmiExplanation = document.getElementById("bmi-explanation");
-	const scaleIndicator = document.getElementById("scale-indicator");
+
+	const bmrNumber = document.getElementById("bmr-number");
+	const tdeeNumber = document.getElementById("tdee-number");
+	const formulaText = document.getElementById("formula-text");
 
 	// Initialize inputs with shared values
 	function initializeInputs() {
+		if (age) age.value = values.age.toString();
 		if (heightFeet) heightFeet.value = values.heightFeet.toString();
 		if (heightInches) heightInches.value = values.heightInches.toString();
 		if (heightCm) heightCm.value = values.heightCm.toString();
 		if (weightLbs) weightLbs.value = values.weightLbs.toString();
 		if (weightKg) weightKg.value = values.weightKg.toString();
+
+		// Set gender toggle to match saved preference
+		document.querySelectorAll(".gender-btn").forEach((btn) => {
+			btn.classList.remove("active");
+			if (btn.dataset.gender === currentGender) {
+				btn.classList.add("active");
+			}
+		});
 
 		// Set unit toggles to match saved preferences
 		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
@@ -456,6 +541,7 @@ import Layout from "../layouts/Layout.astro";
 	// Save current values to shared storage
 	function saveCurrentValues() {
 		const currentValues = {
+			age: parseInt(age?.value || "30"),
 			heightFeet: parseInt(heightFeet?.value || "5"),
 			heightInches: parseFloat(heightInches?.value || "8"),
 			heightCm: parseInt(heightCm?.value || "173"),
@@ -463,56 +549,26 @@ import Layout from "../layouts/Layout.astro";
 			weightKg: parseInt(weightKg?.value || "73"),
 			heightUnit: currentHeightUnit,
 			weightUnit: currentWeightUnit,
+			gender: currentGender,
 		};
 		sharedValues.update(currentValues);
 	}
 
-	// BMI categories and explanations
-	const bmiCategories = {
-		underweight: {
-			name: "Underweight",
-			color: "#3366ff",
-			explanation:
-				"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
-		},
-		normal: {
-			name: "Normal Weight",
-			color: "var(--color-success)",
-			explanation:
-				"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
-		},
-		overweight: {
-			name: "Overweight",
-			color: "var(--color-warning)",
-			explanation:
-				"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
-		},
-		obese: {
-			name: "Obese",
-			color: "var(--color-danger)",
-			explanation:
-				"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
-		},
-	};
+	// Calculate BMR using Mifflin-St Jeor formula
+	function calculateBMR() {
+		let heightInCm, weightInKg, ageValue;
 
-	function getBMICategory(bmi) {
-		if (bmi < 18.5) return "underweight";
-		if (bmi < 25) return "normal";
-		if (bmi < 30) return "overweight";
-		return "obese";
-	}
+		// Get age
+		ageValue = parseInt(age?.value || "30");
 
-	function calculateBMI() {
-		let heightInMeters, weightInKg;
-
-		// Convert height to meters
+		// Convert height to cm
 		if (currentHeightUnit === "imperial") {
 			const feet = parseInt(heightFeet?.value || "5");
 			const inches = parseFloat(heightInches?.value || "8");
 			const totalInches = feet * 12 + inches;
-			heightInMeters = totalInches * 0.0254;
+			heightInCm = totalInches * 2.54;
 		} else {
-			heightInMeters = parseInt(heightCm?.value || "173") / 100;
+			heightInCm = parseInt(heightCm?.value || "173");
 		}
 
 		// Convert weight to kg
@@ -522,36 +578,52 @@ import Layout from "../layouts/Layout.astro";
 			weightInKg = parseInt(weightKg?.value || "73");
 		}
 
-		const bmi = weightInKg / (heightInMeters * heightInMeters);
-		return bmi;
+		// Mifflin-St Jeor Formula
+		// Men: BMR = (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) + 5
+		// Women: BMR = (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) - 161
+		let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * ageValue;
+		bmr += currentGender === "male" ? 5 : -161;
+
+		return bmr;
 	}
 
-	function updateBMIDisplay() {
-		const bmi = calculateBMI();
-		const category = getBMICategory(bmi);
-		const categoryData = bmiCategories[category];
+	function updateDisplay() {
+		const bmr = calculateBMR();
+		const tdee = bmr * currentActivityMultiplier;
 
-		if (bmiNumber) bmiNumber.textContent = bmi.toFixed(1);
-		if (bmiCategory) {
-			bmiCategory.textContent = categoryData.name;
-			bmiCategory.style.backgroundColor = categoryData.color;
+		if (bmrNumber) bmrNumber.textContent = Math.round(bmr).toLocaleString();
+		if (tdeeNumber) tdeeNumber.textContent = Math.round(tdee).toLocaleString();
+
+		// Update formula display
+		let heightInCm, weightInKg, ageValue;
+		ageValue = parseInt(age?.value || "30");
+
+		if (currentHeightUnit === "imperial") {
+			const feet = parseInt(heightFeet?.value || "5");
+			const inches = parseFloat(heightInches?.value || "8");
+			const totalInches = feet * 12 + inches;
+			heightInCm = Math.round(totalInches * 2.54);
+		} else {
+			heightInCm = parseInt(heightCm?.value || "173");
 		}
-		if (bmiExplanation) bmiExplanation.textContent = categoryData.explanation;
 
-		// Update scale indicator position
-		let position;
-		if (bmi < 18.5) position = (bmi / 18.5) * 25;
-		else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
-		else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
-		else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
+		if (currentWeightUnit === "imperial") {
+			weightInKg = Math.round(parseInt(weightLbs?.value || "160") * 0.453592);
+		} else {
+			weightInKg = parseInt(weightKg?.value || "73");
+		}
 
-		if (scaleIndicator) scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+		const genderSign = currentGender === "male" ? "+ 5" : "- 161";
+		if (formulaText) {
+			formulaText.textContent = `BMR = (10 × ${weightInKg}kg) + (6.25 × ${heightInCm}cm) - (5 × ${ageValue}y) ${genderSign} = ${Math.round(bmr).toLocaleString()} cal/day`;
+		}
 
 		// Save values after calculation
 		saveCurrentValues();
 	}
 
 	function updateDisplays() {
+		if (ageDisplay && age) ageDisplay.textContent = age.value;
 		if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
 		if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
 		if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
@@ -563,17 +635,27 @@ import Layout from "../layouts/Layout.astro";
 	let calculationTimeout;
 	function debouncedCalculation() {
 		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(updateBMIDisplay, 100);
+		calculationTimeout = setTimeout(updateDisplay, 100);
 	}
 
 	// Event listeners for sliders
-	[heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
+	[age, heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
 		if (slider) {
 			slider.addEventListener("input", () => {
 				updateDisplays();
 				debouncedCalculation();
 			});
 		}
+	});
+
+	// Gender toggle functionality
+	document.querySelectorAll(".gender-btn").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			document.querySelectorAll(".gender-btn").forEach((b) => b.classList.remove("active"));
+			btn.classList.add("active");
+			currentGender = btn.dataset.gender || "male";
+			debouncedCalculation();
+		});
 	});
 
 	// Unit toggle functionality
@@ -620,9 +702,26 @@ import Layout from "../layouts/Layout.astro";
 			debouncedCalculation();
 		});
 	});
+	// Activity level functionality
+	document.querySelectorAll(".activity-btn").forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			const target = e.currentTarget; // Use currentTarget instead of target to get the button element
+			const multiplier = target.dataset.multiplier;
+
+			if (multiplier) {
+				currentActivityMultiplier = parseFloat(multiplier);
+
+				// Update active state
+				document.querySelectorAll(".activity-btn").forEach((b) => b.classList.remove("active"));
+				target.classList.add("active");
+
+				debouncedCalculation();
+			}
+		});
+	});
 
 	// Initialize the calculator
 	initializeInputs();
 	updateDisplays();
-	updateBMIDisplay();
+	updateDisplay();
 </script>

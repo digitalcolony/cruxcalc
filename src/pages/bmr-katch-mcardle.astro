@@ -1,0 +1,490 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+	title="Katch-McArdle BMR Calculator - CruxCalc"
+	description="Calculate your Basal Metabolic Rate using the Katch-McArdle formula. Most accurate for lean individuals who know their body fat percentage."
+>
+	<section class="calculator-page">
+		<div class="container">
+			<div class="calculator-header">
+				<h1>Katch-McArdle BMR Calculator</h1>
+				<p>Calculate your BMR using lean body mass - most accurate for athletic individuals</p>
+			</div>
+
+			<div class="calculator-layout">
+				<div class="calculator-inputs">
+					<div class="input-group">
+						<label for="weight">Weight</label>
+						<div class="unit-toggle">
+							<button class="unit-btn active" data-unit="imperial">lbs</button>
+							<button class="unit-btn" data-unit="metric">kg</button>
+						</div>
+
+						<div class="weight-inputs imperial">
+							<div class="input-container">
+								<input type="range" id="weight-lbs" min="80" max="400" value="160" />
+								<div class="input-display">
+									<span id="weight-lbs-display">160</span> lbs
+								</div>
+							</div>
+						</div>
+
+						<div class="weight-inputs metric" style="display: none;">
+							<div class="input-container">
+								<input type="range" id="weight-kg" min="35" max="180" value="73" />
+								<div class="input-display">
+									<span id="weight-kg-display">73</span> kg
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label for="body-fat">Body Fat Percentage</label>
+						<div class="input-container">
+							<input type="range" id="body-fat" min="5" max="50" value="15" step="0.5" />
+							<div class="input-display">
+								<span id="body-fat-display">15</span>%
+							</div>
+						</div>
+						<div class="body-fat-guide">
+							<p><strong>General Guidelines:</strong></p>
+							<p>Men: Essential 3-5%, Athletes 6-13%, Fitness 14-17%, Average 18-24%</p>
+							<p>Women: Essential 10-13%, Athletes 14-20%, Fitness 21-24%, Average 25-31%</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="calculator-results">
+					<div class="result-card">
+						<h3>Lean Body Mass</h3>
+						<div class="result-value">
+							<span id="lean-mass-number">62</span>
+							<span class="result-unit">kg (137 lbs)</span>
+						</div>
+						<p class="result-description">Your weight minus body fat</p>
+					</div>
+
+					<div class="result-card">
+						<h3>Basal Metabolic Rate (BMR)</h3>
+						<div class="result-value">
+							<span id="bmr-number">1,685</span>
+							<span class="result-unit">calories/day</span>
+						</div>
+						<p class="result-description">Energy needed for basic bodily functions at rest</p>
+					</div>
+
+					<div class="formula-info">
+						<h4>Katch-McArdle Formula</h4>
+						<p id="formula-text">BMR = 370 + (21.6 × 62kg lean mass) = 1,685 cal/day</p>
+						<p class="formula-note">
+							The Katch-McArdle formula uses lean body mass and is most accurate for athletic
+							individuals with lower body fat percentages. It doesn't require gender as an input
+							since lean mass already accounts for body composition differences.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.calculator-page {
+		padding: 2rem 0 4rem;
+		min-height: 100vh;
+	}
+
+	.calculator-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.calculator-header h1 {
+		color: var(--color-primary);
+		margin-bottom: 0.5rem;
+		font-size: 2.5rem;
+		font-weight: 700;
+	}
+
+	.calculator-header p {
+		color: var(--color-text-muted);
+		font-size: 1.125rem;
+	}
+
+	.calculator-layout {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 3rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.calculator-inputs {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		height: fit-content;
+	}
+
+	.input-group {
+		margin-bottom: 2rem;
+	}
+
+	.input-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-group label {
+		display: block;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		color: var(--color-text);
+	}
+
+	/* Unit Toggle */
+	.unit-toggle {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.unit-btn {
+		flex: 1;
+		padding: 0.5rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-background);
+		color: var(--color-text);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	.unit-btn:hover {
+		border-color: var(--color-primary);
+	}
+
+	.unit-btn.active {
+		background: var(--color-primary);
+		color: white;
+		border-color: var(--color-primary);
+	}
+
+	/* Input Controls */
+	.input-container {
+		margin-bottom: 1rem;
+	}
+
+	.input-container:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		margin-top: 0.5rem;
+		font-size: 1.125rem;
+	}
+
+	input[type="range"] {
+		width: 100%;
+		height: 8px;
+		border-radius: 4px;
+		background: var(--color-border);
+		outline: none;
+		-webkit-appearance: none;
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		box-shadow: var(--shadow-sm);
+	}
+
+	input[type="range"]::-moz-range-thumb {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		border: none;
+		box-shadow: var(--shadow-sm);
+	}
+
+	/* Body Fat Guide */
+	.body-fat-guide {
+		background: var(--color-background);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+		margin-top: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.body-fat-guide p {
+		margin: 0 0 0.5rem 0;
+		color: var(--color-text-muted);
+	}
+
+	.body-fat-guide p:last-child {
+		margin-bottom: 0;
+	}
+
+	.body-fat-guide strong {
+		color: var(--color-text);
+	}
+	/* Activity Selector - Remove unused styles */
+
+	/* Results */
+	.calculator-results {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.result-card {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		text-align: center;
+	}
+
+	.result-card h3 {
+		margin: 0 0 1rem 0;
+		color: var(--color-text);
+		font-size: 1.25rem;
+		font-weight: 600;
+	}
+
+	.result-value {
+		margin-bottom: 1rem;
+	}
+
+	.result-value span:first-child {
+		font-size: 2.5rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		display: block;
+		line-height: 1;
+	}
+
+	.result-unit {
+		color: var(--color-text-muted);
+		font-size: 1rem;
+		font-weight: 500;
+	}
+
+	.result-description {
+		color: var(--color-text-muted);
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	.formula-info {
+		background: var(--color-background);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 1.5rem;
+	}
+
+	.formula-info h4 {
+		margin: 0 0 0.75rem 0;
+		color: var(--color-text);
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.formula-info p {
+		margin: 0 0 0.5rem 0;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		font-family: "Courier New", monospace;
+	}
+
+	.formula-info .formula-note {
+		margin-top: 1rem;
+		font-family: inherit;
+		font-style: italic;
+	}
+
+	/* Mobile Responsiveness */
+	@media (max-width: 768px) {
+		.calculator-layout {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.calculator-header h1 {
+			font-size: 2rem;
+		}
+
+		.result-value span:first-child {
+			font-size: 2rem;
+		}
+	}
+</style>
+
+<script type="module">
+	import sharedValues from "/sharedValues.js";
+	// Load shared values on page load
+	const values = sharedValues.load();
+	let currentWeightUnit = values.weightUnit;
+
+	// Get DOM elements
+	const weightLbs = document.getElementById("weight-lbs");
+	const weightKg = document.getElementById("weight-kg");
+	const bodyFat = document.getElementById("body-fat");
+
+	const weightLbsDisplay = document.getElementById("weight-lbs-display");
+	const weightKgDisplay = document.getElementById("weight-kg-display");
+	const bodyFatDisplay = document.getElementById("body-fat-display");
+	const leanMassNumber = document.getElementById("lean-mass-number");
+	const bmrNumber = document.getElementById("bmr-number");
+	const formulaText = document.getElementById("formula-text");
+
+	// Initialize inputs with shared values
+	function initializeInputs() {
+		if (weightLbs) weightLbs.value = values.weightLbs.toString();
+		if (weightKg) weightKg.value = values.weightKg.toString();
+		if (bodyFat) bodyFat.value = "15"; // Default body fat percentage
+
+		// Set unit toggle to match saved preference
+		document.querySelectorAll(".unit-btn").forEach((btn) => {
+			btn.classList.remove("active");
+			if (btn.dataset.unit === currentWeightUnit) {
+				btn.classList.add("active");
+			}
+		});
+
+		// Show/hide appropriate inputs
+		document.querySelectorAll(".weight-inputs").forEach((input) => {
+			input.style.display = input.classList.contains(currentWeightUnit) ? "block" : "none";
+		});
+	}
+
+	// Save current values to shared storage
+	function saveCurrentValues() {
+		const currentValues = {
+			weightLbs: parseInt(weightLbs?.value || "160"),
+			weightKg: parseInt(weightKg?.value || "73"),
+			weightUnit: currentWeightUnit,
+		};
+		sharedValues.update(currentValues);
+	}
+
+	// Calculate lean body mass and BMR using Katch-McArdle formula
+	function calculateBMR() {
+		let weightInKg, bodyFatPercent;
+
+		// Convert weight to kg
+		if (currentWeightUnit === "imperial") {
+			weightInKg = parseInt(weightLbs?.value || "160") * 0.453592;
+		} else {
+			weightInKg = parseInt(weightKg?.value || "73");
+		}
+
+		// Get body fat percentage
+		bodyFatPercent = parseFloat(bodyFat?.value || "15") / 100;
+
+		// Calculate lean body mass
+		const leanMass = weightInKg * (1 - bodyFatPercent);
+
+		// Katch-McArdle Formula: BMR = 370 + (21.6 × lean body mass in kg)
+		const bmr = 370 + 21.6 * leanMass;
+
+		return { bmr, leanMass, weightInKg };
+	}
+	function updateDisplay() {
+		const { bmr, leanMass, weightInKg } = calculateBMR();
+
+		// Convert lean mass for display
+		const leanMassLbs = leanMass * 2.20462;
+
+		if (leanMassNumber) leanMassNumber.textContent = Math.round(leanMass).toString();
+		if (bmrNumber) bmrNumber.textContent = Math.round(bmr).toLocaleString();
+
+		// Update lean mass unit display
+		const leanMassUnit = document.querySelector("#lean-mass-number + .result-unit");
+		if (leanMassUnit) {
+			leanMassUnit.textContent = `kg (${Math.round(leanMassLbs)} lbs)`;
+		}
+
+		// Update formula display
+		if (formulaText) {
+			formulaText.textContent = `BMR = 370 + (21.6 × ${Math.round(leanMass)}kg lean mass) = ${Math.round(bmr).toLocaleString()} cal/day`;
+		}
+
+		// Save values after calculation
+		saveCurrentValues();
+	}
+
+	function updateDisplays() {
+		if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
+		if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
+		if (bodyFatDisplay && bodyFat) bodyFatDisplay.textContent = bodyFat.value;
+	}
+
+	// Debounced calculation
+	let calculationTimeout;
+	function debouncedCalculation() {
+		clearTimeout(calculationTimeout);
+		calculationTimeout = setTimeout(updateDisplay, 100);
+	}
+
+	// Event listeners for sliders
+	[weightLbs, weightKg, bodyFat].forEach((slider) => {
+		if (slider) {
+			slider.addEventListener("input", () => {
+				updateDisplays();
+				debouncedCalculation();
+			});
+		}
+	});
+
+	// Unit toggle functionality
+	document.querySelectorAll(".unit-toggle").forEach((toggle) => {
+		toggle.addEventListener("click", (e) => {
+			const target = e.target;
+			if (!target?.classList.contains("unit-btn")) return;
+
+			const unit = target.dataset.unit;
+
+			// Update active state
+			toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
+			target.classList.add("active");
+
+			// Update current unit
+			currentWeightUnit = unit || "imperial";
+			sharedValues.syncWeightUnits(currentWeightUnit);
+
+			// Show/hide appropriate inputs
+			const inputGroup = target.closest(".input-group");
+			inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
+				input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
+			});
+
+			// Update sliders with converted values after unit change
+			const updatedValues = sharedValues.load();
+			if (weightLbs) weightLbs.value = updatedValues.weightLbs.toString();
+			if (weightKg) weightKg.value = updatedValues.weightKg.toString();
+
+			updateDisplays();
+			debouncedCalculation();
+		});
+	});
+	// Initialize the calculator
+	initializeInputs();
+	updateDisplays();
+	updateDisplay();
+</script>

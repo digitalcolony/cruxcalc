@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Shared Values Test</title>
+	</head>
+	<body>
+		<h1>CruxCalc Shared Values Test</h1>
+
+		<div>
+			<h2>Current Values:</h2>
+			<div id="current-values"></div>
+		</div>
+
+		<div>
+			<h2>Test Operations:</h2>
+			<button onclick="testSave()">Test Save</button>
+			<button onclick="testLoad()">Test Load</button>
+			<button onclick="testUpdate()">Test Update</button>
+			<button onclick="testClear()">Test Clear</button>
+			<button onclick="testUnitConversion()">Test Unit Conversion</button>
+		</div>
+
+		<div>
+			<h2>Log:</h2>
+			<div id="log"></div>
+		</div>
+
+		<script type="module">
+			import sharedValues from "/sharedValues.js";
+
+			window.sharedValues = sharedValues;
+
+			function log(message) {
+				const logDiv = document.getElementById("log");
+				logDiv.innerHTML += "<p>" + message + "</p>";
+			}
+
+			function displayCurrentValues() {
+				const values = sharedValues.load();
+				document.getElementById("current-values").innerHTML =
+					"<pre>" + JSON.stringify(values, null, 2) + "</pre>";
+			}
+
+			window.testSave = function () {
+				const testValues = {
+					age: 25,
+					weightLbs: 150,
+					heightFeet: 6,
+					heightInches: 0,
+				};
+				sharedValues.save(testValues);
+				log("Saved test values: " + JSON.stringify(testValues));
+				displayCurrentValues();
+			};
+
+			window.testLoad = function () {
+				const values = sharedValues.load();
+				log("Loaded values: " + JSON.stringify(values));
+				displayCurrentValues();
+			};
+
+			window.testUpdate = function () {
+				sharedValues.update({ age: 35, gender: "female" });
+				log("Updated age to 35 and gender to female");
+				displayCurrentValues();
+			};
+
+			window.testClear = function () {
+				sharedValues.clear();
+				log("Cleared all values");
+				displayCurrentValues();
+			};
+
+			window.testUnitConversion = function () {
+				// Test height conversion
+				sharedValues.syncHeightUnits("metric");
+				log("Converted height to metric");
+
+				// Test weight conversion
+				sharedValues.syncWeightUnits("metric");
+				log("Converted weight to metric");
+
+				displayCurrentValues();
+			};
+
+			// Initialize display
+			displayCurrentValues();
+		</script>
+	</body>
+</html>
