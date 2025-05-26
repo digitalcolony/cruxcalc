@@ -7,6 +7,9 @@ export interface Props {
 
 const { title, description = "Modern health and fitness calculators with engaging design." } =
 	Astro.props;
+
+// Get current page path to highlight active nav link
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -17,7 +20,6 @@ const { title, description = "Modern health and fitness calculators with engagin
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<title>{title}</title>
-		<link rel="stylesheet" href="/src/styles/global.css" />
 	</head>
 	<body>
 		<header class="header">
@@ -27,9 +29,19 @@ const { title, description = "Modern health and fitness calculators with engagin
 						<h1>CruxCalc</h1>
 					</a>
 					<div class="nav-links">
-						<a href="/bmi" class="nav-link">BMI</a>
-						<a href="/bmr-harris-benedict" class="nav-link">BMR</a>
-						<a href="/muscle-potential" class="nav-link">Muscle</a>
+						<a href="/bmi" class={`nav-link ${currentPath === "/bmi" ? "nav-link-active" : ""}`}
+							>BMI</a
+						>
+						<a
+							href="/bmr-harris-benedict"
+							class={`nav-link ${currentPath === "/bmr-harris-benedict" ? "nav-link-active" : ""}`}
+							>BMR</a
+						>
+						<a
+							href="/muscle-potential"
+							class={`nav-link ${currentPath === "/muscle-potential" ? "nav-link-active" : ""}`}
+							>Muscle</a
+						>
 						<button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
 					</div>
 				</nav>
@@ -50,6 +62,80 @@ const { title, description = "Modern health and fitness calculators with engagin
 		</footer>
 
 		<style>
+			@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap");
+
+			:root {
+				/* Neo-brutalist color palette */
+				--color-primary: #ff3366;
+				--color-secondary: #00ff88;
+				--color-accent: #3366ff;
+				--color-success: #00cc66;
+				--color-warning: #ffcc00;
+				--color-danger: #ff3366;
+				--color-bg: #f5f5dc;
+				--color-surface: #ffffff;
+				--color-text: #000000;
+				--color-text-muted: #555555;
+				--color-border: #000000;
+
+				/* Bold shadows for neo-brutalist effect */
+				--shadow-sm: 4px 4px 0px #000000;
+				--shadow-md: 6px 6px 0px #000000;
+				--shadow-lg: 8px 8px 0px #000000;
+				--shadow-hover: 2px 2px 0px #000000;
+
+				--border-radius: 0px;
+				--border-width: 4px;
+				--font-size-xs: 0.75rem;
+				--font-size-sm: 0.875rem;
+				--font-size-base: 1rem;
+				--font-size-lg: 1.125rem;
+				--font-size-xl: 1.25rem;
+				--font-size-2xl: 1.5rem;
+				--font-size-3xl: 2rem;
+				--font-size-4xl: 2.5rem;
+			}
+			[data-theme="dark"] {
+				--color-bg: #2f3349;
+				--color-surface: #111111;
+				--color-text: #ffffff;
+				--color-text-muted: #cccccc;
+				--color-border: #ffffff;
+				--shadow-sm: 4px 4px 0px #ffffff;
+				--shadow-md: 6px 6px 0px #ffffff;
+				--shadow-lg: 8px 8px 0px #ffffff;
+				--shadow-hover: 2px 2px 0px #ffffff;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "JetBrains Mono", monospace;
+				background-color: var(--color-bg);
+				color: var(--color-text);
+				margin: 0;
+				padding: 0;
+				line-height: 1.4;
+				font-weight: 700;
+				transition: all 0.2s ease;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0 1rem;
+			}
+
+			.header {
+				background: var(--color-surface);
+				border-bottom: var(--border-width) solid var(--color-border);
+				padding: 1rem 0;
+				position: sticky;
+				top: 0;
+				z-index: 100;
+			}
 			.header {
 				background: var(--color-surface);
 				border-bottom: var(--border-width) solid var(--color-border);
@@ -81,7 +167,6 @@ const { title, description = "Modern health and fitness calculators with engagin
 				align-items: center;
 				gap: 1rem;
 			}
-
 			.nav-link {
 				text-decoration: none;
 				color: var(--color-text);
@@ -89,25 +174,41 @@ const { title, description = "Modern health and fitness calculators with engagin
 				padding: 0.5rem 1rem;
 				border-radius: var(--border-radius);
 				transition: all 0.2s ease;
+				position: relative;
 			}
 
 			.nav-link:hover {
 				background: var(--color-primary);
 				color: white;
+				transform: translate(-1px, -1px);
+				box-shadow: var(--shadow-sm);
 			}
 
+			.nav-link-active {
+				background: var(--color-surface);
+				border: var(--border-width) solid var(--color-primary);
+				color: var(--color-primary);
+				box-shadow: var(--shadow-sm);
+				transform: translate(-1px, -1px);
+			}
+
+			.nav-link-active:hover {
+				background: var(--color-primary);
+				color: white;
+			}
 			.theme-toggle {
 				background: none;
-				border: var(--border-width) solid var(--color-border);
-				border-radius: var(--border-radius);
+				border: none;
 				padding: 0.5rem;
 				cursor: pointer;
-				font-size: 1rem;
+				font-size: 1.2rem;
 				transition: all 0.2s ease;
+				border-radius: var(--border-radius);
 			}
 
 			.theme-toggle:hover {
-				border-color: var(--color-primary);
+				background: var(--color-bg);
+				transform: scale(1.1);
 			}
 
 			.footer {
