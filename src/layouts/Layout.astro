@@ -97,12 +97,23 @@ const { title, description = "Health and fitness calculators with engaging desig
 			.container {
 				max-width: 1200px;
 				margin: 0 auto;
-				padding: 0 1rem;
+				padding: 0 2rem;
 			}
 
+			@media (max-width: 768px) {
+				.container {
+					padding: 0 1.5rem;
+				}
+			}
+
+			@media (max-width: 480px) {
+				.container {
+					padding: 0 1rem;
+				}
+			}
 			main {
 				flex: 1;
-				padding: 2rem 0;
+				padding: 1.5rem 0;
 			}
 		</style>
 	</body>

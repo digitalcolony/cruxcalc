@@ -4,14 +4,14 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="CruxCalc - Health & Fitness Calculators">
-	<section class="hero">
+	<!-- <section class="hero">
 		<div class="container">
 			<h1 class="hero-title">Health & Fitness Calculators</h1>
 			<p class="hero-subtitle">
 				No more boring calculators! Modern, engaging tools for your health journey.
 			</p>
 		</div>
-	</section>
+	</section> -->
 
 	<section class="calculators">
 		<div class="container">
@@ -59,7 +59,7 @@ import Layout from "../layouts/Layout.astro";
 	.hero {
 		background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
 		color: white;
-		padding: 4rem 0;
+		padding: 3rem 0;
 		text-align: center;
 	}
 
@@ -77,7 +77,7 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	.calculators {
-		padding: 4rem 0;
+		padding: 3rem 0;
 	}
 
 	.calculator-grid {
@@ -153,6 +153,25 @@ import Layout from "../layouts/Layout.astro";
 
 		.calculator-grid {
 			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.hero-title {
+			font-size: 1.75rem;
+		}
+
+		.hero-subtitle {
+			font-size: 1.125rem;
+		}
+
+		.calculator-grid {
+			gap: 1rem;
+		}
+
+		.calculator-card {
+			padding: 1.5rem;
 		}
 	}
 </style>
