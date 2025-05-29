@@ -27,12 +27,13 @@ const { title, description = "Health and fitness calculators with engaging desig
 		</script>
 	</head>
 	<body>
-		<Header />
-		<main>
-			<slot />
-		</main>
-
-		<Footer />
+		<div class="page-layout">
+			<Header />
+			<main>
+				<slot />
+			</main>
+			<Footer />
+		</div>
 
 		<style>
 			@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap");
@@ -91,6 +92,13 @@ const { title, description = "Health and fitness calculators with engaging desig
 				line-height: 1.4;
 				font-weight: 700;
 				transition: all 0.2s ease;
+				min-height: 100vh;
+			}
+
+			.page-layout {
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
 			}
 
 			/* Global container for page content */

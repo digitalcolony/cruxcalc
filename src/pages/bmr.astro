@@ -477,30 +477,6 @@ import Layout from "../layouts/Layout.astro";
 		box-shadow: var(--shadow-sm);
 	}
 
-	.result-card.mifflin {
-		border-color: var(--color-primary);
-		background: linear-gradient(
-			135deg,
-			var(--color-surface) 0%,
-			rgba(var(--color-primary-rgb), 0.05) 100%
-		);
-	}
-
-	.result-card.mifflin::before {
-		content: "RECOMMENDED";
-		position: absolute;
-		top: -8px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: var(--color-primary);
-		color: white;
-		padding: 0.25rem 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.5px;
-	}
-
 	.result-card h3 {
 		margin: 0 0 1rem 0;
 		color: var(--color-text);

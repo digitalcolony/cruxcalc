@@ -36,35 +36,19 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <style>
-	.hero {
-		background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-		color: white;
-		padding: 3rem 0;
-		text-align: center;
-	}
-
-	.hero-title {
-		font-size: 3rem;
-		font-weight: 800;
-		margin: 0 0 1rem 0;
-		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-	}
-
-	.hero-subtitle {
-		font-size: 1.25rem;
-		margin: 0;
-		opacity: 0.9;
-	}
-
 	.calculators {
 		padding: 3rem 0;
 	}
 
 	.calculator-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
 		gap: 2rem;
 		margin-top: 2rem;
+		justify-content: center;
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.calculator-card {
@@ -127,10 +111,6 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	@media (max-width: 768px) {
-		.hero-title {
-			font-size: 2rem;
-		}
-
 		.calculator-grid {
 			grid-template-columns: 1fr;
 			gap: 1.5rem;
@@ -138,14 +118,6 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	@media (max-width: 480px) {
-		.hero-title {
-			font-size: 1.75rem;
-		}
-
-		.hero-subtitle {
-			font-size: 1.125rem;
-		}
-
 		.calculator-grid {
 			gap: 1rem;
 		}
