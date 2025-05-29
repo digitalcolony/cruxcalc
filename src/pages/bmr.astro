@@ -137,36 +137,63 @@ import Layout from "../layouts/Layout.astro";
 					<div class="results-grid">
 						<div class="result-card mifflin">
 							<h3>Mifflin-St Jeor</h3>
-							<div class="result-value">
-								<span id="mifflin-bmr">1,685</span>
-								<span class="result-unit">cal/day</span>
-							</div>
-							<div class="result-tdee">
-								TDEE: <span id="mifflin-tdee">2,022</span> cal/day
+							<div class="dual-results">
+								<div class="result-section bmr-section">
+									<div class="result-label">BMR (Resting)</div>
+									<div class="result-value">
+										<span id="mifflin-bmr">1,685</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
+								<div class="result-section tdee-section">
+									<div class="result-label">TDEE (Total Daily)</div>
+									<div class="result-value">
+										<span id="mifflin-tdee">2,022</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
 							</div>
 							<p class="result-description">Most accurate for general population</p>
 						</div>
 
 						<div class="result-card harris">
 							<h3>Harris-Benedict</h3>
-							<div class="result-value">
-								<span id="harris-bmr">1,712</span>
-								<span class="result-unit">cal/day</span>
-							</div>
-							<div class="result-tdee">
-								TDEE: <span id="harris-tdee">2,054</span> cal/day
+							<div class="dual-results">
+								<div class="result-section bmr-section">
+									<div class="result-label">BMR (Resting)</div>
+									<div class="result-value">
+										<span id="harris-bmr">1,712</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
+								<div class="result-section tdee-section">
+									<div class="result-label">TDEE (Total Daily)</div>
+									<div class="result-value">
+										<span id="harris-tdee">2,054</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
 							</div>
 							<p class="result-description">Classic formula, slightly higher estimates</p>
 						</div>
 
 						<div class="result-card katch">
 							<h3>Katch-McArdle</h3>
-							<div class="result-value">
-								<span id="katch-bmr">1,798</span>
-								<span class="result-unit">cal/day</span>
-							</div>
-							<div class="result-tdee">
-								TDEE: <span id="katch-tdee">2,158</span> cal/day
+							<div class="dual-results">
+								<div class="result-section bmr-section">
+									<div class="result-label">BMR (Resting)</div>
+									<div class="result-value">
+										<span id="katch-bmr">1,798</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
+								<div class="result-section tdee-section">
+									<div class="result-label">TDEE (Total Daily)</div>
+									<div class="result-value">
+										<span id="katch-tdee">2,158</span>
+										<span class="result-unit">cal/day</span>
+									</div>
+								</div>
 							</div>
 							<p class="result-description">Most accurate for lean/athletic individuals</p>
 						</div>
@@ -478,46 +505,76 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	.result-card h3 {
-		margin: 0 0 1rem 0;
+		margin: 0 0 1.25rem 0;
 		color: var(--color-text);
 		font-size: 1.125rem;
 		font-weight: 600;
 	}
 
+	/* New dual results layout */
+	.dual-results {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+
+	.result-section {
+		padding: 0.75rem;
+		border-radius: var(--border-radius);
+		background: var(--color-background);
+		border: 1px solid var(--color-border);
+	}
+
+	.bmr-section {
+		background: var(--color-primary);
+		color: white;
+		border-color: var(--color-primary);
+	}
+
+	.tdee-section {
+		background: var(--color-accent);
+		color: white;
+		border-color: var(--color-accent);
+	}
+
+	.result-label {
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		margin-bottom: 0.25rem;
+		opacity: 0.9;
+	}
+
 	.result-value {
-		margin-bottom: 0.75rem;
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 0.25rem;
 	}
 
 	.result-value span:first-child {
-		font-size: 2rem;
+		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-primary);
-		display: block;
 		line-height: 1;
 	}
 
 	.result-unit {
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		font-weight: 500;
-	}
-
-	.result-tdee {
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-		margin-bottom: 0.75rem;
-		font-weight: 500;
-	}
-
-	.result-tdee span {
-		color: var(--color-text);
-		font-weight: 600;
+		opacity: 0.8;
 	}
 
 	.result-description {
 		color: var(--color-text-muted);
 		margin: 0;
 		font-size: 0.75rem;
+	}
+
+	/* Legacy TDEE styling - hide since we're using new layout */
+	.result-tdee {
+		display: none;
 	}
 
 	.comparison-card {
@@ -609,7 +666,6 @@ import Layout from "../layouts/Layout.astro";
 			grid-template-columns: 1fr;
 		}
 	}
-
 	@media (max-width: 768px) {
 		.calculator-header h1 {
 			font-size: 2rem;
@@ -621,11 +677,23 @@ import Layout from "../layouts/Layout.astro";
 		}
 
 		.result-value span:first-child {
-			font-size: 1.75rem;
+			font-size: 1.25rem;
+		}
+
+		.result-label {
+			font-size: 0.7rem;
 		}
 
 		.formula-text {
 			font-size: 0.75rem;
+		}
+
+		.dual-results {
+			gap: 0.5rem;
+		}
+
+		.result-section {
+			padding: 0.5rem;
 		}
 	}
 </style>
@@ -796,8 +864,9 @@ import Layout from "../layouts/Layout.astro";
 
 		return bmr;
 	}
-
 	function updateDisplay() {
+		console.log("updateDisplay called, currentActivityMultiplier:", currentActivityMultiplier);
+
 		const mifflinBmrValue = calculateMifflinBMR();
 		const harrisBmrValue = calculateHarrisBMR();
 		const katchBmrValue = calculateKatchBMR();
@@ -805,6 +874,12 @@ import Layout from "../layouts/Layout.astro";
 		const mifflinTdeeValue = mifflinBmrValue * currentActivityMultiplier;
 		const harrisTdeeValue = harrisBmrValue * currentActivityMultiplier;
 		const katchTdeeValue = katchBmrValue * currentActivityMultiplier;
+
+		console.log("Calculated TDEE values:", {
+			mifflin: mifflinTdeeValue,
+			harris: harrisTdeeValue,
+			katch: katchTdeeValue,
+		});
 
 		// Update BMR displays
 		if (mifflinBmr) mifflinBmr.textContent = Math.round(mifflinBmrValue).toLocaleString();
@@ -848,10 +923,14 @@ import Layout from "../layouts/Layout.astro";
 
 		if (katchFormula) {
 			katchFormula.textContent = `BMR = 370 + (21.6 × ${Math.round(leanBodyMass)}kg lean mass) = ${Math.round(katchBmrValue).toLocaleString()} cal/day`;
-		}
-
-		// Save values after calculation
+		} // Save values after calculation
 		saveCurrentValues();
+
+		// Save Mifflin BMR for other calculators to use
+		localStorage.setItem("cruxcalc-bmr-mifflin", Math.round(mifflinBmrValue).toString());
+
+		// Save Mifflin TDEE for other calculators to use
+		localStorage.setItem("cruxcalc-tdee-mifflin", Math.round(mifflinTdeeValue).toString());
 	}
 
 	function updateDisplays() {
@@ -934,22 +1013,30 @@ import Layout from "../layouts/Layout.astro";
 			updateDisplays();
 			debouncedCalculation();
 		});
-	});
-
-	// Activity level functionality
+	}); // Activity level functionality
+	console.log(
+		"Setting up activity button listeners, found buttons:",
+		document.querySelectorAll(".activity-btn").length
+	);
 	document.querySelectorAll(".activity-btn").forEach((btn) => {
 		btn.addEventListener("click", (e) => {
+			e.preventDefault(); // Prevent any default button behavior
 			const target = e.currentTarget;
 			const multiplier = target.dataset.multiplier;
 
+			console.log("Activity button clicked, multiplier:", multiplier);
+
 			if (multiplier) {
 				currentActivityMultiplier = parseFloat(multiplier);
+				console.log("Updated currentActivityMultiplier to:", currentActivityMultiplier);
 
 				// Update active state
 				document.querySelectorAll(".activity-btn").forEach((b) => b.classList.remove("active"));
 				target.classList.add("active");
 
-				debouncedCalculation();
+				// Force immediate update for activity changes
+				console.log("Calling updateDisplay...");
+				updateDisplay();
 			}
 		});
 	});

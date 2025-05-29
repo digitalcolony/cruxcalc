@@ -1,0 +1,415 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Potato Hack Calculator - CruxCalc">
+	<section class="calculator">
+		<div class="container">
+			<h1 class="calculator-title">Potato Hack Calculator</h1>
+			<p class="calculator-description">
+				Calculate your daily calorie deficit on a potato-only diet. Cooling potatoes overnight
+				increases resistant starch, reducing available calories by 17%.
+			</p>
+
+			<div class="calculator-form">
+				<div class="form-group">
+					<label for="potato-pounds">Pounds of Cooked Potatoes</label>
+					<div class="slider-container">
+						<input
+							type="range"
+							id="potato-pounds"
+							min="3"
+							max="5"
+							step="0.1"
+							value="4"
+							class="slider"
+						/>
+						<div class="slider-value">
+							<span id="potato-value">4.0</span> lbs
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="checkbox-label">
+						<input type="checkbox" id="cooled-overnight" />
+						<span class="checkmark"></span>
+						Cooled Overnight (17% resistant starch reduction)
+					</label>
+				</div>
+				<div class="form-group">
+					<label for="bmr">Your TDEE (Total Daily Energy Expenditure)</label>
+					<input type="number" id="bmr" value="1700" min="800" max="3000" class="input-field" />
+					<span class="input-unit">calories</span>
+				</div>
+
+				<div class="results">
+					<div class="result-card">
+						<h3>Total Calories Consumed</h3>
+						<div class="result-value" id="total-calories">1400</div>
+						<div class="result-unit">calories</div>
+					</div>
+					<div class="result-card">
+						<h3>Daily Calorie Change</h3>
+						<div class="result-value" id="calorie-deficit">300</div>
+						<div class="result-unit">calories</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.calculator {
+		padding: 2rem 0;
+	}
+
+	.calculator-title {
+		font-size: 2.5rem;
+		font-weight: 800;
+		margin: 0 0 1rem 0;
+		color: var(--color-primary);
+		text-align: center;
+	}
+
+	.calculator-description {
+		text-align: center;
+		margin: 0 0 2rem 0;
+		color: var(--color-text-muted);
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.calculator-form {
+		max-width: 500px;
+		margin: 0 auto;
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 2rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	.form-group {
+		margin-bottom: 2rem;
+	}
+
+	.form-group:last-child {
+		margin-bottom: 0;
+	}
+
+	label {
+		display: block;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+		color: var(--color-text);
+	}
+
+	.slider-container {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.slider {
+		flex: 1;
+		height: 8px;
+		border-radius: 4px;
+		background: var(--color-border);
+		outline: none;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		border: 3px solid var(--color-border);
+		cursor: pointer;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.slider::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		border: 3px solid var(--color-border);
+		cursor: pointer;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.slider-value {
+		font-weight: 700;
+		color: var(--color-primary);
+		min-width: 80px;
+		text-align: center;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		font-weight: 700;
+		gap: 0.75rem;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		display: none;
+	}
+
+	.checkmark {
+		width: 20px;
+		height: 20px;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-surface);
+		position: relative;
+		transition: all 0.2s ease;
+	}
+
+	.checkbox-label input[type="checkbox"]:checked + .checkmark {
+		background: var(--color-primary);
+	}
+
+	.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+		content: "✓";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: white;
+		font-weight: 700;
+		font-size: 14px;
+	}
+	.input-field {
+		max-width: 200px;
+		width: 100%;
+		padding: 0.75rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-family: inherit;
+		font-weight: 700;
+		font-size: 1rem;
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+	}
+
+	.input-field:focus {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: var(--shadow-md);
+	}
+
+	.input-unit {
+		display: inline-block;
+		margin-top: 0.5rem;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	.results {
+		margin-top: 2rem;
+		display: grid;
+		gap: 1rem;
+	}
+
+	.result-card {
+		background: var(--color-bg);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1.5rem;
+		text-align: center;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.result-card h3 {
+		margin: 0 0 0.5rem 0;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+
+	.result-value {
+		font-size: 2rem;
+		font-weight: 800;
+		color: var(--color-primary);
+		margin: 0;
+	}
+
+	.result-unit {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin-top: 0.25rem;
+	}
+
+	@media (max-width: 768px) {
+		.calculator-form {
+			margin: 0 1rem;
+			padding: 1.5rem;
+		}
+
+		.calculator-title {
+			font-size: 2rem;
+		}
+
+		.slider-container {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0.5rem;
+		}
+
+		.slider-value {
+			text-align: left;
+		}
+	}
+</style>
+
+<script type="module">
+	import sharedValues from "/sharedValues.js";
+	// Get DOM elements
+	const potatoSlider = document.getElementById("potato-pounds");
+	const potatoValue = document.getElementById("potato-value");
+	const cooledCheckbox = document.getElementById("cooled-overnight");
+	const bmrInput = document.getElementById("bmr");
+	const totalCaloriesDisplay = document.getElementById("total-calories");
+	const calorieDeficitDisplay = document.getElementById("calorie-deficit");
+	// Initialize BMR value from shared data or default
+	function initializeBMR() {
+		const values = sharedValues.load();
+
+		// Check if user has used BMR calculator and get Mifflin-St Jeor TDEE result
+		const savedTDEE = localStorage.getItem("cruxcalc-tdee-mifflin");
+
+		if (savedTDEE) {
+			// Use the saved Mifflin-St Jeor TDEE result
+			bmrInput.value = savedTDEE;
+		} else if (values.bmr) {
+			// Fallback to shared values BMR if available
+			bmrInput.value = values.bmr.toString();
+		} else {
+			// Default to 1700
+			bmrInput.value = "1700";
+		}
+	}
+
+	// Calculate Mifflin-St Jeor BMR from shared values if no saved BMR exists
+	function calculateMifflinBMR() {
+		const values = sharedValues.load();
+
+		if (!values.age || !values.heightCm || !values.weightKg || !values.gender) {
+			return null; // Can't calculate without complete data
+		}
+
+		const { age, heightCm, weightKg, gender } = values;
+
+		let bmr = 10 * weightKg + 6.25 * heightCm - 5 * age;
+		bmr += gender === "male" ? 5 : -161;
+
+		return Math.round(bmr);
+	}
+	// Enhanced BMR initialization
+	function initializeBMREnhanced() {
+		// Priority 1: Saved TDEE from BMR calculator
+		const savedTDEE = localStorage.getItem("cruxcalc-tdee-mifflin");
+
+		if (savedTDEE) {
+			bmrInput.value = savedTDEE;
+			return;
+		}
+
+		// Priority 2: Calculate from shared values if available
+		const calculatedBMR = calculateMifflinBMR();
+		if (calculatedBMR) {
+			bmrInput.value = calculatedBMR.toString();
+			return;
+		}
+
+		// Priority 3: Check shared values for BMR
+		const values = sharedValues.load();
+		if (values.bmr) {
+			bmrInput.value = values.bmr.toString();
+			return;
+		}
+
+		// Priority 4: Default to 1700
+		bmrInput.value = "1700";
+	}
+
+	// Save BMR value to shared storage
+	function saveBMRValue() {
+		const currentBMR = parseInt(bmrInput.value) || 1700;
+		const values = sharedValues.load();
+		values.bmr = currentBMR;
+		sharedValues.save(values);
+
+		// Also save the potato hack specific data
+		const potatoData = {
+			potatoPounds: parseFloat(potatoSlider.value),
+			cooledOvernight: cooledCheckbox.checked,
+			bmr: currentBMR,
+		};
+		localStorage.setItem("cruxcalc-potato-hack", JSON.stringify(potatoData));
+	}
+
+	// Load potato hack specific data
+	function loadPotatoData() {
+		try {
+			const saved = localStorage.getItem("cruxcalc-potato-hack");
+			if (saved) {
+				const data = JSON.parse(saved);
+				if (data.potatoPounds) potatoSlider.value = data.potatoPounds.toString();
+				if (data.cooledOvernight !== undefined) cooledCheckbox.checked = data.cooledOvernight;
+				// BMR is handled separately in initializeBMREnhanced
+			}
+		} catch (error) {
+			console.warn("Error loading potato hack data:", error);
+		}
+	}
+
+	function calculateCalories() {
+		const pounds = parseFloat(potatoSlider.value);
+		const isCooled = cooledCheckbox.checked;
+		const bmr = parseInt(bmrInput.value) || 1700;
+
+		// Calculate potato calories (350 per pound)
+		let potatoCalories = pounds * 350;
+
+		// Apply resistant starch reduction if cooled overnight
+		if (isCooled) {
+			potatoCalories = potatoCalories * (1 - 0.17); // 17% reduction
+		}
+
+		// Round to nearest calorie
+		potatoCalories = Math.round(potatoCalories);
+		// Calculate deficit
+		const deficit = bmr - potatoCalories;
+
+		// Update displays
+		totalCaloriesDisplay.textContent = potatoCalories.toString();
+		// Add minus sign for deficits (negative values)
+		calorieDeficitDisplay.textContent = deficit < 0 ? deficit.toString() : `-${deficit}`;
+		potatoValue.textContent = pounds.toFixed(1);
+
+		// Save values after calculation
+		saveBMRValue();
+	}
+
+	// Event listeners
+	potatoSlider.addEventListener("input", calculateCalories);
+	cooledCheckbox.addEventListener("change", calculateCalories);
+	bmrInput.addEventListener("input", calculateCalories);
+
+	// Initialize on page load
+	loadPotatoData();
+	initializeBMREnhanced();
+	calculateCalories();
+</script>
