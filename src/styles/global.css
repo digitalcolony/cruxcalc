@@ -3,6 +3,7 @@
 :root {
 	/* Neo-brutalist color palette */
 	--color-primary: #ff3366;
+	--color-primary-rgb: 255, 51, 102;
 	--color-secondary: #00ff88;
 	--color-accent: #3366ff;
 	--color-success: #00cc66;
@@ -19,8 +20,8 @@
 	--shadow-md: 6px 6px 0px #000000;
 	--shadow-lg: 8px 8px 0px #000000;
 	--shadow-hover: 2px 2px 0px #000000;
-
 	--border-radius: 0px;
+	--border-radius-lg: 0px;
 	--border-width: 4px;
 	--font-size-xs: 0.75rem;
 	--font-size-sm: 0.875rem;

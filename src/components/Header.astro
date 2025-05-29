@@ -1,9 +1,6 @@
 ---
 // Get current page path to highlight active nav link
 const currentPath = Astro.url.pathname;
-
-// Check if user is on any BMR page
-const isBMRPage = currentPath.includes("/bmr-");
 ---
 
 <header class="header">
@@ -14,32 +11,7 @@ const isBMRPage = currentPath.includes("/bmr-");
 			</a>
 			<div class="nav-links">
 				<a href="/bmi" class={`nav-link ${currentPath === "/bmi" ? "nav-link-active" : ""}`}>BMI</a>
-				<div class={`nav-dropdown ${isBMRPage ? "nav-dropdown-active" : ""}`}>
-					<button class="nav-dropdown-toggle">
-						BMR
-						<span class="dropdown-arrow">▼</span>
-					</button>
-					<div class="nav-dropdown-menu">
-						<a
-							href="/bmr-harris-benedict"
-							class={`nav-dropdown-link ${currentPath === "/bmr-harris-benedict" ? "nav-dropdown-link-active" : ""}`}
-						>
-							Harris-Benedict
-						</a>
-						<a
-							href="/bmr-mifflin-st-jeor"
-							class={`nav-dropdown-link ${currentPath === "/bmr-mifflin-st-jeor" ? "nav-dropdown-link-active" : ""}`}
-						>
-							Mifflin-St Jeor
-						</a>
-						<a
-							href="/bmr-katch-mcardle"
-							class={`nav-dropdown-link ${currentPath === "/bmr-katch-mcardle" ? "nav-dropdown-link-active" : ""}`}
-						>
-							Katch-McArdle
-						</a>
-					</div>
-				</div>
+				<a href="/bmr" class={`nav-link ${currentPath === "/bmr" ? "nav-link-active" : ""}`}>BMR</a>
 				<a
 					href="/muscle-potential"
 					class={`nav-link ${currentPath === "/muscle-potential" ? "nav-link-active" : ""}`}

@@ -3,14 +3,16 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout
-	title="Mifflin-St Jeor BMR Calculator - CruxCalc"
-	description="Calculate your Basal Metabolic Rate using the Mifflin-St Jeor formula. More accurate than Harris-Benedict for modern populations."
+	title="BMR Calculator - All Formulas - CruxCalc"
+	description="Calculate your Basal Metabolic Rate using all three major formulas: Mifflin-St Jeor, Harris-Benedict, and Katch-McArdle. Compare results instantly."
 >
 	<section class="calculator-page">
 		<div class="container">
 			<div class="calculator-header">
-				<h1>Mifflin-St Jeor BMR Calculator</h1>
-				<p>Calculate your Basal Metabolic Rate using the more accurate Mifflin-St Jeor formula</p>
+				<h1>Complete BMR Calculator</h1>
+				<p>
+					Calculate your Basal Metabolic Rate using all three major formulas and compare results
+				</p>
 			</div>
 
 			<div class="calculator-layout">
@@ -90,6 +92,20 @@ import Layout from "../layouts/Layout.astro";
 							</div>
 						</div>
 					</div>
+
+					<div class="input-group">
+						<label for="body-fat"
+							>Body Fat Percentage <span class="optional">(for Katch-McArdle)</span></label
+						>
+						<div class="input-container">
+							<input type="range" id="body-fat" min="5" max="50" value="15" step="0.5" />
+							<div class="input-display">
+								<span id="body-fat-display">15</span>%
+							</div>
+						</div>
+						<p class="input-help">Optional: Required only for Katch-McArdle formula</p>
+					</div>
+
 					<div class="input-group">
 						<label for="activity">Activity Level</label>
 						<div class="activity-selector">
@@ -118,33 +134,88 @@ import Layout from "../layouts/Layout.astro";
 				</div>
 
 				<div class="calculator-results">
-					<div class="result-card">
-						<h3>Basal Metabolic Rate (BMR)</h3>
-						<div class="result-value">
-							<span id="bmr-number">1,685</span>
-							<span class="result-unit">calories/day</span>
+					<div class="results-grid">
+						<div class="result-card mifflin">
+							<h3>Mifflin-St Jeor</h3>
+							<div class="result-value">
+								<span id="mifflin-bmr">1,685</span>
+								<span class="result-unit">cal/day</span>
+							</div>
+							<div class="result-tdee">
+								TDEE: <span id="mifflin-tdee">2,022</span> cal/day
+							</div>
+							<p class="result-description">Most accurate for general population</p>
 						</div>
-						<p class="result-description">Energy needed for basic bodily functions at rest</p>
+
+						<div class="result-card harris">
+							<h3>Harris-Benedict</h3>
+							<div class="result-value">
+								<span id="harris-bmr">1,712</span>
+								<span class="result-unit">cal/day</span>
+							</div>
+							<div class="result-tdee">
+								TDEE: <span id="harris-tdee">2,054</span> cal/day
+							</div>
+							<p class="result-description">Classic formula, slightly higher estimates</p>
+						</div>
+
+						<div class="result-card katch">
+							<h3>Katch-McArdle</h3>
+							<div class="result-value">
+								<span id="katch-bmr">1,798</span>
+								<span class="result-unit">cal/day</span>
+							</div>
+							<div class="result-tdee">
+								TDEE: <span id="katch-tdee">2,158</span> cal/day
+							</div>
+							<p class="result-description">Most accurate for lean/athletic individuals</p>
+						</div>
 					</div>
 
-					<div class="result-card">
-						<h3>Total Daily Energy Expenditure (TDEE)</h3>
-						<div class="result-value">
-							<span id="tdee-number">2,022</span>
-							<span class="result-unit">calories/day</span>
+					<div class="comparison-card">
+						<h3>Formula Comparison</h3>
+						<div class="comparison-stats">
+							<div class="stat">
+								<span class="stat-label">Average BMR:</span>
+								<span class="stat-value" id="average-bmr">1,732</span> cal/day
+							</div>
+							<div class="stat">
+								<span class="stat-label">Range:</span>
+								<span class="stat-value" id="bmr-range">113</span> cal/day
+							</div>
+							<div class="stat">
+								<span class="stat-label">Recommended:</span>
+								<span class="stat-value">Mifflin-St Jeor</span>
+							</div>
 						</div>
-						<p class="result-description">Total calories needed including activity level</p>
 					</div>
 
-					<div class="formula-info">
-						<h4>Mifflin-St Jeor Formula</h4>
-						<p id="formula-text">
-							BMR = (10 × 73kg) + (6.25 × 173cm) - (5 × 30y) + 5 = 1,685 cal/day
-						</p>
-						<p class="formula-note">
-							The Mifflin-St Jeor equation is considered more accurate than Harris-Benedict for most
-							people in modern populations.
-						</p>
+					<div class="formula-details">
+						<div class="formula-card">
+							<h4>Mifflin-St Jeor (Recommended)</h4>
+							<p class="formula-text" id="mifflin-formula">
+								BMR = (10 × 73kg) + (6.25 × 173cm) - (5 × 30y) + 5 = 1,685 cal/day
+							</p>
+							<p class="formula-note">Most accurate for modern populations, published in 1990</p>
+						</div>
+
+						<div class="formula-card">
+							<h4>Harris-Benedict (Revised)</h4>
+							<p class="formula-text" id="harris-formula">
+								BMR = (13.397 × 73kg) + (4.799 × 173cm) - (5.677 × 30y) + 88.362 = 1,712 cal/day
+							</p>
+							<p class="formula-note">Classic formula revised in 1984, tends to overestimate</p>
+						</div>
+
+						<div class="formula-card">
+							<h4>Katch-McArdle</h4>
+							<p class="formula-text" id="katch-formula">
+								BMR = 370 + (21.6 × 62kg lean mass) = 1,798 cal/day
+							</p>
+							<p class="formula-note">
+								Based on lean body mass, most accurate for athletic individuals
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -174,12 +245,11 @@ import Layout from "../layouts/Layout.astro";
 		color: var(--color-text-muted);
 		font-size: 1.125rem;
 	}
-
 	.calculator-layout {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr 1.5fr;
 		gap: 3rem;
-		max-width: 1200px;
+		max-width: 1400px;
 		margin: 0 auto;
 	}
 
@@ -189,6 +259,7 @@ import Layout from "../layouts/Layout.astro";
 		border-radius: var(--border-radius-lg);
 		padding: 2rem;
 		height: fit-content;
+		box-shadow: var(--shadow-md);
 	}
 
 	.input-group {
@@ -204,6 +275,20 @@ import Layout from "../layouts/Layout.astro";
 		font-weight: 600;
 		margin-bottom: 0.75rem;
 		color: var(--color-text);
+	}
+
+	.optional {
+		font-weight: 400;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	.input-help {
+		margin-top: 0.5rem;
+		margin-bottom: 0;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-style: italic;
 	}
 
 	/* Gender Toggle */
@@ -319,6 +404,7 @@ import Layout from "../layouts/Layout.astro";
 		border: none;
 		box-shadow: var(--shadow-sm);
 	}
+
 	/* Activity Selector */
 	.activity-selector {
 		display: flex;
@@ -376,27 +462,58 @@ import Layout from "../layouts/Layout.astro";
 		gap: 1.5rem;
 	}
 
+	.results-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1rem;
+	}
 	.result-card {
 		background: var(--color-surface);
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius-lg);
-		padding: 2rem;
+		padding: 1.5rem;
 		text-align: center;
+		position: relative;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.result-card.mifflin {
+		border-color: var(--color-primary);
+		background: linear-gradient(
+			135deg,
+			var(--color-surface) 0%,
+			rgba(var(--color-primary-rgb), 0.05) 100%
+		);
+	}
+
+	.result-card.mifflin::before {
+		content: "RECOMMENDED";
+		position: absolute;
+		top: -8px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--color-primary);
+		color: white;
+		padding: 0.25rem 0.75rem;
+		border-radius: var(--border-radius);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.5px;
 	}
 
 	.result-card h3 {
 		margin: 0 0 1rem 0;
 		color: var(--color-text);
-		font-size: 1.25rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 	}
 
 	.result-value {
-		margin-bottom: 1rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.result-value span:first-child {
-		font-size: 2.5rem;
+		font-size: 2rem;
 		font-weight: 700;
 		color: var(--color-primary);
 		display: block;
@@ -405,50 +522,119 @@ import Layout from "../layouts/Layout.astro";
 
 	.result-unit {
 		color: var(--color-text-muted);
-		font-size: 1rem;
+		font-size: 0.875rem;
 		font-weight: 500;
+	}
+
+	.result-tdee {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		margin-bottom: 0.75rem;
+		font-weight: 500;
+	}
+
+	.result-tdee span {
+		color: var(--color-text);
+		font-weight: 600;
 	}
 
 	.result-description {
 		color: var(--color-text-muted);
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 	}
 
-	.formula-info {
+	.comparison-card {
 		background: var(--color-background);
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
 	}
 
-	.formula-info h4 {
+	.comparison-card h3 {
+		margin: 0 0 1rem 0;
+		color: var(--color-text);
+		font-size: 1.125rem;
+		font-weight: 600;
+		text-align: center;
+	}
+
+	.comparison-stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1rem;
+		text-align: center;
+	}
+
+	.stat {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.stat-label {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	.stat-value {
+		color: var(--color-text);
+		font-weight: 600;
+		font-size: 1.125rem;
+	}
+
+	.formula-details {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.formula-card {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+	}
+
+	.formula-card h4 {
 		margin: 0 0 0.75rem 0;
 		color: var(--color-text);
 		font-size: 1rem;
 		font-weight: 600;
 	}
 
-	.formula-info p {
+	.formula-text {
 		margin: 0 0 0.5rem 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
 		font-family: "Courier New", monospace;
+		word-break: break-all;
 	}
 
-	.formula-info .formula-note {
-		margin-top: 1rem;
-		font-family: inherit;
+	.formula-note {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
 		font-style: italic;
 	}
 
 	/* Mobile Responsiveness */
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
 		.calculator-layout {
 			grid-template-columns: 1fr;
 			gap: 2rem;
 		}
 
+		.results-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.comparison-stats {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
 		.calculator-header h1 {
 			font-size: 2rem;
 		}
@@ -459,7 +645,11 @@ import Layout from "../layouts/Layout.astro";
 		}
 
 		.result-value span:first-child {
-			font-size: 2rem;
+			font-size: 1.75rem;
+		}
+
+		.formula-text {
+			font-size: 0.75rem;
 		}
 	}
 </style>
@@ -481,6 +671,7 @@ import Layout from "../layouts/Layout.astro";
 	const heightCm = document.getElementById("height-cm");
 	const weightLbs = document.getElementById("weight-lbs");
 	const weightKg = document.getElementById("weight-kg");
+	const bodyFat = document.getElementById("body-fat");
 
 	const ageDisplay = document.getElementById("age-display");
 	const heightFeetDisplay = document.getElementById("height-feet-display");
@@ -488,10 +679,22 @@ import Layout from "../layouts/Layout.astro";
 	const heightCmDisplay = document.getElementById("height-cm-display");
 	const weightLbsDisplay = document.getElementById("weight-lbs-display");
 	const weightKgDisplay = document.getElementById("weight-kg-display");
+	const bodyFatDisplay = document.getElementById("body-fat-display");
 
-	const bmrNumber = document.getElementById("bmr-number");
-	const tdeeNumber = document.getElementById("tdee-number");
-	const formulaText = document.getElementById("formula-text");
+	// Result elements
+	const mifflinBmr = document.getElementById("mifflin-bmr");
+	const mifflinTdee = document.getElementById("mifflin-tdee");
+	const harrisBmr = document.getElementById("harris-bmr");
+	const harrisTdee = document.getElementById("harris-tdee");
+	const katchBmr = document.getElementById("katch-bmr");
+	const katchTdee = document.getElementById("katch-tdee");
+	const averageBmr = document.getElementById("average-bmr");
+	const bmrRange = document.getElementById("bmr-range");
+
+	// Formula elements
+	const mifflinFormula = document.getElementById("mifflin-formula");
+	const harrisFormula = document.getElementById("harris-formula");
+	const katchFormula = document.getElementById("katch-formula");
 
 	// Initialize inputs with shared values
 	function initializeInputs() {
@@ -501,6 +704,7 @@ import Layout from "../layouts/Layout.astro";
 		if (heightCm) heightCm.value = values.heightCm.toString();
 		if (weightLbs) weightLbs.value = values.weightLbs.toString();
 		if (weightKg) weightKg.value = values.weightKg.toString();
+		if (bodyFat) bodyFat.value = "15";
 
 		// Set gender toggle to match saved preference
 		document.querySelectorAll(".gender-btn").forEach((btn) => {
@@ -512,9 +716,11 @@ import Layout from "../layouts/Layout.astro";
 
 		// Set unit toggles to match saved preferences
 		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-			const isHeightToggle =
-				toggle.closest(".input-group")?.querySelector("label")?.textContent?.toLowerCase() ===
-				"height";
+			const isHeightToggle = toggle
+				.closest(".input-group")
+				?.querySelector("label")
+				?.textContent?.toLowerCase()
+				.includes("height");
 			const targetUnit = isHeightToggle ? currentHeightUnit : currentWeightUnit;
 
 			toggle.querySelectorAll(".unit-btn").forEach((btn) => {
@@ -554,11 +760,10 @@ import Layout from "../layouts/Layout.astro";
 		sharedValues.update(currentValues);
 	}
 
-	// Calculate BMR using Mifflin-St Jeor formula
-	function calculateBMR() {
+	// Get standardized values (height in cm, weight in kg)
+	function getStandardizedValues() {
 		let heightInCm, weightInKg, ageValue;
 
-		// Get age
 		ageValue = parseInt(age?.value || "30");
 
 		// Convert height to cm
@@ -578,44 +783,95 @@ import Layout from "../layouts/Layout.astro";
 			weightInKg = parseInt(weightKg?.value || "73");
 		}
 
-		// Mifflin-St Jeor Formula
-		// Men: BMR = (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) + 5
-		// Women: BMR = (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) - 161
+		return { heightInCm, weightInKg, ageValue };
+	}
+
+	// Calculate Mifflin-St Jeor BMR
+	function calculateMifflinBMR() {
+		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
+
 		let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * ageValue;
 		bmr += currentGender === "male" ? 5 : -161;
 
 		return bmr;
 	}
 
+	// Calculate Harris-Benedict BMR
+	function calculateHarrisBMR() {
+		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
+
+		let bmr;
+		if (currentGender === "male") {
+			bmr = 88.362 + 13.397 * weightInKg + 4.799 * heightInCm - 5.677 * ageValue;
+		} else {
+			bmr = 447.593 + 9.247 * weightInKg + 3.098 * heightInCm - 4.33 * ageValue;
+		}
+
+		return bmr;
+	}
+
+	// Calculate Katch-McArdle BMR
+	function calculateKatchBMR() {
+		const { weightInKg } = getStandardizedValues();
+		const bodyFatPercentage = parseFloat(bodyFat?.value || "15");
+
+		const leanBodyMass = weightInKg * (1 - bodyFatPercentage / 100);
+		const bmr = 370 + 21.6 * leanBodyMass;
+
+		return bmr;
+	}
+
 	function updateDisplay() {
-		const bmr = calculateBMR();
-		const tdee = bmr * currentActivityMultiplier;
+		const mifflinBmrValue = calculateMifflinBMR();
+		const harrisBmrValue = calculateHarrisBMR();
+		const katchBmrValue = calculateKatchBMR();
 
-		if (bmrNumber) bmrNumber.textContent = Math.round(bmr).toLocaleString();
-		if (tdeeNumber) tdeeNumber.textContent = Math.round(tdee).toLocaleString();
+		const mifflinTdeeValue = mifflinBmrValue * currentActivityMultiplier;
+		const harrisTdeeValue = harrisBmrValue * currentActivityMultiplier;
+		const katchTdeeValue = katchBmrValue * currentActivityMultiplier;
 
-		// Update formula display
-		let heightInCm, weightInKg, ageValue;
-		ageValue = parseInt(age?.value || "30");
+		// Update BMR displays
+		if (mifflinBmr) mifflinBmr.textContent = Math.round(mifflinBmrValue).toLocaleString();
+		if (harrisBmr) harrisBmr.textContent = Math.round(harrisBmrValue).toLocaleString();
+		if (katchBmr) katchBmr.textContent = Math.round(katchBmrValue).toLocaleString();
 
-		if (currentHeightUnit === "imperial") {
-			const feet = parseInt(heightFeet?.value || "5");
-			const inches = parseFloat(heightInches?.value || "8");
-			const totalInches = feet * 12 + inches;
-			heightInCm = Math.round(totalInches * 2.54);
-		} else {
-			heightInCm = parseInt(heightCm?.value || "173");
-		}
+		// Update TDEE displays
+		if (mifflinTdee) mifflinTdee.textContent = Math.round(mifflinTdeeValue).toLocaleString();
+		if (harrisTdee) harrisTdee.textContent = Math.round(harrisTdeeValue).toLocaleString();
+		if (katchTdee) katchTdee.textContent = Math.round(katchTdeeValue).toLocaleString();
 
-		if (currentWeightUnit === "imperial") {
-			weightInKg = Math.round(parseInt(weightLbs?.value || "160") * 0.453592);
-		} else {
-			weightInKg = parseInt(weightKg?.value || "73");
-		}
+		// Calculate comparison stats
+		const bmrValues = [mifflinBmrValue, harrisBmrValue, katchBmrValue];
+		const avgBmr = bmrValues.reduce((a, b) => a + b, 0) / bmrValues.length;
+		const minBmr = Math.min(...bmrValues);
+		const maxBmr = Math.max(...bmrValues);
+		const rangeBmr = maxBmr - minBmr;
+
+		if (averageBmr) averageBmr.textContent = Math.round(avgBmr).toLocaleString();
+		if (bmrRange) bmrRange.textContent = Math.round(rangeBmr).toLocaleString();
+
+		// Update formula displays
+		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
+		const bodyFatPercentage = parseFloat(bodyFat?.value || "15");
+		const leanBodyMass = weightInKg * (1 - bodyFatPercentage / 100);
 
 		const genderSign = currentGender === "male" ? "+ 5" : "- 161";
-		if (formulaText) {
-			formulaText.textContent = `BMR = (10 × ${weightInKg}kg) + (6.25 × ${heightInCm}cm) - (5 × ${ageValue}y) ${genderSign} = ${Math.round(bmr).toLocaleString()} cal/day`;
+		if (mifflinFormula) {
+			mifflinFormula.textContent = `BMR = (10 × ${Math.round(weightInKg)}kg) + (6.25 × ${Math.round(heightInCm)}cm) - (5 × ${ageValue}y) ${genderSign} = ${Math.round(mifflinBmrValue).toLocaleString()} cal/day`;
+		}
+
+		if (currentGender === "male") {
+			if (harrisFormula) {
+				harrisFormula.textContent = `BMR = 88.362 + (13.397 × ${Math.round(weightInKg)}kg) + (4.799 × ${Math.round(heightInCm)}cm) - (5.677 × ${ageValue}y) = ${Math.round(harrisBmrValue).toLocaleString()} cal/day`;
+			}
+		} else {
+			if (harrisFormula) {
+				harrisFormula.textContent = `BMR = 447.593 + (9.247 × ${Math.round(weightInKg)}kg) + (3.098 × ${Math.round(heightInCm)}cm) - (4.330 × ${ageValue}y) = ${Math.round(harrisBmrValue).toLocaleString()} cal/day`;
+			}
+		}
+
+		if (katchFormula) {
+			katchFormula.textContent = `BMR = 370 + (21.6 × ${Math.round(leanBodyMass)}kg lean mass) = ${Math.round(katchBmrValue).toLocaleString()} cal/day`;
 		}
 
 		// Save values after calculation
@@ -629,6 +885,7 @@ import Layout from "../layouts/Layout.astro";
 		if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
 		if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
 		if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
+		if (bodyFatDisplay && bodyFat) bodyFatDisplay.textContent = bodyFat.value;
 	}
 
 	// Debounced calculation
@@ -639,7 +896,7 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	// Event listeners for sliders
-	[age, heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
+	[age, heightFeet, heightInches, heightCm, weightLbs, weightKg, bodyFat].forEach((slider) => {
 		if (slider) {
 			slider.addEventListener("input", () => {
 				updateDisplays();
@@ -676,7 +933,7 @@ import Layout from "../layouts/Layout.astro";
 
 			// Show/hide appropriate inputs
 			const inputGroup = target.closest(".input-group");
-			if (unitType === "height") {
+			if (unitType?.includes("height")) {
 				currentHeightUnit = unit || "imperial";
 				sharedValues.syncHeightUnits(currentHeightUnit);
 				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
@@ -702,10 +959,11 @@ import Layout from "../layouts/Layout.astro";
 			debouncedCalculation();
 		});
 	});
+
 	// Activity level functionality
 	document.querySelectorAll(".activity-btn").forEach((btn) => {
 		btn.addEventListener("click", (e) => {
-			const target = e.currentTarget; // Use currentTarget instead of target to get the button element
+			const target = e.currentTarget;
 			const multiplier = target.dataset.multiplier;
 
 			if (multiplier) {
