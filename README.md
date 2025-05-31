@@ -1,8 +1,8 @@
-# CruxCalc 🏃‍♂️💪
+# Health & Fitness Calculators 🏃‍♂️💪
 
 **Modern Health & Fitness Calculators**
 
-CruxCalc is a collection of sleek, user-friendly health and fitness calculators built with Astro. Say goodbye to boring, outdated calculator interfaces and hello to engaging, modern tools for your health journey.
+This app is a collection of sleek, user-friendly health and fitness calculators built with Astro. Say goodbye to boring, outdated calculator interfaces and hello to engaging, modern tools for your health journey.
 
 ## ✨ Features
 
@@ -12,6 +12,8 @@ CruxCalc is a collection of sleek, user-friendly health and fitness calculators 
   - Mifflin-St Jeor Equation
   - Katch-McArdle Formula (requires body fat %)
 - **💪 Muscle Potential Calculator** - Casey Butt's scientific formula for predicting natural muscle-building potential
+- **🏃 Running Pace Calculator** - Calculate race finish times for 5K, 10K, half marathon, and full marathon distances
+- **🥔 Potato Hack Calculator** - Calorie deficit calculator for the potato-based weight loss approach
 - **🔄 Shared Values System** - Input data once, use across all calculators
 - **📱 Responsive Design** - Works perfectly on desktop, tablet, and mobile
 - **⚡ Fast & Lightweight** - Built with Astro for optimal performance
@@ -29,14 +31,13 @@ CruxCalc is a collection of sleek, user-friendly health and fitness calculators 
 │   │   └── Layout.astro         # Main layout template
 │   ├── pages/                   # Calculator pages (auto-routed)
 │   │   ├── index.astro          # Homepage with calculator grid
-│   │   ├── bmi.astro           # BMI Calculator
-│   │   ├── bmr-harris-benedict.astro
-│   │   ├── bmr-katch-mcardle.astro
-│   │   ├── bmr-mifflin-st-jeor.astro
-│   │   └── muscle-potential.astro # Casey Butt formula
+│   │   ├── bmi.astro            # BMI Calculator
+│   │   ├── bmr.astro            # BMR Calculator (unified)
+│   │   ├── muscle-potential.astro # Casey Butt formula
+│   │   ├── running.astro        # Running Pace Calculator
+│   │   └── potato-hack.astro    # Potato Hack Calculator
 │   ├── styles/
-│   │   └── global.css          # Modern styling with CSS custom properties
-│   └── utils/                  # Utility functions
+│       └── global.css           # Modern styling with CSS custom properties
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
@@ -63,9 +64,9 @@ Calculate your Body Mass Index with instant visual feedback and health category 
 
 ### BMR Calculators
 
-- **Harris-Benedict** (`/bmr-harris-benedict`) - Classic formula from 1919, revised in 1984
-- **Mifflin-St Jeor** (`/bmr-mifflin-st-jeor`) - More accurate for modern populations (1990)
-- **Katch-McArdle** (`/bmr-katch-mcardle`) - Most accurate when body fat % is known
+- **Harris-Benedict** - Classic formula from 1919, revised in 1984
+- **Mifflin-St Jeor** - More accurate for modern populations (1990)
+- **Katch-McArdle** - Most accurate when body fat % is known
 
 ### Muscle Potential Calculator (`/muscle-potential`)
 
@@ -75,6 +76,24 @@ Uses Casey Butt's scientifically-validated formula to predict natural muscle-bui
 - Wrist circumference (frame size indicator)
 - Ankle circumference (frame size indicator)
 - Body fat percentage
+
+### Running Pace Calculator (`/running`)
+
+Calculate race finish times based on your per-mile pace with features including:
+
+- Interactive pace slider with 5-second increments
+- Finish times for 5K, 10K, half marathon, and full marathon
+- Pace categorization (Elite, Sub-Elite, Competitive, Advanced, Intermediate, Recreational, Beginner, Walking/Jogging, Walking)
+- Persistent pace preference using localStorage
+
+### Potato Hack Calculator (`/potato-hack`)
+
+Specialized calculator for the potato-based weight loss approach featuring:
+
+- Calorie deficit calculations based on potato consumption
+- BMR integration from other calculators
+- Adjustable potato portions and cooking method considerations
+- Weight loss timeline projections
 
 ## 🔄 Shared Values System
 
@@ -114,7 +133,6 @@ All formulas implemented are scientifically validated:
 
    ```bash
    git clone <repository-url>
-   cd cruxcalc
    ```
 
 2. **Install dependencies**
@@ -130,7 +148,7 @@ All formulas implemented are scientifically validated:
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:4321` to see CruxCalc in action!
+   Navigate to `http://localhost:4321` to see the app in action!
 
 ## 📝 License
 
@@ -151,8 +169,6 @@ Feel free to open an issue or submit a pull request.
 ## 🔗 Learn More
 
 - **Astro Documentation** - [docs.astro.build](https://docs.astro.build)
-- **Casey Butt Research** - Scientific basis for muscle potential calculations
-- **BMR Formula Comparisons** - Understanding different metabolic rate equations
 
 ---
 
