@@ -1,0 +1,452 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+	title="Running Pace Calculator - CruxCalc"
+	description="Calculate race finish times based on your running pace. Interactive pace slider for 5K, 10K, half marathon, and full marathon distances."
+>
+	<section class="calculator-page">
+		<div class="container">
+			<div class="calculator-header">
+				<h1>Running Pace Calculator</h1>
+				<p>See your finish times for different race distances based on your pace per mile</p>
+			</div>
+			<div class="calculator-layout">
+				<div class="calculator-inputs">
+					<div class="input-group">
+						<label for="pace">Pace per Mile</label>
+						<div class="input-container">
+							<input type="range" id="pace-slider" min="240" max="1440" value="510" step="5" />
+							<div class="input-display">
+								<span id="pace-display">8:30</span>
+							</div>
+						</div>
+						<div class="pace-range">
+							<span class="range-label">4:00 (Fast)</span>
+							<span class="range-label">24:00 (Slow)</span>
+						</div>
+					</div>
+
+					<div class="pace-category-section">
+						<div class="pace-value">
+							<span id="pace-category">Recreational</span>
+						</div>
+						<div class="pace-description">
+							<span id="pace-description">A comfortable pace for most recreational runners</span>
+						</div>
+					</div>
+				</div>
+				<div class="calculator-results">
+					<div class="race-times">
+						<div class="race-card">
+							<h3>5K</h3>
+							<div class="distance">3.11 miles</div>
+							<div class="finish-time" id="time-5k">24:52</div>
+						</div>
+
+						<div class="race-card">
+							<h3>10K</h3>
+							<div class="distance">6.21 miles</div>
+							<div class="finish-time" id="time-10k">49:41</div>
+						</div>
+
+						<div class="race-card">
+							<h3>Half Marathon</h3>
+							<div class="distance">13.11 miles</div>
+							<div class="finish-time" id="time-half">1:44:53</div>
+						</div>
+
+						<div class="race-card">
+							<h3>Full Marathon</h3>
+							<div class="distance">26.22 miles</div>
+							<div class="finish-time" id="time-full">3:29:46</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<script>
+		// Race distances in miles
+		const DISTANCES = {
+			"5k": 3.10686,
+			"10k": 6.21371,
+			half: 13.1094,
+			full: 26.2188,
+		};
+
+		// Pace categories with descriptions
+		const PACE_CATEGORIES = [
+			{ max: 300, name: "Elite", description: "World-class competitive pace", color: "#d4af37" },
+			{
+				max: 360,
+				name: "Sub-Elite",
+				description: "Highly competitive racing pace",
+				color: "#c0392b",
+			},
+			{
+				max: 420,
+				name: "Competitive",
+				description: "Strong competitive runner pace",
+				color: "#e74c3c",
+			},
+			{ max: 480, name: "Advanced", description: "Experienced runner pace", color: "#f39c12" },
+			{
+				max: 540,
+				name: "Intermediate",
+				description: "Regular training runner pace",
+				color: "#27ae60",
+			},
+			{
+				max: 600,
+				name: "Recreational",
+				description: "Comfortable recreational pace",
+				color: "#3498db",
+			},
+			{
+				max: 720,
+				name: "Beginner",
+				description: "New runner or easy training pace",
+				color: "#9b59b6",
+			},
+			{
+				max: 900,
+				name: "Walking/Jogging",
+				description: "Walk-jog combination pace",
+				color: "#95a5a6",
+			},
+			{
+				max: 1440,
+				name: "Walking",
+				description: "Brisk to moderate walking pace",
+				color: "#7f8c8d",
+			},
+		];
+
+		function formatTime(totalSeconds: number) {
+			const hours = Math.floor(totalSeconds / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			const seconds = Math.round(totalSeconds % 60);
+
+			if (hours > 0) {
+				return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+			} else {
+				return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+			}
+		}
+
+		function formatPace(totalSeconds: number) {
+			const minutes = Math.floor(totalSeconds / 60);
+			const seconds = Math.round(totalSeconds % 60);
+			return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+		}
+		function calculateRaceTimes(paceSeconds: number) {
+			const times = {
+				"5k": 0,
+				"10k": 0,
+				half: 0,
+				full: 0,
+			};
+			for (const [race, distance] of Object.entries(DISTANCES)) {
+				times[race as "5k" | "10k" | "half" | "full"] = distance * paceSeconds;
+			}
+			return times;
+		}
+
+		function getPaceCategory(paceSeconds: number) {
+			for (const category of PACE_CATEGORIES) {
+				if (paceSeconds <= category.max) {
+					return category;
+				}
+			}
+			return PACE_CATEGORIES[PACE_CATEGORIES.length - 1];
+		}
+		function savePaceValue() {
+			const paceSlider = document.getElementById("pace-slider");
+			if (!paceSlider) return;
+
+			const paceSeconds = parseInt((paceSlider as HTMLInputElement).value);
+			try {
+				localStorage.setItem("cruxcalc-running-pace", paceSeconds.toString());
+			} catch (error) {
+				console.warn("Error saving pace value to localStorage:", error);
+			}
+		}
+
+		function loadPaceValue() {
+			try {
+				const savedPace = localStorage.getItem("cruxcalc-running-pace");
+				if (savedPace) {
+					return parseInt(savedPace);
+				}
+			} catch (error) {
+				console.warn("Error loading pace value from localStorage:", error);
+			}
+			// Default to 8:30 (510 seconds) if no saved value
+			return 510;
+		}
+
+		function updateCalculations() {
+			const paceSlider = document.getElementById("pace-slider");
+			if (!paceSlider) return;
+
+			const paceSeconds = parseInt((paceSlider as HTMLInputElement).value);
+
+			// Update pace display
+			const paceDisplay = document.getElementById("pace-display");
+			if (paceDisplay) {
+				paceDisplay.textContent = formatPace(paceSeconds);
+			}
+
+			// Calculate and display race times
+			const raceTimes = calculateRaceTimes(paceSeconds);
+
+			const time5k = document.getElementById("time-5k");
+			if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
+
+			const time10k = document.getElementById("time-10k");
+			if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
+
+			const timeHalf = document.getElementById("time-half");
+			if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
+
+			const timeFull = document.getElementById("time-full");
+			if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
+
+			// Update pace category
+			const category = getPaceCategory(paceSeconds);
+			const categoryElement = document.getElementById("pace-category");
+			const descriptionElement = document.getElementById("pace-description");
+
+			if (categoryElement) {
+				categoryElement.textContent = category.name;
+				categoryElement.style.backgroundColor = category.color;
+			}
+
+			if (descriptionElement) {
+				descriptionElement.textContent = category.description;
+			}
+
+			// Save the pace value to localStorage
+			savePaceValue();
+		}
+		// Initialize calculator
+		document.addEventListener("DOMContentLoaded", function () {
+			const paceSlider = document.getElementById("pace-slider");
+			if (paceSlider) {
+				// Load saved pace value or use default (8:30 = 510 seconds)
+				const savedPaceSeconds = loadPaceValue();
+				(paceSlider as HTMLInputElement).value = savedPaceSeconds.toString();
+
+				// Add input event listener
+				paceSlider.addEventListener("input", updateCalculations);
+
+				// Initial calculation with loaded value
+				updateCalculations();
+			}
+		});
+	</script>
+</Layout>
+
+<style>
+	.calculator-page {
+		padding: 2rem 0 4rem 0;
+	}
+
+	.calculator-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.calculator-header h1 {
+		color: var(--color-primary);
+		margin-bottom: 0.5rem;
+		font-size: 2.5rem;
+		font-weight: 700;
+	}
+
+	.calculator-header p {
+		color: var(--color-text-muted);
+		font-size: 1.125rem;
+	}
+
+	.calculator-layout {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 3rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	@media (max-width: 768px) {
+		.calculator-layout {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+	}
+
+	.calculator-inputs {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		height: fit-content;
+	}
+
+	.input-group {
+		margin-bottom: 2rem;
+	}
+
+	.input-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-group label {
+		display: block;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		color: var(--color-text);
+	}
+
+	.input-container {
+		margin-bottom: 1rem;
+	}
+
+	.input-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		margin-top: 0.5rem;
+		font-size: 1.5rem;
+	}
+
+	input[type="range"] {
+		width: 100%;
+		height: 8px;
+		border-radius: 4px;
+		background: var(--color-border);
+		outline: none;
+		-webkit-appearance: none;
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		box-shadow: var(--shadow-sm);
+	}
+
+	input[type="range"]::-moz-range-thumb {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		border: none;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.pace-range {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 0.5rem;
+	}
+	.range-label {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.pace-category-section {
+		margin-top: 2rem;
+		text-align: center;
+	}
+
+	.pace-value {
+		margin-bottom: 1rem;
+	}
+
+	.pace-value span {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border-radius: var(--border-radius);
+		background: var(--color-primary);
+		display: inline-block;
+	}
+
+	.pace-description {
+		color: var(--color-text-muted);
+		font-size: 1rem;
+		font-weight: 500;
+	}
+
+	/* Results */
+	.calculator-results {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.race-times {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.5rem;
+	}
+
+	@media (max-width: 480px) {
+		.race-times {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.race-card {
+		text-align: center;
+		padding: 1.5rem;
+		background: var(--color-bg);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		transition: all 0.1s ease;
+	}
+
+	.race-card:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--shadow-md);
+	}
+
+	.race-card h3 {
+		color: var(--color-primary);
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	.distance {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		font-weight: 500;
+		margin-bottom: 0.75rem;
+	}
+
+	.finish-time {
+		color: var(--color-text);
+		font-size: 1.5rem;
+		font-weight: 800;
+		font-family: "JetBrains Mono", monospace;
+	}
+
+	/* Dark mode adjustments */
+	[data-theme="dark"] .race-card {
+		background: var(--color-surface);
+	}
+</style>

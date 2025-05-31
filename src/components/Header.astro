@@ -21,6 +21,9 @@ const currentPath = Astro.url.pathname;
 					href="/potato-hack"
 					class={`nav-link ${currentPath === "/potato-hack" ? "nav-link-active" : ""}`}>Potato</a
 				>
+				<a href="/running" class={`nav-link ${currentPath === "/running" ? "nav-link-active" : ""}`}
+					>Run</a
+				>
 				<button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
 			</div>
 		</nav>
