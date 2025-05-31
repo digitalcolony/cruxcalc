@@ -2,13 +2,16 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Potato Hack Calculator - CruxCalc">
+<Layout title="Potato Hack Calculator">
 	<section class="calculator">
 		<div class="container">
 			<h1 class="calculator-title">Potato Hack Calculator</h1>
 			<p class="calculator-description">
 				Calculate your daily calorie deficit on a potato-only diet. Cooling potatoes overnight
-				increases resistant starch, reducing available calories by 17%.
+				increases resistant starch, reducing available calories by 17%. See the <a
+					href="https://criticalmas.org/2017/08/math-behind-potato-hack/"
+					target="_blank">math</a
+				>.
 			</p>
 
 			<div class="calculator-form">
@@ -285,12 +288,9 @@ import Layout from "../layouts/Layout.astro";
 	// Initialize BMR value from shared data or default
 	function initializeBMR() {
 		const values = sharedValues.load();
-
-		// Check if user has used BMR calculator and get Mifflin-St Jeor TDEE result
 		const savedTDEE = localStorage.getItem("cruxcalc-tdee-mifflin");
 
 		if (savedTDEE) {
-			// Use the saved Mifflin-St Jeor TDEE result
 			bmrInput.value = savedTDEE;
 		} else if (values.bmr) {
 			// Fallback to shared values BMR if available
