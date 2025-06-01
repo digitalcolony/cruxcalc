@@ -1,6 +1,26 @@
 ---
 // Get current page path to highlight active nav link
 const currentPath = Astro.url.pathname;
+
+// Helper function to check if a path is active
+// This handles various edge cases that might occur in production vs development
+function isActivePath(linkPath: string, currentPath: string): boolean {
+	// Normalize paths by removing trailing slashes and converting to lowercase
+	const normalizePath = (path: string): string => {
+		return path.replace(/\/$/, "").toLowerCase() || "/";
+	};
+
+	const normalizedCurrent = normalizePath(currentPath);
+	const normalizedLink = normalizePath(linkPath);
+
+	// For home page, exact match only
+	if (normalizedLink === "/") {
+		return normalizedCurrent === "/";
+	}
+
+	// For other pages, check exact match
+	return normalizedCurrent === normalizedLink;
+}
 ---
 
 <header class="header">
@@ -10,18 +30,27 @@ const currentPath = Astro.url.pathname;
 				<h1>Health & Fitness Calculators</h1>
 			</a>
 			<div class="nav-links">
-				<a href="/bmi" class={`nav-link ${currentPath === "/bmi" ? "nav-link-active" : ""}`}>BMI</a>
-				<a href="/bmr" class={`nav-link ${currentPath === "/bmr" ? "nav-link-active" : ""}`}>BMR</a>
+				<a
+					href="/bmi"
+					class={`nav-link ${isActivePath("/bmi", currentPath) ? "nav-link-active" : ""}`}>BMI</a
+				>
+				<a
+					href="/bmr"
+					class={`nav-link ${isActivePath("/bmr", currentPath) ? "nav-link-active" : ""}`}>BMR</a
+				>
 				<a
 					href="/muscle-potential"
-					class={`nav-link ${currentPath === "/muscle-potential" ? "nav-link-active" : ""}`}
+					class={`nav-link ${isActivePath("/muscle-potential", currentPath) ? "nav-link-active" : ""}`}
 					>Muscle</a
 				>
 				<a
 					href="/potato-hack"
-					class={`nav-link ${currentPath === "/potato-hack" ? "nav-link-active" : ""}`}>Potato</a
+					class={`nav-link ${isActivePath("/potato-hack", currentPath) ? "nav-link-active" : ""}`}
+					>Potato</a
 				>
-				<a href="/running" class={`nav-link ${currentPath === "/running" ? "nav-link-active" : ""}`}
+				<a
+					href="/running"
+					class={`nav-link ${isActivePath("/running", currentPath) ? "nav-link-active" : ""}`}
 					>Run</a
 				>
 				<button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
@@ -260,6 +289,55 @@ const currentPath = Astro.url.pathname;
 			localStorage.setItem("theme", newTheme);
 			themeToggle.textContent = newTheme === "dark" ? "☀️" : "🌙";
 		});
+	}
+	// Fix navigation highlighting for production builds
+	function updateActiveNavigation() {
+		const currentPath = window.location.pathname;
+		const navLinks = document.querySelectorAll(".nav-link");
+
+		// Remove all active classes first
+		navLinks.forEach((link) => {
+			link.classList.remove("nav-link-active");
+		});
+
+		// Add active class to matching link
+		navLinks.forEach((link) => {
+			const href = link.getAttribute("href");
+			if (href && isActivePathClient(href, currentPath)) {
+				link.classList.add("nav-link-active");
+			}
+		});
+	}
+
+	// Run on DOMContentLoaded and also with a small delay as fallback
+	document.addEventListener("DOMContentLoaded", updateActiveNavigation);
+
+	// Fallback for cases where DOMContentLoaded has already fired or doesn't work properly
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", updateActiveNavigation);
+	} else {
+		// DOM is already ready
+		updateActiveNavigation();
+	}
+
+	// Additional fallback with small delay
+	setTimeout(updateActiveNavigation, 100); // Client-side path matching function
+	function isActivePathClient(linkPath: string, currentPath: string): boolean {
+		// Normalize paths by removing trailing slashes and converting to lowercase
+		const normalizePath = (path: string): string => {
+			return path.replace(/\/$/, "").toLowerCase() || "/";
+		};
+
+		const normalizedCurrent = normalizePath(currentPath);
+		const normalizedLink = normalizePath(linkPath);
+
+		// For home page, exact match only
+		if (normalizedLink === "/") {
+			return normalizedCurrent === "/";
+		}
+
+		// For other pages, check exact match
+		return normalizedCurrent === normalizedLink;
 	}
 
 	// Dropdown functionality
