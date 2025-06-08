@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://cruxcalc.netlify.app",
+	site: "https://calc.potatohack.com",
 	integrations: [],
 	vite: {
 		css: {

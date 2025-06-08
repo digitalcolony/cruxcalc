@@ -1,0 +1,23 @@
+{
+    "name": "Potato Hack Fitness Calculators",
+    "short_name": "PotatoCalc",
+    "version": "1.0.0",
+    "description": "Health and fitness calculators ",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#ff3366",
+    "background_color": "#f5f5dc",
+    "display": "standalone",
+    "start_url": "/",
+    "scope": "/"
+}

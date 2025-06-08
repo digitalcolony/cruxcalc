@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://calc.potatohack.com/sitemap.xml
+
+# Block common crawler paths that aren't useful
+Disallow: /api/
+Disallow: /.well-known/

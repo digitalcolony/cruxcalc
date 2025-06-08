@@ -1,0 +1,13 @@
+{
+    "name": "cruxcalc-image-generator",
+    "version": "1.0.0",
+    "description": "Generate social media images for CruxCalc",
+    "main": "generate-images.js",
+    "scripts": {
+        "generate": "node generate-images.js",
+        "favicons": "node generate-favicons.js"
+    },
+    "devDependencies": {
+        "puppeteer": "^23.0.0"
+    }
+}
