@@ -182,7 +182,7 @@ import Layout from "../layouts/Layout.astro";
 					</div>
 					<div class="formula-info">
 						<h4>Casey Butt's Formula</h4>
-						<p id="formula-text">LBM = H^1.5 × (√(W × A) / 22.67) × (1.12 - 0.004 × BF%)</p>
+						<p id="formula-text">LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)</p>
 						<p class="formula-note">
 							Casey Butt's scientifically-derived formula calculates maximum natural lean body mass
 							based on bone structure (wrist/ankle) and height. The formula was developed from
@@ -593,16 +593,16 @@ import Layout from "../layouts/Layout.astro";
 		}
 		// Get body fat percentage
 		bodyFatPercent = parseFloat(bodyFat?.value || "10") / 100;
-
-		// Casey Butt's formula for maximum lean body mass
-		// LBM = H^1.5 × (√(W × A) / 22.67) × (1.12 - 0.004 × BF%)
-		// Where H = height, W = wrist, A = ankle, BF% = body fat percentage
+		// Casey Butt's formula for maximum lean body mass (Imperial Units)
+		// LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)
+		// Where H = height in inches, W = wrist in inches, A = ankle in inches, F = body fat %
 
 		const heightFactor = Math.pow(heightInInches, 1.5);
-		const boneFactor = Math.sqrt(wristInInches * ankleInInches) / 22.67;
-		const bodyFatFactor = 1.12 - 0.004 * (bodyFatPercent * 100);
+		const wristFactor = Math.sqrt(wristInInches) / 22.667;
+		const ankleFactor = Math.sqrt(ankleInInches) / 17.01;
+		const bodyFatFactor = (bodyFatPercent * 100) / 224 + 1;
 
-		const maxLeanMassLbs = heightFactor * boneFactor * bodyFatFactor;
+		const maxLeanMassLbs = heightFactor * (wristFactor + ankleFactor) * bodyFatFactor;
 		const maxWeightLbs = maxLeanMassLbs / (1 - bodyFatPercent);
 
 		// Casey Butt's body part measurements based on bone structure
@@ -664,7 +664,7 @@ import Layout from "../layouts/Layout.astro";
 		document.getElementById("max-calves").textContent =
 			`${(results.maxCalvesInches * convert).toFixed(1)} ${displayUnit}`; // Update formula display
 		if (formulaText) {
-			formulaText.textContent = `LBM = ${results.heightInInches.toFixed(1)}^1.5 × (√(${results.wristInInches.toFixed(1)} × ${results.ankleInInches.toFixed(1)}) / 22.67) × (1.12 - 0.004 × ${(results.bodyFatPercent * 100).toFixed(1)}) = ${Math.round(results.maxLeanMassLbs)} lbs`;
+			formulaText.textContent = `LBM = ${results.heightInInches.toFixed(1)}^1.5 × (√${results.wristInInches.toFixed(1)}/22.667 + √${results.ankleInInches.toFixed(1)}/17.01) × (${(results.bodyFatPercent * 100).toFixed(1)}/224 + 1) = ${Math.round(results.maxLeanMassLbs)} lbs`;
 		}
 
 		// Save values after calculation
