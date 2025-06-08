@@ -45,7 +45,6 @@ import Layout from "../layouts/Layout.astro";
 					<input type="number" id="bmr" value="1700" min="800" max="3000" class="input-field" />
 					<span class="input-unit">calories</span>
 				</div>
-
 				<div class="results">
 					<div class="result-card">
 						<h3>Total Calories Consumed</h3>
@@ -56,6 +55,11 @@ import Layout from "../layouts/Layout.astro";
 						<h3>Daily Calorie Change</h3>
 						<div class="result-value" id="calorie-deficit">300</div>
 						<div class="result-unit">calories</div>
+					</div>
+					<div class="result-card">
+						<h3>Estimated Weekly Fat Change</h3>
+						<div class="result-value" id="weekly-fat-change">0.6</div>
+						<div class="result-unit" id="fat-change-unit">lbs fat loss</div>
 					</div>
 				</div>
 			</div>
@@ -277,14 +281,15 @@ import Layout from "../layouts/Layout.astro";
 </style>
 
 <script type="module">
-	import sharedValues from "/sharedValues.js";
-	// Get DOM elements
+	import sharedValues from "/sharedValues.js"; // Get DOM elements
 	const potatoSlider = document.getElementById("potato-pounds");
 	const potatoValue = document.getElementById("potato-value");
 	const cooledCheckbox = document.getElementById("cooled-overnight");
 	const bmrInput = document.getElementById("bmr");
 	const totalCaloriesDisplay = document.getElementById("total-calories");
 	const calorieDeficitDisplay = document.getElementById("calorie-deficit");
+	const weeklyFatChangeDisplay = document.getElementById("weekly-fat-change");
+	const fatChangeUnitDisplay = document.getElementById("fat-change-unit");
 	// Initialize BMR value from shared data or default
 	function initializeBMR() {
 		const values = sharedValues.load();
@@ -374,7 +379,6 @@ import Layout from "../layouts/Layout.astro";
 			console.warn("Error loading potato hack data:", error);
 		}
 	}
-
 	function calculateCalories() {
 		const pounds = parseFloat(potatoSlider.value);
 		const isCooled = cooledCheckbox.checked;
@@ -393,11 +397,26 @@ import Layout from "../layouts/Layout.astro";
 		// Calculate deficit
 		const deficit = bmr - potatoCalories;
 
+		// Calculate weekly fat change (3500 calories = 1 pound of fat)
+		const weeklyCalorieChange = deficit * 7;
+		const weeklyFatChange = weeklyCalorieChange / 3500;
+
 		// Update displays
 		totalCaloriesDisplay.textContent = potatoCalories.toString();
 		// Add minus sign for deficits (negative values)
 		calorieDeficitDisplay.textContent = deficit < 0 ? deficit.toString() : `-${deficit}`;
 		potatoValue.textContent = pounds.toFixed(1);
+		// Update weekly fat change display
+		if (deficit > 0) {
+			weeklyFatChangeDisplay.textContent = `-${Math.abs(weeklyFatChange).toFixed(1)}`;
+			fatChangeUnitDisplay.textContent = "lbs (loss)";
+		} else if (deficit < 0) {
+			weeklyFatChangeDisplay.textContent = `+${Math.abs(weeklyFatChange).toFixed(1)}`;
+			fatChangeUnitDisplay.textContent = "lbs (gain)";
+		} else {
+			weeklyFatChangeDisplay.textContent = "0.0";
+			fatChangeUnitDisplay.textContent = "lbs (maintenance)";
+		}
 
 		// Save values after calculation
 		saveBMRValue();
