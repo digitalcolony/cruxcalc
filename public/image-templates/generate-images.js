@@ -36,6 +36,7 @@ async function generateAllImages() {
 		await generateImage("og-default.html", "og-image.png", 1200, 630);
 		await generateImage("og-potato.html", "og-potato.png", 1200, 630);
 		await generateImage("og-muscle.html", "og-muscle.png", 1200, 630);
+		await generateImage("og-running.html", "og-running.png", 1200, 630);
 
 		// Generate Twitter Card (1200x600)
 		await generateImage("twitter-card.html", "twitter-card.png", 1200, 600);
@@ -45,6 +46,7 @@ async function generateAllImages() {
 		console.log("- /public/og-image.png (default Open Graph)");
 		console.log("- /public/og-potato.png (Potato Hack page)");
 		console.log("- /public/og-muscle.png (Muscle Potential page)");
+		console.log("- /public/og-running.png (Running Pace page)");
 		console.log("- /public/twitter-card.png (Twitter Card)");
 	} catch (error) {
 		console.error("❌ Error generating images:", error);
