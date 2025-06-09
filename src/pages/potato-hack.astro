@@ -22,7 +22,7 @@ import Layout from "../layouts/Layout.astro";
 
 			<div class="calculator-form">
 				<div class="form-group">
-					<label for="potato-pounds">Pounds of Cooked Potatoes</label>
+					<label for="potato-pounds">Daily Pounds of Cooked Potatoes Consumed</label>
 					<div class="slider-container">
 						<input
 							type="range"
@@ -43,7 +43,7 @@ import Layout from "../layouts/Layout.astro";
 					<label class="checkbox-label">
 						<input type="checkbox" id="cooled-overnight" />
 						<span class="checkmark"></span>
-						Cooled Overnight (17% resistant starch reduction)
+						Cooled Overnight<br /> (17% resistant starch reduction)
 					</label>
 				</div>
 				<div class="form-group">
@@ -61,6 +61,21 @@ import Layout from "../layouts/Layout.astro";
 						<h3>Daily Calorie Change</h3>
 						<div class="result-value" id="calorie-deficit">300</div>
 						<div class="result-unit">calories</div>
+					</div>
+					<div class="result-card">
+						<h3>3 Day Hack</h3>
+						<div class="result-value" id="three-day-change">0.3</div>
+						<div class="result-unit" id="three-day-unit">lbs (loss)</div>
+					</div>
+					<div class="result-card">
+						<h3>4 Day Hack</h3>
+						<div class="result-value" id="four-day-change">0.3</div>
+						<div class="result-unit" id="four-day-unit">lbs (loss)</div>
+					</div>
+					<div class="result-card">
+						<h3>5 Day Hack</h3>
+						<div class="result-value" id="five-day-change">0.4</div>
+						<div class="result-unit" id="five-day-unit">lbs (loss)</div>
 					</div>
 					<div class="result-card">
 						<h3>Estimated Weekly Fat Change</h3>
@@ -294,6 +309,12 @@ import Layout from "../layouts/Layout.astro";
 	const bmrInput = document.getElementById("bmr");
 	const totalCaloriesDisplay = document.getElementById("total-calories");
 	const calorieDeficitDisplay = document.getElementById("calorie-deficit");
+	const threeDayChangeDisplay = document.getElementById("three-day-change");
+	const threeDayUnitDisplay = document.getElementById("three-day-unit");
+	const fourDayChangeDisplay = document.getElementById("four-day-change");
+	const fourDayUnitDisplay = document.getElementById("four-day-unit");
+	const fiveDayChangeDisplay = document.getElementById("five-day-change");
+	const fiveDayUnitDisplay = document.getElementById("five-day-unit");
 	const weeklyFatChangeDisplay = document.getElementById("weekly-fat-change");
 	const fatChangeUnitDisplay = document.getElementById("fat-change-unit");
 	// Initialize BMR value from shared data or default
@@ -402,16 +423,45 @@ import Layout from "../layouts/Layout.astro";
 		potatoCalories = Math.round(potatoCalories);
 		// Calculate deficit
 		const deficit = bmr - potatoCalories;
-
 		// Calculate weekly fat change (3500 calories = 1 pound of fat)
 		const weeklyCalorieChange = deficit * 7;
 		const weeklyFatChange = weeklyCalorieChange / 3500;
+
+		// Calculate 3, 4, and 5 day estimates
+		const threeDayCalorieChange = deficit * 3;
+		const threeDayFatChange = threeDayCalorieChange / 3500;
+
+		const fourDayCalorieChange = deficit * 4;
+		const fourDayFatChange = fourDayCalorieChange / 3500;
+
+		const fiveDayCalorieChange = deficit * 5;
+		const fiveDayFatChange = fiveDayCalorieChange / 3500;
 
 		// Update displays
 		totalCaloriesDisplay.textContent = potatoCalories.toString();
 		// Add minus sign for deficits (negative values)
 		calorieDeficitDisplay.textContent = deficit < 0 ? deficit.toString() : `-${deficit}`;
 		potatoValue.textContent = pounds.toFixed(1);
+
+		// Helper function to update fat change display
+		function updateFatChangeDisplay(fatChange, valueElement, unitElement, dayLabel) {
+			if (deficit > 0) {
+				valueElement.textContent = `-${Math.abs(fatChange).toFixed(1)}`;
+				unitElement.textContent = "lbs (loss)";
+			} else if (deficit < 0) {
+				valueElement.textContent = `+${Math.abs(fatChange).toFixed(1)}`;
+				unitElement.textContent = "lbs (gain)";
+			} else {
+				valueElement.textContent = "0.0";
+				unitElement.textContent = "lbs (maintenance)";
+			}
+		}
+
+		// Update 3, 4, 5 day displays
+		updateFatChangeDisplay(threeDayFatChange, threeDayChangeDisplay, threeDayUnitDisplay, "3 Day");
+		updateFatChangeDisplay(fourDayFatChange, fourDayChangeDisplay, fourDayUnitDisplay, "4 Day");
+		updateFatChangeDisplay(fiveDayFatChange, fiveDayChangeDisplay, fiveDayUnitDisplay, "5 Day");
+
 		// Update weekly fat change display
 		if (deficit > 0) {
 			weeklyFatChangeDisplay.textContent = `-${Math.abs(weeklyFatChange).toFixed(1)}`;
