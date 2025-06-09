@@ -1,8 +1,8 @@
-# Health & Fitness Calculators 🏃‍♂️💪
+# Potato Hack Fitness Calculators 🥔💪
 
-**Modern Health & Fitness Calculators**
+**Modern Health & Fitness Calculators - Available as Web App & Desktop App**
 
-This app is a collection of sleek, user-friendly health and fitness calculators built with Astro. Say goodbye to boring, outdated calculator interfaces and hello to engaging, modern tools for your health journey.
+This is a collection of sleek, user-friendly health and fitness calculators built with Astro. Say goodbye to boring, outdated calculator interfaces and hello to engaging, modern tools for your health journey. **Download as a desktop or mobile app for the best experience!**
 
 ## ✨ Features
 
@@ -13,10 +13,47 @@ This app is a collection of sleek, user-friendly health and fitness calculators 
   - Katch-McArdle Formula (requires body fat %)
 - **💪 Muscle Potential Calculator** - Casey Butt's scientific formula for predicting natural muscle-building potential
 - **🏃 Running Pace Calculator** - Calculate race finish times for 5K, 10K, half marathon, and full marathon distances
-- **🥔 Potato Hack Calculator** - Calorie deficit calculator for the potato-based weight loss approach
+- **🥔 Potato Hack Calculator** - Calorie deficit calculator for the potato-based weight loss approach with 3, 4, 5 day and weekly estimates
+- **📱 Progressive Web App (PWA)** - Download and install as a desktop or mobile app
+- **⚡ Always Up-to-Date** - Automatic updates when new features are added
 - **🔄 Shared Values System** - Input data once, use across all calculators
 - **📱 Responsive Design** - Works perfectly on desktop, tablet, and mobile
 - **⚡ Fast & Lightweight** - Built with Astro for optimal performance
+
+## 📱 Download as an App
+
+### Desktop Installation (Windows, Mac, Linux)
+
+1. Visit [calc.potatohack.com](https://calc.potatohack.com) in Chrome, Edge, or Firefox
+2. Look for the **"Install"** or **"Download"** icon in your browser's address bar
+3. Click to install - it will appear as a standalone desktop app
+4. Launch from your desktop, taskbar, or start menu
+
+### Mobile Installation (Android & iOS)
+
+1. Open [calc.potatohack.com](https://calc.potatohack.com) in your mobile browser
+2. **Android**: Tap "Add to Home Screen" or "Install App"
+3. **iOS**: Tap the Share button → "Add to Home Screen"
+4. The app icon will appear on your home screen
+
+### App Benefits
+
+- **🖥️ Standalone Window** - Opens without browser UI for distraction-free calculations
+- **⚡ Instant Access** - Launch directly from desktop/home screen
+- **🔄 Auto-Updates** - Always get the latest features and bug fixes
+- **💾 Offline Ready** - Basic functionality works without internet
+- **🎯 Native Feel** - Behaves like a traditional desktop/mobile app
+
+## 🌐 Social Media Optimized
+
+Professional link previews when shared on:
+
+- **Facebook** - Custom branded Open Graph cards
+- **Twitter** - Dedicated Twitter Card images
+- **LinkedIn** - Professional preview cards
+- **WhatsApp/SMS** - Rich link previews
+
+Each calculator has its own themed social media image for better engagement.
 
 ## 🚀 Project Structure
 
@@ -24,11 +61,15 @@ This app is a collection of sleek, user-friendly health and fitness calculators 
 /
 ├── public/
 │   ├── favicon.svg
-│   └── sharedValues.js          # Cross-calculator data sharing
+│   ├── site.webmanifest         # PWA configuration
+│   ├── og-*.png                 # Social media images
+│   ├── android-chrome-*.png     # PWA icons
+│   └── image-templates/         # Social media image generators
 ├── src/
 │   ├── components/              # Reusable Astro components
+│   │   └── Header.astro         # Navigation with active states
 │   ├── layouts/
-│   │   └── Layout.astro         # Main layout template
+│   │   └── Layout.astro         # Main layout with SEO & social meta
 │   ├── pages/                   # Calculator pages (auto-routed)
 │   │   ├── index.astro          # Homepage with calculator grid
 │   │   ├── bmi.astro            # BMI Calculator
@@ -36,9 +77,9 @@ This app is a collection of sleek, user-friendly health and fitness calculators 
 │   │   ├── muscle-potential.astro # Casey Butt formula
 │   │   ├── running.astro        # Running Pace Calculator
 │   │   └── potato-hack.astro    # Potato Hack Calculator
-│   ├── styles/
-│       └── global.css           # Modern styling with CSS custom properties
-├── astro.config.mjs
+│   └── styles/
+│       └── global.css           # Neo-brutalist styling
+├── astro.config.mjs             # Site config with calc.potatohack.com
 ├── package.json
 └── tsconfig.json
 ```
@@ -97,7 +138,7 @@ Specialized calculator for the potato-based weight loss approach featuring:
 
 ## 🔄 Shared Values System
 
-CruxCalc features a smart shared values system that allows you to:
+The calculators feature a smart shared values system that allows you to:
 
 - Enter your basic measurements once
 - Use them across all calculators automatically
@@ -106,8 +147,10 @@ CruxCalc features a smart shared values system that allows you to:
 
 ## 🎨 Design Philosophy
 
+- **Neo-Brutalist Design** - Bold, functional design with strong visual hierarchy
 - **Modern & Clean** - Contemporary design that's easy on the eyes
 - **Mobile-First** - Responsive design that works on any device
+- **PWA Standards** - App-like experience with offline capabilities
 - **Accessibility** - Semantic HTML and keyboard navigation support
 - **Performance** - Fast loading with minimal JavaScript
 - **User-Friendly** - Intuitive interfaces with helpful explanations
@@ -116,18 +159,27 @@ CruxCalc features a smart shared values system that allows you to:
 
 All formulas implemented are scientifically validated:
 
-- BMI uses the standard WHO classification
-- BMR formulas are peer-reviewed and widely accepted
-- Casey Butt's muscle potential formula is based on extensive analysis of drug-free bodybuilders
+- **BMI** uses the standard WHO classification
+- **BMR** formulas are peer-reviewed and widely accepted
+- **Casey Butt's muscle potential** formula is based on extensive analysis of drug-free bodybuilders
+- **Potato hack calculations** include resistant starch reduction for cooled potatoes (17%)
 
 ## 🛠️ Built With
 
 - **[Astro](https://astro.build)** - Modern static site generator
+- **Progressive Web App** - PWA standards for app-like experience
 - **Vanilla JavaScript** - For calculator logic and interactivity
 - **CSS3** - Modern styling with custom properties and grid/flexbox
 - **HTML5** - Semantic markup for accessibility
+- **Open Graph & Twitter Cards** - Professional social media sharing
 
 ## 🚀 Getting Started
+
+### For Users
+
+Simply visit [calc.potatohack.com](https://calc.potatohack.com) and start calculating! Optionally download as an app for the best experience.
+
+### For Developers
 
 1. **Clone the repository**
 
@@ -172,4 +224,4 @@ Feel free to open an issue or submit a pull request.
 
 ---
 
-_Built with ❤️ for the health and fitness community_
+_Built with 🥔 for the health and fitness community - Available everywhere as a web app!_
