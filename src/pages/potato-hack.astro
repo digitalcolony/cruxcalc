@@ -13,28 +13,52 @@ import Layout from "../layouts/Layout.astro";
 		<div class="container">
 			<h1 class="calculator-title">Potato Hack Calculator</h1>
 			<p class="calculator-description">
-				Calculate your daily calorie deficit on a potato-only diet. Cooling potatoes overnight
-				increases resistant starch, reducing available calories by 17%. See the <a
+				Calculate your daily calorie deficit on a potato-only diet. Choose between pounds or
+				kilograms for convenience. Cooling potatoes overnight increases resistant starch, reducing
+				available calories by 17%. See the <a
 					href="https://criticalmas.org/2017/08/math-behind-potato-hack/"
 					target="_blank">math</a
 				>.
 			</p>
-
 			<div class="calculator-form">
 				<div class="form-group">
-					<label for="potato-pounds">Daily Pounds of Cooked Potatoes Consumed</label>
-					<div class="slider-container">
-						<input
-							type="range"
-							id="potato-pounds"
-							min="3"
-							max="5"
-							step="0.1"
-							value="4"
-							class="slider"
-						/>
-						<div class="slider-value">
-							<span id="potato-value">4.0</span> lbs
+					<label for="potato-weight">Daily Weight of Cooked Potatoes Consumed</label>
+					<div class="unit-toggle">
+						<button class="unit-btn active" data-unit="imperial">lbs</button>
+						<button class="unit-btn" data-unit="metric">kg</button>
+					</div>
+
+					<div class="weight-inputs imperial">
+						<div class="slider-container">
+							<input
+								type="range"
+								id="potato-pounds"
+								min="3"
+								max="5"
+								step="0.1"
+								value="4"
+								class="slider"
+							/>
+							<div class="slider-value">
+								<span id="potato-pounds-value">4.0</span> lbs
+							</div>
+						</div>
+					</div>
+
+					<div class="weight-inputs metric" style="display: none;">
+						<div class="slider-container">
+							<input
+								type="range"
+								id="potato-kg"
+								min="1.4"
+								max="2.3"
+								step="0.05"
+								value="1.8"
+								class="slider"
+							/>
+							<div class="slider-value">
+								<span id="potato-kg-value">1.8</span> kg
+							</div>
 						</div>
 					</div>
 				</div>
@@ -127,12 +151,45 @@ import Layout from "../layouts/Layout.astro";
 	.form-group:last-child {
 		margin-bottom: 0;
 	}
-
 	label {
 		display: block;
 		font-weight: 700;
 		margin-bottom: 0.5rem;
 		color: var(--color-text);
+	}
+
+	/* Unit Toggle */
+	.unit-toggle {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.unit-btn {
+		flex: 1;
+		padding: 0.5rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-background);
+		color: var(--color-text);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	.unit-btn:hover {
+		border-color: var(--color-primary);
+	}
+
+	.unit-btn.active {
+		background: var(--color-primary);
+		color: white;
+		border-color: var(--color-primary);
+	}
+
+	.weight-inputs {
+		display: block;
 	}
 
 	.slider-container {
@@ -278,7 +335,6 @@ import Layout from "../layouts/Layout.astro";
 		color: var(--color-text-muted);
 		margin-top: 0.25rem;
 	}
-
 	@media (max-width: 768px) {
 		.calculator-form {
 			margin: 0 1rem;
@@ -298,13 +354,27 @@ import Layout from "../layouts/Layout.astro";
 		.slider-value {
 			text-align: left;
 		}
+
+		.unit-toggle {
+			flex-direction: row;
+			gap: 0.25rem;
+		}
+
+		.unit-btn {
+			font-size: 0.75rem;
+			padding: 0.4rem;
+		}
 	}
 </style>
 
 <script type="module">
-	import sharedValues from "/sharedValues.js"; // Get DOM elements
-	const potatoSlider = document.getElementById("potato-pounds");
-	const potatoValue = document.getElementById("potato-value");
+	import sharedValues from "/sharedValues.js";
+
+	// Get DOM elements
+	const potatoPoundsSlider = document.getElementById("potato-pounds");
+	const potatoKgSlider = document.getElementById("potato-kg");
+	const potatoPoundsValue = document.getElementById("potato-pounds-value");
+	const potatoKgValue = document.getElementById("potato-kg-value");
 	const cooledCheckbox = document.getElementById("cooled-overnight");
 	const bmrInput = document.getElementById("bmr");
 	const totalCaloriesDisplay = document.getElementById("total-calories");
@@ -317,6 +387,19 @@ import Layout from "../layouts/Layout.astro";
 	const fiveDayUnitDisplay = document.getElementById("five-day-unit");
 	const weeklyFatChangeDisplay = document.getElementById("weekly-fat-change");
 	const fatChangeUnitDisplay = document.getElementById("fat-change-unit");
+
+	// Current unit state
+	let currentWeightUnit = "imperial";
+
+	// Conversion functions
+	function poundsToKg(pounds) {
+		return pounds * 0.453592;
+	}
+
+	function kgToPounds(kg) {
+		return kg / 0.453592;
+	}
+
 	// Initialize BMR value from shared data or default
 	function initializeBMR() {
 		const values = sharedValues.load();
@@ -348,6 +431,7 @@ import Layout from "../layouts/Layout.astro";
 
 		return Math.round(bmr);
 	}
+
 	// Enhanced BMR initialization
 	function initializeBMREnhanced() {
 		// Priority 1: Saved TDEE from BMR calculator
@@ -385,9 +469,11 @@ import Layout from "../layouts/Layout.astro";
 
 		// Also save the potato hack specific data
 		const potatoData = {
-			potatoPounds: parseFloat(potatoSlider.value),
+			potatoPounds: parseFloat(potatoPoundsSlider.value),
+			potatoKg: parseFloat(potatoKgSlider.value),
 			cooledOvernight: cooledCheckbox.checked,
 			bmr: currentBMR,
+			weightUnit: currentWeightUnit,
 		};
 		localStorage.setItem("cruxcalc-potato-hack", JSON.stringify(potatoData));
 	}
@@ -398,16 +484,46 @@ import Layout from "../layouts/Layout.astro";
 			const saved = localStorage.getItem("cruxcalc-potato-hack");
 			if (saved) {
 				const data = JSON.parse(saved);
-				if (data.potatoPounds) potatoSlider.value = data.potatoPounds.toString();
+				if (data.potatoPounds) potatoPoundsSlider.value = data.potatoPounds.toString();
+				if (data.potatoKg) potatoKgSlider.value = data.potatoKg.toString();
 				if (data.cooledOvernight !== undefined) cooledCheckbox.checked = data.cooledOvernight;
-				// BMR is handled separately in initializeBMREnhanced
+				if (data.weightUnit) currentWeightUnit = data.weightUnit;
 			}
 		} catch (error) {
 			console.warn("Error loading potato hack data:", error);
 		}
 	}
+
+	// Update display values
+	function updateDisplays() {
+		if (potatoPoundsValue)
+			potatoPoundsValue.textContent = parseFloat(potatoPoundsSlider.value).toFixed(1);
+		if (potatoKgValue) potatoKgValue.textContent = parseFloat(potatoKgSlider.value).toFixed(1);
+	}
+
+	// Sync weight values between units
+	function syncWeightValues(fromUnit) {
+		if (fromUnit === "imperial") {
+			const pounds = parseFloat(potatoPoundsSlider.value);
+			const kg = poundsToKg(pounds);
+			potatoKgSlider.value = kg.toFixed(2);
+		} else {
+			const kg = parseFloat(potatoKgSlider.value);
+			const pounds = kgToPounds(kg);
+			potatoPoundsSlider.value = pounds.toFixed(1);
+		}
+		updateDisplays();
+	}
+
 	function calculateCalories() {
-		const pounds = parseFloat(potatoSlider.value);
+		// Get weight in pounds (convert if needed)
+		let pounds;
+		if (currentWeightUnit === "imperial") {
+			pounds = parseFloat(potatoPoundsSlider.value);
+		} else {
+			pounds = kgToPounds(parseFloat(potatoKgSlider.value));
+		}
+
 		const isCooled = cooledCheckbox.checked;
 		const bmr = parseInt(bmrInput.value) || 1700;
 
@@ -441,19 +557,21 @@ import Layout from "../layouts/Layout.astro";
 		totalCaloriesDisplay.textContent = potatoCalories.toString();
 		// Add minus sign for deficits (negative values)
 		calorieDeficitDisplay.textContent = deficit < 0 ? deficit.toString() : `-${deficit}`;
-		potatoValue.textContent = pounds.toFixed(1);
-
 		// Helper function to update fat change display
 		function updateFatChangeDisplay(fatChange, valueElement, unitElement, dayLabel) {
+			const displayWeight =
+				currentWeightUnit === "metric" ? poundsToKg(Math.abs(fatChange)) : Math.abs(fatChange);
+			const unitLabel = currentWeightUnit === "metric" ? "kg" : "lbs";
+
 			if (deficit > 0) {
-				valueElement.textContent = `-${Math.abs(fatChange).toFixed(1)}`;
-				unitElement.textContent = "lbs (loss)";
+				valueElement.textContent = `-${displayWeight.toFixed(1)}`;
+				unitElement.textContent = `${unitLabel} (loss)`;
 			} else if (deficit < 0) {
-				valueElement.textContent = `+${Math.abs(fatChange).toFixed(1)}`;
-				unitElement.textContent = "lbs (gain)";
+				valueElement.textContent = `+${displayWeight.toFixed(1)}`;
+				unitElement.textContent = `${unitLabel} (gain)`;
 			} else {
 				valueElement.textContent = "0.0";
-				unitElement.textContent = "lbs (maintenance)";
+				unitElement.textContent = `${unitLabel} (maintenance)`;
 			}
 		}
 
@@ -463,28 +581,87 @@ import Layout from "../layouts/Layout.astro";
 		updateFatChangeDisplay(fiveDayFatChange, fiveDayChangeDisplay, fiveDayUnitDisplay, "5 Day");
 
 		// Update weekly fat change display
+		const weeklyDisplayWeight =
+			currentWeightUnit === "metric"
+				? poundsToKg(Math.abs(weeklyFatChange))
+				: Math.abs(weeklyFatChange);
+		const weeklyUnitLabel = currentWeightUnit === "metric" ? "kg fat" : "lbs fat";
+
 		if (deficit > 0) {
-			weeklyFatChangeDisplay.textContent = `-${Math.abs(weeklyFatChange).toFixed(1)}`;
-			fatChangeUnitDisplay.textContent = "lbs (loss)";
+			weeklyFatChangeDisplay.textContent = `-${weeklyDisplayWeight.toFixed(1)}`;
+			fatChangeUnitDisplay.textContent = `${weeklyUnitLabel} loss`;
 		} else if (deficit < 0) {
-			weeklyFatChangeDisplay.textContent = `+${Math.abs(weeklyFatChange).toFixed(1)}`;
-			fatChangeUnitDisplay.textContent = "lbs (gain)";
+			weeklyFatChangeDisplay.textContent = `+${weeklyDisplayWeight.toFixed(1)}`;
+			fatChangeUnitDisplay.textContent = `${weeklyUnitLabel} gain`;
 		} else {
 			weeklyFatChangeDisplay.textContent = "0.0";
-			fatChangeUnitDisplay.textContent = "lbs (maintenance)";
+			fatChangeUnitDisplay.textContent = `${weeklyUnitLabel} (maintenance)`;
 		}
 
 		// Save values after calculation
 		saveBMRValue();
 	}
 
+	// Initialize unit toggle display
+	function initializeUnitToggle() {
+		const toggle = document.querySelector(".unit-toggle");
+		if (toggle) {
+			toggle.querySelectorAll(".unit-btn").forEach((btn) => {
+				btn.classList.remove("active");
+				if (btn.dataset.unit === currentWeightUnit) {
+					btn.classList.add("active");
+				}
+			});
+
+			// Show/hide appropriate inputs
+			const inputGroup = toggle.closest(".form-group");
+			inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
+				input.style.display = input.classList.contains(currentWeightUnit) ? "block" : "none";
+			});
+		}
+	}
+
 	// Event listeners
-	potatoSlider.addEventListener("input", calculateCalories);
+	potatoPoundsSlider.addEventListener("input", () => {
+		syncWeightValues("imperial");
+		calculateCalories();
+	});
+
+	potatoKgSlider.addEventListener("input", () => {
+		syncWeightValues("metric");
+		calculateCalories();
+	});
+
 	cooledCheckbox.addEventListener("change", calculateCalories);
 	bmrInput.addEventListener("input", calculateCalories);
+
+	// Unit toggle functionality
+	document.querySelector(".unit-toggle")?.addEventListener("click", (e) => {
+		const target = e.target;
+		if (!target?.classList.contains("unit-btn")) return;
+
+		const unit = target.dataset.unit;
+		currentWeightUnit = unit || "imperial";
+
+		// Update active state
+		const toggle = target.closest(".unit-toggle");
+		toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
+		target.classList.add("active");
+
+		// Show/hide appropriate inputs
+		const inputGroup = target.closest(".form-group");
+		inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
+			input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
+		});
+
+		updateDisplays();
+		calculateCalories();
+	});
 
 	// Initialize on page load
 	loadPotatoData();
 	initializeBMREnhanced();
+	initializeUnitToggle();
+	updateDisplays();
 	calculateCalories();
 </script>
