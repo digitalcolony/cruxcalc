@@ -14,6 +14,7 @@ class SharedValues {
 			heightUnit: "imperial", // 'imperial' or 'metric'
 			weightUnit: "imperial", // 'imperial' or 'metric'
 			gender: "male", // for BMR calculators
+			useAsianBMI: false, // for BMI calculator
 		};
 	}
 

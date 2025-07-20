@@ -1,5 +1,4 @@
 ---
-// filepath: c:\_CODE\sites\cruxcalc\src\pages\bmi.astro
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -73,6 +72,19 @@ import Layout from "../layouts/Layout.astro";
 							</div>
 						</div>
 					</div>
+
+					<div class="input-group bmi-scale-group">
+						<label>BMI Scale</label>
+						<div class="checkbox-container">
+							<label class="checkbox-label">
+								<input type="checkbox" id="asian-scale" />
+								<span class="checkbox-text">Use Asian BMI Scale</span>
+							</label>
+						</div>
+						<p class="input-help">
+							Asian populations have different BMI thresholds for health risks
+						</p>
+					</div>
 				</div>
 
 				<div class="calculator-results">
@@ -108,6 +120,35 @@ import Layout from "../layouts/Layout.astro";
 							Your BMI falls within the normal weight range. This suggests a healthy weight for your
 							height.
 						</p>
+
+						<div class="bmi-scales-info" id="bmi-scales-info">
+							<h4>BMI Scale Comparison</h4>
+							<div class="scales-comparison">
+								<div class="scale-info">
+									<h5>Standard BMI Scale</h5>
+									<ul>
+										<li>Underweight: &lt; 18.5</li>
+										<li>Normal: 18.5 - 24.9</li>
+										<li>Overweight: 25.0 - 29.9</li>
+										<li>Obese: ≥ 30.0</li>
+									</ul>
+								</div>
+								<div class="scale-info">
+									<h5>Asian BMI Scale</h5>
+									<ul>
+										<li>Underweight: &lt; 18.5</li>
+										<li>Normal: 18.5 - 22.9</li>
+										<li>Overweight: 23.0 - 27.4</li>
+										<li>Obese: ≥ 27.5</li>
+									</ul>
+								</div>
+							</div>
+							<p class="scale-note">
+								<strong>Why different scales?</strong> Research shows that Asian populations have higher
+								risks of diabetes and cardiovascular disease at lower BMI levels. The Asian BMI scale
+								uses lower thresholds to better identify health risks in Asian populations.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -166,6 +207,47 @@ import Layout from "../layouts/Layout.astro";
 		font-weight: 600;
 		margin-bottom: 0.75rem;
 		color: var(--color-text);
+	}
+
+	.input-help {
+		margin-top: 0.5rem;
+		margin-bottom: 0;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-style: italic;
+	}
+
+	/* Checkbox styling */
+	.bmi-scale-group {
+		margin-top: 0.5rem;
+	}
+
+	.checkbox-container {
+		margin-bottom: 0.75rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		cursor: pointer;
+		font-weight: 500;
+		margin-bottom: 0;
+		padding: 0.5rem 0;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		width: 20px;
+		height: 20px;
+		accent-color: var(--color-primary);
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+
+	.checkbox-text {
+		font-size: 1rem;
+		color: var(--color-text);
+		font-weight: 500;
 	}
 
 	/* Unit Toggle */
@@ -370,6 +452,67 @@ import Layout from "../layouts/Layout.astro";
 		line-height: 1.5;
 	}
 
+	.bmi-scales-info {
+		margin-top: 1.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--color-border);
+	}
+
+	.bmi-scales-info h4 {
+		margin: 0 0 1rem 0;
+		color: var(--color-text);
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.scales-comparison {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.scale-info h5 {
+		margin: 0 0 0.5rem 0;
+		color: var(--color-primary);
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+
+	.scale-info ul {
+		margin: 0;
+		padding-left: 1rem;
+		list-style-type: none;
+	}
+
+	.scale-info li {
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		margin-bottom: 0.25rem;
+		position: relative;
+	}
+
+	.scale-info li::before {
+		content: "•";
+		color: var(--color-primary);
+		position: absolute;
+		left: -0.75rem;
+	}
+
+	.scale-note {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 0.75rem;
+		margin: 0;
+		font-size: 0.75rem;
+		line-height: 1.4;
+	}
+
+	.scale-note strong {
+		color: var(--color-text);
+	}
+
 	/* Mobile Responsiveness */
 	@media (max-width: 768px) {
 		.calculator-layout {
@@ -389,6 +532,20 @@ import Layout from "../layouts/Layout.astro";
 		.bmi-value span:first-child {
 			font-size: 2rem;
 		}
+
+		.scales-comparison {
+			grid-template-columns: 1fr;
+			gap: 0.75rem;
+		}
+
+		.checkmark {
+			width: 28px;
+			height: 28px;
+		}
+
+		.checkbox-text {
+			font-size: 0.9rem;
+		}
 	}
 </style>
 
@@ -401,6 +558,7 @@ import Layout from "../layouts/Layout.astro";
 	let currentWeightUnit = values.weightUnit;
 
 	// Get DOM elements
+	const asianScale = document.getElementById("asian-scale");
 	const heightFeet = document.getElementById("height-feet");
 	const heightInches = document.getElementById("height-inches");
 	const heightCm = document.getElementById("height-cm");
@@ -424,6 +582,11 @@ import Layout from "../layouts/Layout.astro";
 		if (heightCm) heightCm.value = values.heightCm.toString();
 		if (weightLbs) weightLbs.value = values.weightLbs.toString();
 		if (weightKg) weightKg.value = values.weightKg.toString();
+
+		// Restore Asian BMI scale preference
+		if (asianScale) {
+			asianScale.checked = values.useAsianBMI || false;
+		}
 
 		// Set unit toggles to match saved preferences
 		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
@@ -463,43 +626,81 @@ import Layout from "../layouts/Layout.astro";
 			weightKg: parseInt(weightKg?.value || "73"),
 			heightUnit: currentHeightUnit,
 			weightUnit: currentWeightUnit,
+			useAsianBMI: asianScale?.checked || false,
 		};
 		sharedValues.update(currentValues);
 	}
 
 	// BMI categories and explanations
 	const bmiCategories = {
-		underweight: {
-			name: "Underweight",
-			color: "#3366ff",
-			explanation:
-				"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+		standard: {
+			underweight: {
+				name: "Underweight",
+				color: "#3366ff",
+				explanation:
+					"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+			},
+			normal: {
+				name: "Normal Weight",
+				color: "var(--color-success)",
+				explanation:
+					"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
+			},
+			overweight: {
+				name: "Overweight",
+				color: "var(--color-warning)",
+				explanation:
+					"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
+			},
+			obese: {
+				name: "Obese",
+				color: "var(--color-danger)",
+				explanation:
+					"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
+			},
 		},
-		normal: {
-			name: "Normal Weight",
-			color: "var(--color-success)",
-			explanation:
-				"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
-		},
-		overweight: {
-			name: "Overweight",
-			color: "var(--color-warning)",
-			explanation:
-				"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
-		},
-		obese: {
-			name: "Obese",
-			color: "var(--color-danger)",
-			explanation:
-				"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
+		asian: {
+			underweight: {
+				name: "Underweight",
+				color: "#3366ff",
+				explanation:
+					"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+			},
+			normal: {
+				name: "Normal Weight",
+				color: "var(--color-success)",
+				explanation:
+					"Your BMI falls within the normal weight range for Asian populations. This suggests a healthy weight for your height.",
+			},
+			overweight: {
+				name: "Overweight",
+				color: "var(--color-warning)",
+				explanation:
+					"Your BMI indicates you may be overweight according to Asian BMI standards. Consider consulting with a healthcare provider about healthy weight management.",
+			},
+			obese: {
+				name: "Obese",
+				color: "var(--color-danger)",
+				explanation:
+					"Your BMI indicates obesity according to Asian BMI standards. We recommend consulting with a healthcare provider for personalized advice.",
+			},
 		},
 	};
 
-	function getBMICategory(bmi) {
-		if (bmi < 18.5) return "underweight";
-		if (bmi < 25) return "normal";
-		if (bmi < 30) return "overweight";
-		return "obese";
+	function getBMICategory(bmi, useAsianScale = false) {
+		if (useAsianScale) {
+			// Asian BMI scale thresholds
+			if (bmi < 18.5) return "underweight";
+			if (bmi < 23) return "normal";
+			if (bmi < 27.5) return "overweight";
+			return "obese";
+		} else {
+			// Standard BMI scale thresholds
+			if (bmi < 18.5) return "underweight";
+			if (bmi < 25) return "normal";
+			if (bmi < 30) return "overweight";
+			return "obese";
+		}
 	}
 
 	function calculateBMI() {
@@ -528,8 +729,10 @@ import Layout from "../layouts/Layout.astro";
 
 	function updateBMIDisplay() {
 		const bmi = calculateBMI();
-		const category = getBMICategory(bmi);
-		const categoryData = bmiCategories[category];
+		const useAsianScale = asianScale?.checked || false;
+		const scaleType = useAsianScale ? "asian" : "standard";
+		const category = getBMICategory(bmi, useAsianScale);
+		const categoryData = bmiCategories[scaleType][category];
 
 		if (bmiNumber) bmiNumber.textContent = bmi.toFixed(1);
 		if (bmiCategory) {
@@ -538,12 +741,21 @@ import Layout from "../layouts/Layout.astro";
 		}
 		if (bmiExplanation) bmiExplanation.textContent = categoryData.explanation;
 
-		// Update scale indicator position
+		// Update scale indicator position based on the selected scale
 		let position;
-		if (bmi < 18.5) position = (bmi / 18.5) * 25;
-		else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
-		else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
-		else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
+		if (useAsianScale) {
+			// Asian scale: underweight < 18.5, normal 18.5-22.9, overweight 23-27.4, obese ≥ 27.5
+			if (bmi < 18.5) position = (bmi / 18.5) * 25;
+			else if (bmi < 23) position = 25 + ((bmi - 18.5) / 4.5) * 25;
+			else if (bmi < 27.5) position = 50 + ((bmi - 23) / 4.5) * 25;
+			else position = 75 + Math.min(((bmi - 27.5) / 7.5) * 25, 25);
+		} else {
+			// Standard scale: underweight < 18.5, normal 18.5-24.9, overweight 25-29.9, obese ≥ 30
+			if (bmi < 18.5) position = (bmi / 18.5) * 25;
+			else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
+			else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
+			else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
+		}
 
 		if (scaleIndicator) scaleIndicator.style.left = `${Math.min(position, 100)}%`;
 
@@ -575,6 +787,15 @@ import Layout from "../layouts/Layout.astro";
 			});
 		}
 	});
+
+	// Event listener for Asian scale checkbox
+	if (asianScale) {
+		asianScale.addEventListener("change", () => {
+			// Save the preference immediately when changed
+			saveCurrentValues();
+			debouncedCalculation();
+		});
+	}
 
 	// Unit toggle functionality
 	document.querySelectorAll(".unit-toggle").forEach((toggle) => {
