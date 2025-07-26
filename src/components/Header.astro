@@ -39,6 +39,11 @@ function isActivePath(linkPath: string, currentPath: string): boolean {
 					class={`nav-link ${isActivePath("/bmr", currentPath) ? "nav-link-active" : ""}`}>BMR</a
 				>
 				<a
+					href="/heart-rate-zones"
+					class={`nav-link ${isActivePath("/heart-rate-zones", currentPath) ? "nav-link-active" : ""}`}
+					>HR</a
+				>
+				<a
 					href="/muscle-potential"
 					class={`nav-link ${isActivePath("/muscle-potential", currentPath) ? "nav-link-active" : ""}`}
 					>Muscle</a
