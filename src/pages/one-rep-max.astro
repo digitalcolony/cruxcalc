@@ -162,6 +162,8 @@ import Layout from "../layouts/Layout.astro";
 	.calculator-page {
 		padding: 2rem 0 4rem;
 		min-height: 100vh;
+		width: 100%;
+		overflow-x: hidden;
 	}
 
 	.calculator-header {
@@ -490,8 +492,22 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	@media (max-width: 768px) {
+		.calculator-page {
+			padding: 1rem 0 2rem;
+		}
+
+		.calculator-header {
+			margin-bottom: 2rem;
+			padding: 0 1rem;
+		}
+
 		.calculator-header h1 {
 			font-size: 2rem;
+		}
+
+		.calculator-layout {
+			grid-template-columns: 1fr;
+			gap: 2rem;
 		}
 
 		.result-value {
@@ -515,10 +531,24 @@ import Layout from "../layouts/Layout.astro";
 		.calculator-inputs,
 		.formula-details {
 			padding: 1rem;
+			border-left: none;
+			border-right: none;
+			border-radius: 0;
 		}
 
 		.result-card {
 			padding: 1rem;
+			border-left: none;
+			border-right: none;
+			border-radius: 0;
+		}
+
+		.calculator-page {
+			padding: 1rem 0;
+		}
+
+		.calculator-header {
+			padding: 0 0.5rem;
 		}
 	}
 </style>
