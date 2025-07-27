@@ -1,0 +1,737 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+	title="One Rep Max Calculator - Potato Hack Fitness Calculators"
+	description="Calculate your one-repetition maximum using Epley, Brzycki, and Lombardi formulas. Estimate your max lift from submaximal weights and reps."
+>
+	<section class="calculator-page">
+		<div class="container">
+			<div class="calculator-header">
+				<h1>One Rep Max Calculator</h1>
+				<p>
+					Estimate your maximum lift using three proven formulas from submaximal weights and
+					repetitions
+				</p>
+			</div>
+
+			<div class="calculator-layout">
+				<div class="calculator-inputs">
+					<div class="input-group">
+						<label for="weight">Weight Lifted</label>
+						<div class="unit-toggle">
+							<button class="unit-btn active" data-unit="lbs">lbs</button>
+							<button class="unit-btn" data-unit="kg">kg</button>
+						</div>
+
+						<div class="weight-inputs imperial">
+							<div class="input-container">
+								<input type="range" id="weight" min="50" max="500" value="135" />
+								<div class="input-display">
+									<span id="weight-display">135</span> lbs
+								</div>
+							</div>
+						</div>
+
+						<div class="weight-inputs metric" style="display: none;">
+							<div class="input-container">
+								<input type="range" id="weight-kg" min="23" max="227" value="61" />
+								<div class="input-display">
+									<span id="weight-kg-display">61</span> kg
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label for="reps">Repetitions Performed</label>
+						<div class="input-container">
+							<input type="range" id="reps" min="1" max="10" value="5" />
+							<div class="input-display">
+								<span id="reps-display">5</span> reps
+							</div>
+						</div>
+					</div>
+
+					<div class="info-sections">
+						<div class="info-section mobile-hide">
+							<h3>How to Use This Calculator</h3>
+							<p>
+								Enter the weight you lifted and how many repetitions you completed. The calculator
+								will estimate your one-rep maximum using three scientifically-backed formulas.
+							</p>
+						</div>
+
+						<div class="info-section mobile-hide">
+							<h3>Best Practices</h3>
+							<ul>
+								<li><strong>Rep Range:</strong> Use 3-6 reps for most accurate estimates</li>
+								<li>
+									<strong>Form:</strong> Only count reps with proper form and full range of motion
+								</li>
+								<li><strong>Rest:</strong> Use weights from when you're fresh, not fatigued</li>
+								<li>
+									<strong>Safety:</strong> Always use spotters when attempting actual max lifts
+								</li>
+							</ul>
+						</div>
+
+						<div class="info-section mobile-hide">
+							<h3>Formula Accuracy</h3>
+							<p>
+								These formulas typically estimate within ±10% of actual 1RM. Results may vary based
+								on training experience, muscle fiber composition, and exercise type.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="calculator-results">
+					<div class="results-grid">
+						<div class="result-card epley-card">
+							<h3>Epley Formula</h3>
+							<div class="result-value">
+								<span id="epley-result">169</span>
+								<span class="result-unit" id="epley-unit">lbs</span>
+							</div>
+							<p class="result-description">Most commonly used formula</p>
+						</div>
+
+						<div class="result-card brzycki-card">
+							<h3>Brzycki Formula</h3>
+							<div class="result-value">
+								<span id="brzycki-result">169</span>
+								<span class="result-unit" id="brzycki-unit">lbs</span>
+							</div>
+							<p class="result-description">Conservative research-backed estimate</p>
+						</div>
+
+						<div class="result-card lombardi-card">
+							<h3>Lombardi Formula</h3>
+							<div class="result-value">
+								<span id="lombardi-result">169</span>
+								<span class="result-unit" id="lombardi-unit">lbs</span>
+							</div>
+							<p class="result-description">Logarithmic approach</p>
+						</div>
+					</div>
+
+					<div class="formula-details">
+						<h3>Formula Information</h3>
+						<div class="formula-grid">
+							<div class="formula-item">
+								<h4>Epley</h4>
+								<code>1RM = w × (1 + r/30)</code>
+								<p>
+									Developed by Boyd Epley (1985). Tends to slightly overestimate for low rep ranges
+									but is widely used in strength training.
+								</p>
+							</div>
+							<div class="formula-item">
+								<h4>Brzycki</h4>
+								<code>1RM = w × 36/(37 - r)</code>
+								<p>
+									Created by Matt Brzycki (1998). More conservative estimate, extensively validated
+									in research studies.
+								</p>
+							</div>
+							<div class="formula-item">
+								<h4>Lombardi</h4>
+								<code>1RM = w × r^0.10</code>
+								<p>
+									Uses logarithmic progression. Works well for moderate rep ranges (3-8 reps) and
+									different muscle groups.
+								</p>
+							</div>
+						</div>
+						<div class="formula-note">
+							<p>
+								<strong>Note:</strong> All formulas converge around 10 reps but diverge significantly
+								below 5 reps. For best accuracy, use weights you can lift for 3-6 repetitions.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.calculator-page {
+		padding: 2rem 0 4rem;
+		min-height: 100vh;
+	}
+
+	.calculator-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.calculator-header h1 {
+		color: var(--color-primary);
+		margin-bottom: 0.5rem;
+		font-size: 2.5rem;
+		font-weight: 700;
+	}
+
+	.calculator-header p {
+		color: var(--color-text-muted);
+		font-size: 1.125rem;
+	}
+
+	.calculator-layout {
+		display: grid;
+		grid-template-columns: 1fr 1.5fr;
+		gap: 3rem;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.calculator-inputs {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		height: fit-content;
+		box-shadow: var(--shadow-md);
+	}
+
+	.input-group {
+		margin-bottom: 2rem;
+		display: block;
+	}
+
+	.input-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-group label {
+		display: block;
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--color-text);
+		margin-bottom: 0.75rem;
+	}
+
+	.unit-toggle {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.unit-btn {
+		flex: 1;
+		font-family: inherit;
+		font-weight: 600;
+		padding: 0.5rem 1rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-surface);
+		color: var(--color-text);
+		cursor: pointer;
+		transition: all 0.1s ease;
+		font-size: 0.875rem;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.unit-btn:hover {
+		transform: translate(-1px, -1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	.unit-btn.active {
+		background: var(--color-primary);
+		color: white;
+	}
+
+	.input-container {
+		position: relative;
+		margin-bottom: 1rem;
+		width: 100%;
+	}
+
+	.input-container:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		margin-top: 0.5rem;
+		font-size: 1.125rem;
+	}
+
+	input[type="range"] {
+		width: 100%;
+		height: 8px;
+		border-radius: 4px;
+		background: var(--color-border);
+		outline: none;
+		-webkit-appearance: none;
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		box-shadow: var(--shadow-sm);
+	}
+
+	input[type="range"]::-moz-range-thumb {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		cursor: pointer;
+		border: none;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.weight-inputs {
+		width: 100%;
+	}
+
+	.weight-inputs.metric {
+		display: none;
+	}
+
+	.calculator-results {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.results-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	.result-card {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1.5rem;
+		text-align: center;
+		box-shadow: var(--shadow-md);
+		transition: all 0.1s ease;
+	}
+
+	.result-card:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--shadow-lg);
+	}
+
+	.result-card h3 {
+		margin: 0 0 0.75rem 0;
+		color: var(--color-text);
+		font-size: 1.125rem;
+	}
+
+	.result-value {
+		font-size: 2.5rem;
+		font-weight: 800;
+		color: var(--color-primary);
+		margin-bottom: 0.25rem;
+		line-height: 1;
+	}
+
+	.result-unit {
+		font-size: 1.25rem;
+		color: var(--color-text-muted);
+		margin-left: 0.5rem;
+	}
+
+	.result-description {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		margin: 0;
+	}
+
+	.formula-details {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 2rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	.formula-details h3 {
+		margin: 0 0 1.5rem 0;
+		color: var(--color-text);
+		text-align: center;
+		font-size: 1.25rem;
+	}
+
+	.formula-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.formula-item {
+		padding: 1rem;
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		border-radius: var(--border-radius);
+	}
+
+	.formula-item h4 {
+		margin: 0 0 0.5rem 0;
+		color: var(--color-primary);
+		font-size: 1rem;
+		font-weight: 700;
+	}
+
+	.formula-item code {
+		display: block;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		padding: 0.5rem;
+		margin: 0.5rem 0;
+		font-family: "Courier New", monospace;
+		font-size: 0.875rem;
+		color: var(--color-text);
+	}
+
+	.formula-item p {
+		margin: 0.5rem 0 0 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		line-height: 1.4;
+	}
+
+	.formula-note {
+		background: var(--color-bg);
+		border: 2px solid var(--color-primary);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+	}
+
+	.formula-note p {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text);
+		line-height: 1.5;
+	}
+
+	.info-sections {
+		margin-top: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.info-section {
+		background: var(--color-bg);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1.5rem;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.info-section h3 {
+		margin: 0 0 1rem 0;
+		color: var(--color-primary);
+		font-weight: 700;
+		font-size: 1rem;
+	}
+
+	.info-section p {
+		color: var(--color-text-muted);
+		line-height: 1.6;
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	.info-section ul {
+		color: var(--color-text-muted);
+		line-height: 1.6;
+		margin: 0;
+		padding-left: 1.5rem;
+		font-size: 0.875rem;
+	}
+
+	.info-section li {
+		margin-bottom: 0.5rem;
+	}
+
+	.info-section strong {
+		color: var(--color-text);
+	}
+
+	/* Color coding for different formulas */
+	.epley-card {
+		border-left: 6px solid #00ff88;
+	}
+
+	.brzycki-card {
+		border-left: 6px solid #33ccff;
+	}
+
+	.lombardi-card {
+		border-left: 6px solid #ffcc00;
+	}
+
+	/* Mobile Responsiveness */
+	@media (max-width: 1024px) {
+		.calculator-layout {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.calculator-header h1 {
+			font-size: 2rem;
+		}
+
+		.result-value {
+			font-size: 2rem;
+		}
+
+		.unit-toggle {
+			justify-content: center;
+		}
+
+		.mobile-hide {
+			display: none;
+		}
+
+		.formula-grid {
+			gap: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.calculator-inputs,
+		.formula-details {
+			padding: 1rem;
+		}
+
+		.result-card {
+			padding: 1rem;
+		}
+	}
+</style>
+
+<script type="module">
+	// Constants for unit conversion
+	const LBS_TO_KG = 0.453592;
+	const KG_TO_LBS = 2.20462;
+
+	// State variables
+	let currentUnit = "lbs"; // "lbs" or "kg"
+	let currentWeightLbs = 135; // Always store weight in pounds internally
+	let currentReps = 5;
+
+	// Get DOM elements
+	const weightSlider = document.getElementById("weight");
+	const weightKgSlider = document.getElementById("weight-kg");
+	const repsSlider = document.getElementById("reps");
+	const weightDisplay = document.getElementById("weight-display");
+	const weightKgDisplay = document.getElementById("weight-kg-display");
+	const repsDisplay = document.getElementById("reps-display");
+
+	// Container elements
+	const imperialWeightInputs = document.querySelector(".weight-inputs.imperial");
+	const metricWeightInputs = document.querySelector(".weight-inputs.metric");
+
+	// Result elements
+	const epleyResult = document.getElementById("epley-result");
+	const brzyckiResult = document.getElementById("brzycki-result");
+	const lombardiResult = document.getElementById("lombardi-result");
+	const epleyUnit = document.getElementById("epley-unit");
+	const brzyckiUnit = document.getElementById("brzycki-unit");
+	const lombardiUnit = document.getElementById("lombardi-unit");
+
+	// Unit conversion functions
+	function lbsToKg(lbs) {
+		return lbs * LBS_TO_KG;
+	}
+
+	function kgToLbs(kg) {
+		return kg * KG_TO_LBS;
+	}
+
+	// 1RM calculation formulas
+	function calculateEpley(weight, reps) {
+		if (reps === 1) return weight;
+		return weight * (1 + reps / 30);
+	}
+
+	function calculateBrzycki(weight, reps) {
+		if (reps === 1) return weight;
+		return (weight * 36) / (37 - reps);
+	}
+
+	function calculateLombardi(weight, reps) {
+		if (reps === 1) return weight;
+		return weight * Math.pow(reps, 0.1);
+	}
+
+	// Update weight slider range based on unit
+	function updateWeightSliderRange() {
+		if (currentUnit === "kg") {
+			// Show metric inputs, hide imperial
+			if (imperialWeightInputs) imperialWeightInputs.style.display = "none";
+			if (metricWeightInputs) metricWeightInputs.style.display = "block";
+
+			// Update kg slider value
+			if (weightKgSlider) {
+				weightKgSlider.value = Math.round(lbsToKg(currentWeightLbs));
+			}
+		} else {
+			// Show imperial inputs, hide metric
+			if (imperialWeightInputs) imperialWeightInputs.style.display = "block";
+			if (metricWeightInputs) metricWeightInputs.style.display = "none";
+
+			// Update lbs slider value
+			if (weightSlider) {
+				weightSlider.value = currentWeightLbs;
+			}
+		}
+	}
+
+	// Update all displays
+	function updateDisplays() {
+		// Update weight displays
+		if (weightDisplay) {
+			weightDisplay.textContent = currentWeightLbs.toString();
+		}
+		if (weightKgDisplay) {
+			const weightKg = lbsToKg(currentWeightLbs);
+			weightKgDisplay.textContent = weightKg.toFixed(1);
+		}
+
+		// Update reps display
+		if (repsDisplay) {
+			repsDisplay.textContent = currentReps.toString();
+		}
+	}
+
+	// Calculate and display all 1RM results
+	function calculateAndDisplayResults() {
+		// Use current weight in pounds for calculations
+		const epleyValue = calculateEpley(currentWeightLbs, currentReps);
+		const brzyckiValue = calculateBrzycki(currentWeightLbs, currentReps);
+		const lombardiValue = calculateLombardi(currentWeightLbs, currentReps);
+
+		// Display results in user's preferred unit
+		if (currentUnit === "kg") {
+			if (epleyResult) epleyResult.textContent = Math.round(lbsToKg(epleyValue)).toString();
+			if (brzyckiResult) brzyckiResult.textContent = Math.round(lbsToKg(brzyckiValue)).toString();
+			if (lombardiResult)
+				lombardiResult.textContent = Math.round(lbsToKg(lombardiValue)).toString();
+			if (epleyUnit) epleyUnit.textContent = "kg";
+			if (brzyckiUnit) brzyckiUnit.textContent = "kg";
+			if (lombardiUnit) lombardiUnit.textContent = "kg";
+		} else {
+			if (epleyResult) epleyResult.textContent = Math.round(epleyValue).toString();
+			if (brzyckiResult) brzyckiResult.textContent = Math.round(brzyckiValue).toString();
+			if (lombardiResult) lombardiResult.textContent = Math.round(lombardiValue).toString();
+			if (epleyUnit) epleyUnit.textContent = "lbs";
+			if (brzyckiUnit) brzyckiUnit.textContent = "lbs";
+			if (lombardiUnit) lombardiUnit.textContent = "lbs";
+		}
+
+		// Save current values to localStorage
+		saveCurrentValues();
+	}
+
+	// Save current values to localStorage
+	function saveCurrentValues() {
+		localStorage.setItem("cruxcalc-1rm-weight", currentWeightLbs.toString());
+		localStorage.setItem("cruxcalc-1rm-reps", currentReps.toString());
+		localStorage.setItem("cruxcalc-1rm-units", currentUnit);
+	}
+
+	// Load saved values from localStorage
+	function loadSavedValues() {
+		const savedWeight = localStorage.getItem("cruxcalc-1rm-weight");
+		const savedReps = localStorage.getItem("cruxcalc-1rm-reps");
+		const savedUnits = localStorage.getItem("cruxcalc-1rm-units");
+
+		if (savedWeight) {
+			currentWeightLbs = parseInt(savedWeight);
+		}
+		if (savedReps) {
+			currentReps = parseInt(savedReps);
+		}
+		if (savedUnits) {
+			currentUnit = savedUnits;
+			updateUnitButtons();
+		}
+
+		// Update slider values
+		repsSlider.value = currentReps;
+		updateWeightSliderRange();
+	}
+
+	// Update unit button states
+	function updateUnitButtons() {
+		document.querySelectorAll(".unit-btn").forEach((btn) => {
+			btn.classList.remove("active");
+			if (btn.dataset.unit === currentUnit) {
+				btn.classList.add("active");
+			}
+		});
+	}
+
+	// Debounced calculation
+	let calculationTimeout;
+	function debouncedCalculation() {
+		clearTimeout(calculationTimeout);
+		calculationTimeout = setTimeout(calculateAndDisplayResults, 100);
+	}
+
+	// Event listeners
+	if (weightSlider) {
+		weightSlider.addEventListener("input", () => {
+			currentWeightLbs = parseInt(weightSlider.value);
+			updateDisplays();
+			debouncedCalculation();
+		});
+	}
+
+	if (weightKgSlider) {
+		weightKgSlider.addEventListener("input", () => {
+			// Convert kg input back to lbs for storage
+			currentWeightLbs = Math.round(kgToLbs(parseInt(weightKgSlider.value)));
+			updateDisplays();
+			debouncedCalculation();
+		});
+	}
+
+	if (repsSlider) {
+		repsSlider.addEventListener("input", () => {
+			currentReps = parseInt(repsSlider.value);
+			updateDisplays();
+			debouncedCalculation();
+		});
+	}
+
+	// Unit toggle functionality
+	document.querySelectorAll(".unit-btn").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			currentUnit = btn.dataset.unit || "lbs";
+			updateUnitButtons();
+			updateWeightSliderRange();
+			updateDisplays();
+			calculateAndDisplayResults();
+		});
+	});
+
+	// Initialize the calculator
+	loadSavedValues();
+	updateDisplays();
+	calculateAndDisplayResults();
+</script>
