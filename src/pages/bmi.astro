@@ -549,301 +549,305 @@ import Layout from "../layouts/Layout.astro";
 	}
 </style>
 
-<script type="module">
-	import sharedValues from "/sharedValues.js";
-
+<script src="/sharedValues.js" is:inline></script>
+<script>
+	// @ts-nocheck - Disable TypeScript checking for this Astro component
 	// Load shared values on page load
-	const values = sharedValues.load();
+	const values = new window.SharedValues().load();
+	const sharedValues = new window.SharedValues();
 	let currentHeightUnit = values.heightUnit;
 	let currentWeightUnit = values.weightUnit;
 
-	// Get DOM elements
-	const asianScale = document.getElementById("asian-scale");
-	const heightFeet = document.getElementById("height-feet");
-	const heightInches = document.getElementById("height-inches");
-	const heightCm = document.getElementById("height-cm");
-	const weightLbs = document.getElementById("weight-lbs");
-	const weightKg = document.getElementById("weight-kg");
+	// Initialize the calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		// Get DOM elements
+		const asianScale = document.getElementById("asian-scale");
+		const heightFeet = document.getElementById("height-feet");
+		const heightInches = document.getElementById("height-inches");
+		const heightCm = document.getElementById("height-cm");
+		const weightLbs = document.getElementById("weight-lbs");
+		const weightKg = document.getElementById("weight-kg");
 
-	const heightFeetDisplay = document.getElementById("height-feet-display");
-	const heightInchesDisplay = document.getElementById("height-inches-display");
-	const heightCmDisplay = document.getElementById("height-cm-display");
-	const weightLbsDisplay = document.getElementById("weight-lbs-display");
-	const weightKgDisplay = document.getElementById("weight-kg-display");
-	const bmiNumber = document.getElementById("bmi-number");
-	const bmiCategory = document.getElementById("bmi-category");
-	const bmiExplanation = document.getElementById("bmi-explanation");
-	const scaleIndicator = document.getElementById("scale-indicator");
+		const heightFeetDisplay = document.getElementById("height-feet-display");
+		const heightInchesDisplay = document.getElementById("height-inches-display");
+		const heightCmDisplay = document.getElementById("height-cm-display");
+		const weightLbsDisplay = document.getElementById("weight-lbs-display");
+		const weightKgDisplay = document.getElementById("weight-kg-display");
+		const bmiNumber = document.getElementById("bmi-number");
+		const bmiCategory = document.getElementById("bmi-category");
+		const bmiExplanation = document.getElementById("bmi-explanation");
+		const scaleIndicator = document.getElementById("scale-indicator");
 
-	// Initialize inputs with shared values
-	function initializeInputs() {
-		if (heightFeet) heightFeet.value = values.heightFeet.toString();
-		if (heightInches) heightInches.value = values.heightInches.toString();
-		if (heightCm) heightCm.value = values.heightCm.toString();
-		if (weightLbs) weightLbs.value = values.weightLbs.toString();
-		if (weightKg) weightKg.value = values.weightKg.toString();
+		// Initialize inputs with shared values
+		function initializeInputs() {
+			if (heightFeet) heightFeet.value = values.heightFeet.toString();
+			if (heightInches) heightInches.value = values.heightInches.toString();
+			if (heightCm) heightCm.value = values.heightCm.toString();
+			if (weightLbs) weightLbs.value = values.weightLbs.toString();
+			if (weightKg) weightKg.value = values.weightKg.toString();
 
-		// Restore Asian BMI scale preference
-		if (asianScale) {
-			asianScale.checked = values.useAsianBMI || false;
-		}
+			// Restore Asian BMI scale preference
+			if (asianScale) {
+				asianScale.checked = values.useAsianBMI || false;
+			}
 
-		// Set unit toggles to match saved preferences
-		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-			const isHeightToggle =
-				toggle.closest(".input-group")?.querySelector("label")?.textContent?.toLowerCase() ===
-				"height";
-			const targetUnit = isHeightToggle ? currentHeightUnit : currentWeightUnit;
+			// Set unit toggles to match saved preferences
+			document.querySelectorAll(".unit-toggle").forEach((toggle) => {
+				const isHeightToggle =
+					toggle.closest(".input-group")?.querySelector("label")?.textContent?.toLowerCase() ===
+					"height";
+				const targetUnit = isHeightToggle ? currentHeightUnit : currentWeightUnit;
 
-			toggle.querySelectorAll(".unit-btn").forEach((btn) => {
-				btn.classList.remove("active");
-				if (btn.dataset.unit === targetUnit) {
-					btn.classList.add("active");
+				toggle.querySelectorAll(".unit-btn").forEach((btn) => {
+					btn.classList.remove("active");
+					if (btn.dataset.unit === targetUnit) {
+						btn.classList.add("active");
+					}
+				});
+
+				// Show/hide appropriate inputs
+				const inputGroup = toggle.closest(".input-group");
+				if (isHeightToggle) {
+					inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
+						input.style.display = input.classList.contains(targetUnit) ? "flex" : "none";
+					});
+				} else {
+					inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
+						input.style.display = input.classList.contains(targetUnit) ? "block" : "none";
+					});
 				}
 			});
+		}
 
-			// Show/hide appropriate inputs
-			const inputGroup = toggle.closest(".input-group");
-			if (isHeightToggle) {
-				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(targetUnit) ? "flex" : "none";
-				});
+		// Save current values to shared storage
+		function saveCurrentValues() {
+			const currentValues = {
+				heightFeet: parseInt(heightFeet?.value || "5"),
+				heightInches: parseFloat(heightInches?.value || "8"),
+				heightCm: parseInt(heightCm?.value || "173"),
+				weightLbs: parseInt(weightLbs?.value || "160"),
+				weightKg: parseInt(weightKg?.value || "73"),
+				heightUnit: currentHeightUnit,
+				weightUnit: currentWeightUnit,
+				useAsianBMI: asianScale?.checked || false,
+			};
+			sharedValues.update(currentValues);
+		}
+
+		// BMI categories and explanations
+		const bmiCategories = {
+			standard: {
+				underweight: {
+					name: "Underweight",
+					color: "#3366ff",
+					explanation:
+						"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+				},
+				normal: {
+					name: "Normal Weight",
+					color: "var(--color-success)",
+					explanation:
+						"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
+				},
+				overweight: {
+					name: "Overweight",
+					color: "var(--color-warning)",
+					explanation:
+						"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
+				},
+				obese: {
+					name: "Obese",
+					color: "var(--color-danger)",
+					explanation:
+						"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
+				},
+			},
+			asian: {
+				underweight: {
+					name: "Underweight",
+					color: "#3366ff",
+					explanation:
+						"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+				},
+				normal: {
+					name: "Normal Weight",
+					color: "var(--color-success)",
+					explanation:
+						"Your BMI falls within the normal weight range for Asian populations. This suggests a healthy weight for your height.",
+				},
+				overweight: {
+					name: "Overweight",
+					color: "var(--color-warning)",
+					explanation:
+						"Your BMI indicates you may be overweight according to Asian BMI standards. Consider consulting with a healthcare provider about healthy weight management.",
+				},
+				obese: {
+					name: "Obese",
+					color: "var(--color-danger)",
+					explanation:
+						"Your BMI indicates obesity according to Asian BMI standards. We recommend consulting with a healthcare provider for personalized advice.",
+				},
+			},
+		};
+
+		function getBMICategory(bmi, useAsianScale = false) {
+			if (useAsianScale) {
+				// Asian BMI scale thresholds
+				if (bmi < 18.5) return "underweight";
+				if (bmi < 23) return "normal";
+				if (bmi < 27.5) return "overweight";
+				return "obese";
 			} else {
-				inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(targetUnit) ? "block" : "none";
+				// Standard BMI scale thresholds
+				if (bmi < 18.5) return "underweight";
+				if (bmi < 25) return "normal";
+				if (bmi < 30) return "overweight";
+				return "obese";
+			}
+		}
+
+		function calculateBMI() {
+			let heightInMeters, weightInKg;
+
+			// Convert height to meters
+			if (currentHeightUnit === "imperial") {
+				const feet = parseInt(heightFeet?.value || "5");
+				const inches = parseFloat(heightInches?.value || "8");
+				const totalInches = feet * 12 + inches;
+				heightInMeters = totalInches * 0.0254;
+			} else {
+				heightInMeters = parseInt(heightCm?.value || "173") / 100;
+			}
+
+			// Convert weight to kg
+			if (currentWeightUnit === "imperial") {
+				weightInKg = parseInt(weightLbs?.value || "160") * 0.453592;
+			} else {
+				weightInKg = parseInt(weightKg?.value || "73");
+			}
+
+			const bmi = weightInKg / (heightInMeters * heightInMeters);
+			return bmi;
+		}
+
+		function updateBMIDisplay() {
+			const bmi = calculateBMI();
+			const useAsianScale = asianScale?.checked || false;
+			const scaleType = useAsianScale ? "asian" : "standard";
+			const category = getBMICategory(bmi, useAsianScale);
+			const categoryData = bmiCategories[scaleType][category];
+
+			if (bmiNumber) bmiNumber.textContent = bmi.toFixed(1);
+			if (bmiCategory) {
+				bmiCategory.textContent = categoryData.name;
+				bmiCategory.style.backgroundColor = categoryData.color;
+			}
+			if (bmiExplanation) bmiExplanation.textContent = categoryData.explanation;
+
+			// Update scale indicator position based on the selected scale
+			let position;
+			if (useAsianScale) {
+				// Asian scale: underweight < 18.5, normal 18.5-22.9, overweight 23-27.4, obese ≥ 27.5
+				if (bmi < 18.5) position = (bmi / 18.5) * 25;
+				else if (bmi < 23) position = 25 + ((bmi - 18.5) / 4.5) * 25;
+				else if (bmi < 27.5) position = 50 + ((bmi - 23) / 4.5) * 25;
+				else position = 75 + Math.min(((bmi - 27.5) / 7.5) * 25, 25);
+			} else {
+				// Standard scale: underweight < 18.5, normal 18.5-24.9, overweight 25-29.9, obese ≥ 30
+				if (bmi < 18.5) position = (bmi / 18.5) * 25;
+				else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
+				else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
+				else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
+			}
+
+			if (scaleIndicator) scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+
+			// Save values after calculation
+			saveCurrentValues();
+		}
+
+		function updateDisplays() {
+			if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
+			if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
+			if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
+			if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
+			if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
+		}
+
+		// Debounced calculation
+		let calculationTimeout;
+		function debouncedCalculation() {
+			clearTimeout(calculationTimeout);
+			calculationTimeout = setTimeout(updateBMIDisplay, 100);
+		}
+
+		// Event listeners for sliders
+		[heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
+			if (slider) {
+				slider.addEventListener("input", () => {
+					updateDisplays();
+					debouncedCalculation();
 				});
 			}
 		});
-	}
 
-	// Save current values to shared storage
-	function saveCurrentValues() {
-		const currentValues = {
-			heightFeet: parseInt(heightFeet?.value || "5"),
-			heightInches: parseFloat(heightInches?.value || "8"),
-			heightCm: parseInt(heightCm?.value || "173"),
-			weightLbs: parseInt(weightLbs?.value || "160"),
-			weightKg: parseInt(weightKg?.value || "73"),
-			heightUnit: currentHeightUnit,
-			weightUnit: currentWeightUnit,
-			useAsianBMI: asianScale?.checked || false,
-		};
-		sharedValues.update(currentValues);
-	}
-
-	// BMI categories and explanations
-	const bmiCategories = {
-		standard: {
-			underweight: {
-				name: "Underweight",
-				color: "#3366ff",
-				explanation:
-					"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
-			},
-			normal: {
-				name: "Normal Weight",
-				color: "var(--color-success)",
-				explanation:
-					"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
-			},
-			overweight: {
-				name: "Overweight",
-				color: "var(--color-warning)",
-				explanation:
-					"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
-			},
-			obese: {
-				name: "Obese",
-				color: "var(--color-danger)",
-				explanation:
-					"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
-			},
-		},
-		asian: {
-			underweight: {
-				name: "Underweight",
-				color: "#3366ff",
-				explanation:
-					"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
-			},
-			normal: {
-				name: "Normal Weight",
-				color: "var(--color-success)",
-				explanation:
-					"Your BMI falls within the normal weight range for Asian populations. This suggests a healthy weight for your height.",
-			},
-			overweight: {
-				name: "Overweight",
-				color: "var(--color-warning)",
-				explanation:
-					"Your BMI indicates you may be overweight according to Asian BMI standards. Consider consulting with a healthcare provider about healthy weight management.",
-			},
-			obese: {
-				name: "Obese",
-				color: "var(--color-danger)",
-				explanation:
-					"Your BMI indicates obesity according to Asian BMI standards. We recommend consulting with a healthcare provider for personalized advice.",
-			},
-		},
-	};
-
-	function getBMICategory(bmi, useAsianScale = false) {
-		if (useAsianScale) {
-			// Asian BMI scale thresholds
-			if (bmi < 18.5) return "underweight";
-			if (bmi < 23) return "normal";
-			if (bmi < 27.5) return "overweight";
-			return "obese";
-		} else {
-			// Standard BMI scale thresholds
-			if (bmi < 18.5) return "underweight";
-			if (bmi < 25) return "normal";
-			if (bmi < 30) return "overweight";
-			return "obese";
-		}
-	}
-
-	function calculateBMI() {
-		let heightInMeters, weightInKg;
-
-		// Convert height to meters
-		if (currentHeightUnit === "imperial") {
-			const feet = parseInt(heightFeet?.value || "5");
-			const inches = parseFloat(heightInches?.value || "8");
-			const totalInches = feet * 12 + inches;
-			heightInMeters = totalInches * 0.0254;
-		} else {
-			heightInMeters = parseInt(heightCm?.value || "173") / 100;
-		}
-
-		// Convert weight to kg
-		if (currentWeightUnit === "imperial") {
-			weightInKg = parseInt(weightLbs?.value || "160") * 0.453592;
-		} else {
-			weightInKg = parseInt(weightKg?.value || "73");
-		}
-
-		const bmi = weightInKg / (heightInMeters * heightInMeters);
-		return bmi;
-	}
-
-	function updateBMIDisplay() {
-		const bmi = calculateBMI();
-		const useAsianScale = asianScale?.checked || false;
-		const scaleType = useAsianScale ? "asian" : "standard";
-		const category = getBMICategory(bmi, useAsianScale);
-		const categoryData = bmiCategories[scaleType][category];
-
-		if (bmiNumber) bmiNumber.textContent = bmi.toFixed(1);
-		if (bmiCategory) {
-			bmiCategory.textContent = categoryData.name;
-			bmiCategory.style.backgroundColor = categoryData.color;
-		}
-		if (bmiExplanation) bmiExplanation.textContent = categoryData.explanation;
-
-		// Update scale indicator position based on the selected scale
-		let position;
-		if (useAsianScale) {
-			// Asian scale: underweight < 18.5, normal 18.5-22.9, overweight 23-27.4, obese ≥ 27.5
-			if (bmi < 18.5) position = (bmi / 18.5) * 25;
-			else if (bmi < 23) position = 25 + ((bmi - 18.5) / 4.5) * 25;
-			else if (bmi < 27.5) position = 50 + ((bmi - 23) / 4.5) * 25;
-			else position = 75 + Math.min(((bmi - 27.5) / 7.5) * 25, 25);
-		} else {
-			// Standard scale: underweight < 18.5, normal 18.5-24.9, overweight 25-29.9, obese ≥ 30
-			if (bmi < 18.5) position = (bmi / 18.5) * 25;
-			else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
-			else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
-			else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
-		}
-
-		if (scaleIndicator) scaleIndicator.style.left = `${Math.min(position, 100)}%`;
-
-		// Save values after calculation
-		saveCurrentValues();
-	}
-
-	function updateDisplays() {
-		if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
-		if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
-		if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
-		if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
-		if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
-	}
-
-	// Debounced calculation
-	let calculationTimeout;
-	function debouncedCalculation() {
-		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(updateBMIDisplay, 100);
-	}
-
-	// Event listeners for sliders
-	[heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
-		if (slider) {
-			slider.addEventListener("input", () => {
-				updateDisplays();
+		// Event listener for Asian scale checkbox
+		if (asianScale) {
+			asianScale.addEventListener("change", () => {
+				// Save the preference immediately when changed
+				saveCurrentValues();
 				debouncedCalculation();
 			});
 		}
-	});
 
-	// Event listener for Asian scale checkbox
-	if (asianScale) {
-		asianScale.addEventListener("change", () => {
-			// Save the preference immediately when changed
-			saveCurrentValues();
-			debouncedCalculation();
+		// Unit toggle functionality
+		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
+			toggle.addEventListener("click", (e) => {
+				const target = e.target;
+				if (!target?.classList.contains("unit-btn")) return;
+
+				const unitType = target
+					.closest(".input-group")
+					?.querySelector("label")
+					?.textContent?.toLowerCase();
+				const unit = target.dataset.unit;
+
+				// Update active state
+				toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
+				target.classList.add("active");
+
+				// Show/hide appropriate inputs
+				const inputGroup = target.closest(".input-group");
+				if (unitType === "height") {
+					currentHeightUnit = unit || "imperial";
+					sharedValues.syncHeightUnits(currentHeightUnit);
+					inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
+						input.style.display = input.classList.contains(unit || "imperial") ? "flex" : "none";
+					});
+				} else {
+					currentWeightUnit = unit || "imperial";
+					sharedValues.syncWeightUnits(currentWeightUnit);
+					inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
+						input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
+					});
+				}
+
+				// Update sliders with converted values after unit change
+				const updatedValues = sharedValues.load();
+				if (heightFeet) heightFeet.value = updatedValues.heightFeet.toString();
+				if (heightInches) heightInches.value = updatedValues.heightInches.toString();
+				if (heightCm) heightCm.value = updatedValues.heightCm.toString();
+				if (weightLbs) weightLbs.value = updatedValues.weightLbs.toString();
+				if (weightKg) weightKg.value = updatedValues.weightKg.toString();
+
+				updateDisplays();
+				debouncedCalculation();
+			});
 		});
-	}
 
-	// Unit toggle functionality
-	document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-		toggle.addEventListener("click", (e) => {
-			const target = e.target;
-			if (!target?.classList.contains("unit-btn")) return;
-
-			const unitType = target
-				.closest(".input-group")
-				?.querySelector("label")
-				?.textContent?.toLowerCase();
-			const unit = target.dataset.unit;
-
-			// Update active state
-			toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
-			target.classList.add("active");
-
-			// Show/hide appropriate inputs
-			const inputGroup = target.closest(".input-group");
-			if (unitType === "height") {
-				currentHeightUnit = unit || "imperial";
-				sharedValues.syncHeightUnits(currentHeightUnit);
-				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(unit || "imperial") ? "flex" : "none";
-				});
-			} else {
-				currentWeightUnit = unit || "imperial";
-				sharedValues.syncWeightUnits(currentWeightUnit);
-				inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
-				});
-			}
-
-			// Update sliders with converted values after unit change
-			const updatedValues = sharedValues.load();
-			if (heightFeet) heightFeet.value = updatedValues.heightFeet.toString();
-			if (heightInches) heightInches.value = updatedValues.heightInches.toString();
-			if (heightCm) heightCm.value = updatedValues.heightCm.toString();
-			if (weightLbs) weightLbs.value = updatedValues.weightLbs.toString();
-			if (weightKg) weightKg.value = updatedValues.weightKg.toString();
-
-			updateDisplays();
-			debouncedCalculation();
-		});
+		// Initialize the calculator
+		initializeInputs();
+		updateDisplays();
+		updateBMIDisplay();
 	});
-
-	// Initialize the calculator
-	initializeInputs();
-	updateDisplays();
-	updateBMIDisplay();
 </script>

@@ -2,10 +2,10 @@
 
 ## Project Overview
 
-**Calculator Name:** [TBD - To Be Determined]
+**Calculator Name:** Body Fat Percentage Calculator
 **Project:** CruxCalc - Potato Hack Fitness Calculators
 **Date:** July 27, 2025
-**Status:** Planning Phase
+**Status:** Body Fat Calculator - Requirements Complete
 
 ## Existing Calculator Analysis
 
@@ -17,6 +17,7 @@ Current calculators implemented:
 - ✅ Muscle Potential - Casey Butt's maximum muscle formulas
 - ✅ Potato Hack - Calorie deficit with resistant starch
 - ✅ Running Pace - Race time predictions for 5K/10K/half/full marathon
+- ✅ One Rep Max Calculator - 1RM estimation using 3 proven formulas
 
 ## Suggested Next Calculator Options
 
@@ -101,6 +102,194 @@ Current calculators implemented:
 - **References:** Scientific backing or formula sources
 
 ## Specific Requirements Template
+
+### Calculator Name: Body Fat Percentage Calculator
+
+#### 1. Functional Requirements
+
+**Primary Function:**
+
+- [ ] Calculate body fat percentage using U.S. Navy circumference method (primary)
+- [ ] Calculate body fat percentage using enhanced BMI method (secondary comparison)
+- [ ] Display both results with accuracy ranges and method explanations
+- [ ] Show body fat categories and age-adjusted ideal ranges
+
+**Input Requirements:**
+
+- [ ] Gender selection: Male/Female toggle button
+- [ ] Age: Range slider from 18-80 years (shared with BMR/HR calculators)
+- [ ] Height: Range slider with ft/in and cm options (leverage BMI integration)
+- [ ] Weight: Range slider with lbs/kg options (leverage BMI integration)
+- [ ] Neck circumference: Range slider 10-25 inches (25-63 cm)
+- [ ] Waist circumference: Range slider 20-60 inches (51-152 cm)
+- [ ] Hip circumference: Range slider 25-65 inches (64-165 cm) - Women only
+- [ ] Unit system support (Imperial/Metric toggle)
+- [ ] Real-time calculation updates with debouncing
+
+**Output Requirements:**
+
+- [ ] Primary result: Navy method body fat percentage (large, prominent display)
+- [ ] Secondary result: BMI method body fat percentage (comparison display)
+- [ ] Body fat category classification (Essential/Athletic/Fitness/Average/Obese)
+- [ ] Age-adjusted ideal body fat range (Jackson & Pollock standards)
+- [ ] Fat mass and lean body mass calculations
+- [ ] Method accuracy disclaimers and explanations
+
+#### 2. Calculation Logic
+
+**Navy Method Formulas (Hodgdon & Beckett, 1984):**
+
+- [ ] **Men**: `495 / (1.0324 - 0.19077×log10(waist-neck) + 0.15456×log10(height)) - 450`
+- [ ] **Women**: `495 / (1.29579 - 0.35004×log10(waist+hip-neck) + 0.22100×log10(height)) - 450`
+
+**Enhanced BMI Method (Deurenberg Formula, Updated):**
+
+- [ ] **Adults**: `BF% = 1.39×BMI + 0.16×age - 10.34×gender - 9` (gender: 0=female, 1=male)
+- [ ] **Children**: `BF% = 1.51×BMI - 0.70×age - 3.6×gender + 1.4` (if age < 18)
+
+**Supporting Calculations:**
+
+- [ ] **Fat Mass**: `FM = (BF% / 100) × Weight`
+- [ ] **Lean Mass**: `LM = Weight - FM`
+- [ ] **BMI**: `BMI = weight(kg) / height(m)²` (integrate with existing BMI calculator)
+
+**Data Processing:**
+
+- [ ] Round body fat percentage to 1 decimal place
+- [ ] Round fat/lean mass to 1 decimal place
+- [ ] Input validation for all measurements
+- [ ] Handle edge cases (extreme measurements)
+- [ ] Default values: 30yr male, 5'10", 175lbs, 15" neck, 32" waist
+
+#### 3. User Experience
+
+**Interface Design:**
+
+- [ ] Two-column layout (inputs left, results right)
+- [ ] Gender toggle at top of inputs
+- [ ] Age slider (shared value synchronization)
+- [ ] Height/Weight sliders (BMI integration)
+- [ ] Circumference measurement sliders
+- [ ] Unit toggle (Imperial/Metric)
+- [ ] Primary Navy result card (large, prominent)
+- [ ] Secondary BMI comparison card
+- [ ] Body fat category indicator with visual scale
+- [ ] Age-adjusted ideal range display
+
+**Interaction Flow:**
+
+- [ ] Page loads with default values
+- [ ] Gender selection updates formula and required inputs
+- [ ] Female selection shows hip measurement slider
+- [ ] Age sync with BMR/HR calculators
+- [ ] Height/Weight sync with BMI calculator
+- [ ] Real-time updates with debounced calculations
+- [ ] Unit conversion affects all measurements
+
+#### 4. Integration Requirements
+
+**Shared Data Synchronization:**
+
+- [ ] Age: Sync with BMR and Heart Rate calculators
+- [ ] Height: Sync with BMI calculator
+- [ ] Weight: Sync with BMI calculator
+- [ ] Gender: Sync with BMR calculator
+- [ ] Unit preferences: Global setting
+
+**localStorage Keys:**
+
+- [ ] `cruxcalc-bf-neck` (store in inches, convert for display)
+- [ ] `cruxcalc-bf-waist` (store in inches, convert for display)
+- [ ] `cruxcalc-bf-hips` (store in inches, convert for display)
+- [ ] `cruxcalc-bf-units` (imperial/metric preference)
+- [ ] Use existing shared keys for age, height, weight, gender
+
+**Navigation:**
+
+- [ ] Short navigation label: "Body Fat" (8 characters max)
+- [ ] URL path: `/body-fat`
+- [ ] Page title: "Body Fat Percentage Calculator - Navy & BMI Methods"
+- [ ] Meta description: "Calculate body fat percentage using Navy circumference method and BMI formula. Get accurate body composition analysis with category classifications."
+
+#### 5. Content Requirements
+
+**Body Fat Categories (ACE Standards):**
+
+- [ ] **Essential Fat**: Men 2-5% | Women 10-13%
+- [ ] **Athletes**: Men 6-13% | Women 14-20%
+- [ ] **Fitness**: Men 14-17% | Women 21-24%
+- [ ] **Average**: Men 18-24% | Women 25-31%
+- [ ] **Obese**: Men 25%+ | Women 32%+
+
+**Age-Adjusted Ideal Ranges (Jackson & Pollock):**
+
+- [ ] Display ideal body fat percentage for user's age
+- [ ] Show progression of healthy ranges by decade
+- [ ] Explain why body fat naturally increases with age
+
+**Educational Sections:**
+
+- [ ] Navy Method: Military validation, circumference accuracy
+- [ ] BMI Method: Quick comparison, limitations explanation
+- [ ] Why Both Methods: Accuracy range demonstration
+- [ ] Measurement Instructions: How to measure circumferences correctly
+- [ ] Accuracy Limitations: ±3-4% typical variation
+- [ ] Body Fat vs BMI: Why body composition matters more than weight
+
+**Formula Details Section:**
+
+- [ ] **Navy Method**: Developed by Naval Health Research Center, ±3-4% accuracy
+- [ ] **BMI Method**: Enhanced Deurenberg formula, ±4-5% accuracy
+- [ ] **Comparison Value**: Showing both methods builds confidence in results
+- [ ] **Measurement Tips**: Proper technique for neck, waist, hip measurements
+
+**SEO Content:**
+
+- [ ] Page title: "Body Fat Calculator - Navy Method & BMI Body Fat Percentage"
+- [ ] Meta description: "Calculate body fat percentage using proven Navy circumference method and BMI formula. Get accurate body composition analysis with age-adjusted recommendations."
+- [ ] Target keywords: body fat calculator, body fat percentage, Navy method, circumference measurements
+
+#### 6. Technical Specifications
+
+**Performance:**
+
+- [ ] Instant calculation updates (< 50ms)
+- [ ] Smooth slider interactions
+- [ ] Mobile-optimized circumference input controls
+
+**Browser Support:**
+
+- [ ] Modern browser compatibility (ES6+)
+- [ ] Touch-friendly measurement sliders
+- [ ] Accessibility: ARIA labels, keyboard navigation
+
+**Data Persistence:**
+
+- [ ] Remember user's measurements across sessions
+- [ ] Sync shared values (age, height, weight) with other calculators
+- [ ] Persist unit preferences globally
+
+**Conversion Logic:**
+
+- [ ] 1 inch = 2.54 cm (precise conversion)
+- [ ] 1 pound = 0.453592 kg (precise conversion)
+- [ ] Display metric values to 1 decimal place
+- [ ] Store internally in imperial for consistency
+
+**UI Matching Design System:**
+
+- [ ] Same two-column layout (inputs left, results right)
+- [ ] Same slider styling and behavior
+- [ ] Same card design for results
+- [ ] Same color scheme and typography
+- [ ] Same responsive breakpoints
+
+**Gender-Specific Interface:**
+
+- [ ] Hide/show hip measurement based on gender selection
+- [ ] Update formula descriptions dynamically
+- [ ] Adjust default values by gender
+- [ ] Update ideal ranges by gender
 
 ### Calculator Name: One Rep Max Calculator
 
@@ -247,33 +436,41 @@ Current calculators implemented:
 
 ## Implementation Phases
 
-### Phase 1: Planning & Design
+### Phase 1: Planning & Design (Body Fat Calculator)
 
 - [x] Choose calculator type from options
 - [x] Complete detailed requirements
-- [x] Create design mockups/wireframes
-- [x] Identify formula sources and validation
+- [x] Research Navy and BMI formulas from authoritative sources
+- [x] Identify formula sources and validation studies
+- [ ] Create design mockups for dual-method interface
+- [ ] Plan gender-specific UI flow
 
 ### Phase 2: Core Development
 
-- [x] Create page structure and layout
-- [x] Implement basic calculation logic
-- [x] Add input controls and validation
-- [x] Style according to design system
+- [ ] Create page structure and layout
+- [ ] Implement Navy circumference method calculations
+- [ ] Implement enhanced BMI method calculations
+- [ ] Add gender-specific input controls
+- [ ] Add circumference measurement sliders
+- [ ] Style according to design system
 
 ### Phase 3: Integration & Polish
 
-- [ ] Integrate with shared value system
-- [ ] Add cross-page data synchronization
-- [ ] Implement local storage persistence
+- [ ] Integrate with shared value system (age, height, weight, gender)
+- [ ] Add cross-calculator data synchronization
+- [ ] Implement local storage persistence for measurements
+- [ ] Add body fat category classifications
+- [ ] Add age-adjusted ideal ranges
 - [ ] Add educational content sections
 
 ### Phase 4: Testing & Optimization
 
-- [ ] Validate calculations across input ranges
+- [ ] Validate calculations against Navy standards
+- [ ] Test BMI formula accuracy
 - [ ] Test responsive design on multiple devices
 - [ ] Verify cross-calculator data sync
 - [ ] Performance optimization and accessibility
+- [ ] Test circumference input UX on mobile
 
 ### Phase 5: Deployment
 
@@ -282,38 +479,64 @@ Current calculators implemented:
 - [ ] Update README and documentation
 - [ ] Create social media preview assets
 
+### Previous Implementation (Completed): One Rep Max Calculator
+
 ## Decision Points
 
-**Decisions Made:**
+**Previous Decision (Completed):**
 
-1. **Calculator Choice:** ✅ **Option 3: One Rep Max Calculator**
-2. **Target Complexity:** ✅ **Low-Medium** (Perfect for next implementation)
-3. **Primary User Goal:** ✅ **Quick Calculation** with educational context
-4. **Integration Priority:** ✅ **Standalone** (no cross-calculator dependencies)
+1. **Calculator Choice:** ✅ **Option 3: One Rep Max Calculator** - COMPLETED
+2. **Target Complexity:** ✅ **Low-Medium** - COMPLETED
+3. **Primary User Goal:** ✅ **Quick Calculation** with educational context - COMPLETED
+4. **Integration Priority:** ✅ **Standalone** - COMPLETED
+
+**Current Decision:**
+
+1. **Calculator Choice:** ✅ **Option 2: Body Fat Percentage Calculator**
+2. **Target Complexity:** ✅ **Medium-High** (Dual method implementation)
+3. **Primary User Goal:** ✅ **Accurate Body Composition Assessment** with education
+4. **Integration Priority:** ✅ **BMI Integration** (leverage existing BMI calculator)
 
 **Key Features Confirmed:**
 
-- Three proven formulas (Epley, Brzycki, Lombardi)
-- Weight slider: 50-500 lbs with kg conversion
-- Reps slider: 1-10 repetitions
-- BMR page layout matching
-- Real-time calculations
-- Educational content on formula accuracy and usage
+- Navy Circumference Method (primary)
+- Enhanced BMI Method (secondary comparison)
+- Dual results display with accuracy comparison
+- Body fat category classifications (Essential/Athletic/Fitness/Average/Obese)
+- Age-adjusted ideal ranges
+- Fat mass and lean mass calculations
 
 ## Success Criteria
 
-- [ ] Calculation accuracy verified against known standards
-- [ ] Mobile responsiveness on all common devices
+### Body Fat Calculator Success Metrics
+
+- [ ] Navy method calculation accuracy verified against military standards
+- [ ] BMI method matches enhanced Deurenberg formula results
+- [ ] Dual method comparison provides educational value
+- [ ] Mobile responsiveness for circumference measurements
+- [ ] Cross-calculator data sync (age, height, weight) working properly
 - [ ] Page load time under 2 seconds
-- [ ] Cross-calculator data sync working properly
-- [ ] Educational content provides clear value
+- [ ] Body fat categories display correctly
+- [ ] Age-adjusted ideals show appropriate ranges
+- [ ] Educational content explains method differences clearly
 - [ ] Design consistency with existing calculators
+
+### Previous Success Criteria (One Rep Max - Completed)
+
+- [x] Calculation accuracy verified against known standards
+- [x] Mobile responsiveness on all common devices
+- [x] Page load time under 2 seconds
+- [x] Cross-calculator data sync working properly
+- [x] Educational content provides clear value
+- [x] Design consistency with existing calculators
 
 ---
 
-**Next Steps:**
+**Next Steps for Body Fat Calculator:**
 
-1. Review this requirements document
-2. Choose specific calculator from options
-3. Fill in detailed requirements for chosen calculator
-4. Begin Phase 1 implementation planning
+1. Begin Phase 1: Create design mockups for dual-method interface
+2. Plan gender-specific UI flow (hip measurement for women)
+3. Set up shared value integration with BMI calculator
+4. Implement Navy circumference method as primary calculation
+5. Add BMI method as secondary comparison
+6. Build body fat category classification system

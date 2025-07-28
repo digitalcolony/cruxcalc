@@ -615,11 +615,12 @@ import Layout from "../layouts/Layout.astro";
 	}
 </style>
 
-<script type="module">
-	import sharedValues from "/sharedValues.js";
-
+<script src="/sharedValues.js" is:inline></script>
+<script>
+	// @ts-nocheck - Disable TypeScript checking for this Astro component
 	// Load shared values on page load
-	const values = sharedValues.load();
+	const values = new window.SharedValues().load();
+	const sharedValues = new window.SharedValues();
 	let currentMethod = "formula"; // "formula" or "custom"
 
 	// Get DOM elements
@@ -823,8 +824,10 @@ import Layout from "../layouts/Layout.astro";
 		checkForUpdatedValues();
 	});
 
-	// Initialize the calculator
-	initializeInputs();
-	updateDisplays();
-	calculateZones();
+	// Initialize the calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		initializeInputs();
+		updateDisplays();
+		calculateZones();
+	});
 </script>

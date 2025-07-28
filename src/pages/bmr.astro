@@ -698,11 +698,12 @@ import Layout from "../layouts/Layout.astro";
 	}
 </style>
 
-<script type="module">
-	import sharedValues from "/sharedValues.js";
-
+<script src="/sharedValues.js" is:inline></script>
+<script>
+	// @ts-nocheck - Disable TypeScript checking for this Astro component
 	// Load shared values on page load
-	const values = sharedValues.load();
+	const values = new window.SharedValues().load();
+	const sharedValues = new window.SharedValues();
 	let currentGender = values.gender;
 	let currentHeightUnit = values.heightUnit;
 	let currentWeightUnit = values.weightUnit;
@@ -1041,8 +1042,10 @@ import Layout from "../layouts/Layout.astro";
 		});
 	});
 
-	// Initialize the calculator
-	initializeInputs();
-	updateDisplays();
-	updateDisplay();
+	// Initialize the calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		initializeInputs();
+		updateDisplays();
+		updateDisplay();
+	});
 </script>

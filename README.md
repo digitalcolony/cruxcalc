@@ -11,7 +11,10 @@ This is a collection of sleek, user-friendly health and fitness calculators buil
   - Harris-Benedict Equation
   - Mifflin-St Jeor Equation
   - Katch-McArdle Formula (requires body fat %)
-- **💪 Muscle Potential Calculator** - Casey Butt's scientific formula for predicting natural muscle-building potential
+- **� Body Fat Calculator** - Navy circumference method for accurate body fat percentage measurement
+- **❤️ Heart Rate Zones Calculator** - Calculate optimal training zones using Karvonen and percentage methods
+- **�💪 One Rep Max Calculator** - Estimate maximum lift capacity using Epley, Brzycki, and Lombardi formulas
+- **🏋️ Muscle Potential Calculator** - Casey Butt's scientific formula for predicting natural muscle-building potential
 - **🏃 Running Pace Calculator** - Calculate race finish times for 5K, 10K, half marathon, and full marathon distances
 - **🥔 Potato Hack Calculator** - Calorie deficit calculator for the potato-based weight loss approach with 3, 4, 5 day and weekly estimates
 - **📱 Progressive Web App (PWA)** - Download and install as a desktop or mobile app
@@ -74,6 +77,9 @@ Each calculator has its own themed social media image for better engagement.
 │   │   ├── index.astro          # Homepage with calculator grid
 │   │   ├── bmi.astro            # BMI Calculator
 │   │   ├── bmr.astro            # BMR Calculator (unified)
+│   │   ├── body-fat.astro       # Body Fat Calculator (Navy Method)
+│   │   ├── heart-rate-zones.astro # Heart Rate Zones Calculator
+│   │   ├── one-rep-max.astro    # One Rep Max Calculator
 │   │   ├── muscle-potential.astro # Casey Butt formula
 │   │   ├── running.astro        # Running Pace Calculator
 │   │   └── potato-hack.astro    # Potato Hack Calculator
@@ -103,11 +109,41 @@ All commands are run from the root of the project, from a terminal:
 
 Calculate your Body Mass Index with instant visual feedback and health category classification.
 
-### BMR Calculators
+### BMR Calculators (`/bmr`)
 
 - **Harris-Benedict** - Classic formula from 1919, revised in 1984
 - **Mifflin-St Jeor** - More accurate for modern populations (1990)
 - **Katch-McArdle** - Most accurate when body fat % is known
+
+### Body Fat Calculator (`/body-fat`)
+
+Calculate body fat percentage using the U.S. Navy circumference method featuring:
+
+- Gender-specific formulas for accurate measurements
+- Real-time body fat category feedback
+- Visual category indicators (Essential, Athletic, Fitness, Average, Obese)
+- Measurement guidance for neck, waist, and hip circumferences
+- Supports both imperial and metric units
+
+### Heart Rate Zones Calculator (`/heart-rate-zones`)
+
+Calculate personalized heart rate training zones using:
+
+- **Karvonen Method** - Uses resting heart rate for personalized zones
+- **Percentage Method** - Based on maximum heart rate percentage
+- Five training zones: Active Recovery, Aerobic Base, Aerobic, Lactate Threshold, Neuromuscular Power
+- Real-time zone feedback and training recommendations
+- Age-based maximum heart rate estimation
+
+### One Rep Max Calculator (`/one-rep-max`)
+
+Estimate your maximum lift capacity using three proven formulas:
+
+- **Epley Formula** - Most commonly used in powerlifting
+- **Brzycki Formula** - Popular alternative with different rep range focus
+- **Lombardi Formula** - Traditional formula for strength estimation
+- Compare results across all three methods
+- Input current weight and reps to calculate 1RM
 
 ### Muscle Potential Calculator (`/muscle-potential`)
 
@@ -161,6 +197,9 @@ All formulas implemented are scientifically validated:
 
 - **BMI** uses the standard WHO classification
 - **BMR** formulas are peer-reviewed and widely accepted
+- **Body Fat (Navy Method)** developed by the Naval Health Research Center, widely used by U.S. military
+- **Heart Rate Zones** based on Karvonen method and percentage-based calculations used by sports scientists
+- **One Rep Max** formulas are established strength training standards used in powerlifting and sports
 - **Casey Butt's muscle potential** formula is based on extensive analysis of drug-free bodybuilders
 - **Potato hack calculations** include resistant starch reduction for cooled potatoes (17%)
 

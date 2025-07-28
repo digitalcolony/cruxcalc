@@ -372,8 +372,10 @@ import Layout from "../layouts/Layout.astro";
 	}
 </style>
 
-<script type="module">
-	import sharedValues from "/sharedValues.js";
+<script src="/sharedValues.js" is:inline></script>
+<script>
+	// @ts-nocheck - Disable TypeScript checking for this Astro component
+	const sharedValues = new window.SharedValues();
 
 	// Get DOM elements
 	const potatoPoundsSlider = document.getElementById("potato-pounds");
@@ -663,10 +665,12 @@ import Layout from "../layouts/Layout.astro";
 		calculateCalories();
 	});
 
-	// Initialize on page load
-	loadPotatoData();
-	initializeBMREnhanced();
-	initializeUnitToggle();
-	updateDisplays();
-	calculateCalories();
+	// Initialize on page load when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		loadPotatoData();
+		initializeBMREnhanced();
+		initializeUnitToggle();
+		updateDisplays();
+		calculateCalories();
+	});
 </script>

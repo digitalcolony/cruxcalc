@@ -130,7 +130,5 @@ class SharedValues {
 	}
 }
 
-// Create a singleton instance
-const sharedValues = new SharedValues();
-
-export default sharedValues;
+// Make SharedValues available globally
+window.SharedValues = SharedValues;
