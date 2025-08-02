@@ -2,6 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import CategoryBadge from "../components/CategoryBadge.astro";
 
 // Initialize SharedValues on the server side
 const sharedValues = {
@@ -120,13 +123,12 @@ const sharedValues = {
 				</div>
 
 				<div class="calculator-results">
-					<div class="result-display">
-						<div class="bmi-value">
-							<span id="bmi-number">22.8</span>
-							<span class="bmi-unit">BMI</span>
+					<ResultCard title="Your BMI Result" variant="primary">
+						<ResultValue value={22.8} unit="BMI" size="xl" color="primary" id="bmi-number" />
+						<div slot="badge">
+							<CategoryBadge category="Normal Weight" class="normal" id="bmi-category" />
 						</div>
-						<div class="bmi-category" id="bmi-category">Normal Weight</div>
-					</div>
+					</ResultCard>
 
 					<div class="bmi-scale">
 						<div class="scale-bar">
@@ -146,42 +148,40 @@ const sharedValues = {
 						<div class="scale-indicator" id="scale-indicator"></div>
 					</div>
 
-					<div class="bmi-info">
-						<h3>Understanding Your BMI</h3>
+					<ResultCard title="Understanding Your BMI">
 						<p id="bmi-explanation">
 							Your BMI falls within the normal weight range. This suggests a healthy weight for your
 							height.
 						</p>
+					</ResultCard>
 
-						<div class="bmi-scales-info" id="bmi-scales-info">
-							<h4>BMI Scale Comparison</h4>
-							<div class="scales-comparison">
-								<div class="scale-info">
-									<h5>Standard BMI Scale</h5>
-									<ul>
-										<li>Underweight: &lt; 18.5</li>
-										<li>Normal: 18.5 - 24.9</li>
-										<li>Overweight: 25.0 - 29.9</li>
-										<li>Obese: ≥ 30.0</li>
-									</ul>
-								</div>
-								<div class="scale-info">
-									<h5>Asian BMI Scale</h5>
-									<ul>
-										<li>Underweight: &lt; 18.5</li>
-										<li>Normal: 18.5 - 22.9</li>
-										<li>Overweight: 23.0 - 27.4</li>
-										<li>Obese: ≥ 27.5</li>
-									</ul>
-								</div>
+					<ResultCard title="BMI Scale Comparison">
+						<div class="scales-comparison">
+							<div class="scale-info">
+								<h5>Standard BMI Scale</h5>
+								<ul>
+									<li>Underweight: &lt; 18.5</li>
+									<li>Normal: 18.5 - 24.9</li>
+									<li>Overweight: 25.0 - 29.9</li>
+									<li>Obese: ≥ 30.0</li>
+								</ul>
 							</div>
-							<p class="scale-note">
-								<strong>Why different scales?</strong> Research shows that Asian populations have higher
-								risks of diabetes and cardiovascular disease at lower BMI levels. The Asian BMI scale
-								uses lower thresholds to better identify health risks in Asian populations.
-							</p>
+							<div class="scale-info">
+								<h5>Asian BMI Scale</h5>
+								<ul>
+									<li>Underweight: &lt; 18.5</li>
+									<li>Normal: 18.5 - 22.9</li>
+									<li>Overweight: 23.0 - 27.4</li>
+									<li>Obese: ≥ 27.5</li>
+								</ul>
+							</div>
 						</div>
-					</div>
+					</ResultCard>
+					<p class="scale-note">
+						<strong>Why different scales?</strong> Research shows that Asian populations have higher
+						risks of diabetes and cardiovascular disease at lower BMI levels. The Asian BMI scale uses
+						lower thresholds to better identify health risks in Asian populations.
+					</p>
 				</div>
 			</div>
 		</div>
@@ -226,27 +226,13 @@ const sharedValues = {
 		height: fit-content;
 	}
 
+	/* Custom input group styling for BMI specific layouts */
 	.input-group {
 		margin-bottom: 2rem;
 	}
 
 	.input-group:last-child {
 		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--color-text);
-	}
-
-	.input-help {
-		margin-top: 0.5rem;
-		margin-bottom: 0;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		font-style: italic;
 	}
 
 	/* Checkbox styling */
@@ -282,36 +268,7 @@ const sharedValues = {
 		font-weight: 500;
 	}
 
-	/* Unit Toggle */
-	.unit-toggle {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.unit-btn {
-		flex: 1;
-		padding: 0.5rem;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		background: var(--color-background);
-		color: var(--color-text);
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 500;
-		font-size: 0.875rem;
-	}
-
-	.unit-btn:hover {
-		border-color: var(--color-primary);
-	}
-
-	.unit-btn.active {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
+	/* Height inputs layout for imperial units */
 	.height-inputs {
 		display: flex;
 		gap: 1rem;
@@ -321,51 +278,6 @@ const sharedValues = {
 		display: block;
 	}
 
-	.input-container {
-		margin-bottom: 1rem;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.125rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
-	}
-
 	/* Results */
 	.calculator-results {
 		display: flex;
@@ -373,43 +285,7 @@ const sharedValues = {
 		gap: 1.5rem;
 	}
 
-	.result-display {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		text-align: center;
-	}
-
-	.bmi-value {
-		margin-bottom: 1rem;
-	}
-
-	.bmi-value span:first-child {
-		font-size: 2.5rem;
-		font-weight: 700;
-		color: var(--color-primary);
-		display: block;
-		line-height: 1;
-	}
-
-	.bmi-unit {
-		color: var(--color-text-muted);
-		font-size: 1rem;
-		font-weight: 500;
-	}
-
-	.bmi-category {
-		font-size: 1.125rem;
-		font-weight: 600;
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--border-radius);
-		background: var(--color-success);
-		color: white;
-		display: inline-block;
-		margin-bottom: 1rem;
-	}
-
+	/* BMI Scale Visualization */
 	.bmi-scale {
 		background: var(--color-surface);
 		border: var(--border-width) solid var(--color-border);
@@ -807,13 +683,19 @@ const sharedValues = {
 			const category = this.getBMICategory(bmi, useAsianScale);
 			const categoryData = this.getCategoryData(category, useAsianScale);
 
+			// Update BMI number (find the span inside the result-value component)
 			if (this.bmiNumber) {
-				this.bmiNumber.textContent = bmi.toFixed(1);
+				const numberSpan = this.bmiNumber.querySelector(".result-value__number");
+				if (numberSpan) {
+					numberSpan.textContent = bmi.toFixed(1);
+				}
 			}
 
+			// Update BMI category
 			if (this.bmiCategory) {
 				this.bmiCategory.textContent = categoryData.name;
-				this.bmiCategory.style.backgroundColor = categoryData.color;
+				// Update the CSS class for the category badge
+				this.bmiCategory.className = `category-badge category-badge--md category-badge--solid ${category}`;
 			}
 
 			if (this.bmiExplanation) {

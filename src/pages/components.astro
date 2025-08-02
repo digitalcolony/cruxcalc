@@ -1,4 +1,8 @@
 ---
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import CategoryBadge from "../components/CategoryBadge.astro";
+import ComparisonTable from "../components/ComparisonTable.astro";
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
@@ -138,6 +142,144 @@ import GenderToggle from "../components/GenderToggle.astro";
 					<div class="example">
 						<h3>Gender Selection (Female Default)</h3>
 						<GenderToggle activeGender="female" />
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>ResultCard Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Default Result Card</h3>
+						<ResultCard title="BMI Result">
+							<ResultValue value={23.4} unit="kg/m²" />
+							<p>Your BMI indicates a normal weight range.</p>
+						</ResultCard>
+					</div>
+
+					<div class="example">
+						<h3>Primary Variant with Badge</h3>
+						<ResultCard title="BMR Calculation" variant="primary">
+							<ResultValue value={1847} unit="calories/day" size="xl" />
+							<slot name="badge">
+								<CategoryBadge category="Moderately Active" color="var(--color-primary)" />
+							</slot>
+						</ResultCard>
+					</div>
+
+					<div class="example">
+						<h3>Warning Variant</h3>
+						<ResultCard title="Health Alert" variant="warning">
+							<ResultValue value={28.5} unit="BMI" color="warning" />
+							<p>Consider consulting a healthcare provider.</p>
+						</ResultCard>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>ResultValue Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Different Sizes</h3>
+						<div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+							<ResultValue value={23.4} unit="BMI" size="sm" />
+							<ResultValue value={23.4} unit="BMI" size="md" />
+							<ResultValue value={23.4} unit="BMI" size="lg" />
+							<ResultValue value={23.4} unit="BMI" size="xl" />
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Different Colors</h3>
+						<div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+							<ResultValue value={18.2} unit="BMI" color="primary" />
+							<ResultValue value={22.5} unit="BMI" color="success" />
+							<ResultValue value={26.8} unit="BMI" color="warning" />
+							<ResultValue value={31.2} unit="BMI" color="danger" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>CategoryBadge Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>BMI Categories</h3>
+						<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+							<CategoryBadge category="Underweight" class="underweight" />
+							<CategoryBadge category="Normal Weight" class="normal" />
+							<CategoryBadge category="Overweight" class="overweight" />
+							<CategoryBadge category="Obese" class="obese" />
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Variants & Sizes</h3>
+						<div style="display: flex; flex-direction: column; gap: 1rem;">
+							<div style="display: flex; gap: 0.5rem; align-items: center;">
+								<CategoryBadge category="Solid" variant="solid" size="sm" />
+								<CategoryBadge category="Outline" variant="outline" size="md" />
+								<CategoryBadge category="Soft" variant="soft" size="lg" />
+							</div>
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Custom Colors</h3>
+						<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+							<CategoryBadge category="Custom Blue" color="#007bff" />
+							<CategoryBadge category="Custom Green" color="#28a745" variant="outline" />
+							<CategoryBadge category="Custom Purple" color="#6f42c1" variant="soft" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>ComparisonTable Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>BMI Categories Table</h3>
+						<ComparisonTable
+							caption="BMI Categories and Health Risks"
+							headers={["Category", "BMI Range", "Health Risk"]}
+							rows={[
+								{ cells: ["Underweight", "< 18.5", "Low"], class: "underweight" },
+								{ cells: ["Normal", "18.5 - 24.9", "Normal"], highlight: true },
+								{ cells: ["Overweight", "25.0 - 29.9", "Increased"], class: "overweight" },
+								{ cells: ["Obese", "≥ 30.0", "High"], class: "obese" },
+							]}
+							class="bmi-categories"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Activity Levels</h3>
+						<ComparisonTable
+							headers={["Activity Level", "Description", "Multiplier"]}
+							rows={[
+								{ cells: ["Sedentary", "Little/no exercise", "1.2"] },
+								{ cells: ["Light", "Light exercise 1-3 days/week", "1.375"], highlight: true },
+								{ cells: ["Moderate", "Moderate exercise 3-5 days/week", "1.55"] },
+								{ cells: ["Very Active", "Hard exercise 6-7 days/week", "1.725"] },
+								{ cells: ["Extremely Active", "Very hard exercise/physical job", "1.9"] },
+							]}
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Simple Data Table</h3>
+						<ComparisonTable
+							headers={["Metric", "Value"]}
+							rows={[
+								{ cells: ["Height", "180 cm"] },
+								{ cells: ["Weight", "75 kg"] },
+								{ cells: ["BMI", "23.1"], highlight: true },
+								{ cells: ["Body Fat", "15%"] },
+							]}
+						/>
 					</div>
 				</div>
 			</div>

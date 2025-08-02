@@ -1,0 +1,139 @@
+---
+export interface Props {
+	headers: string[];
+	rows: Array<{
+		cells: string[];
+		highlight?: boolean;
+		id?: string;
+		class?: string;
+	}>;
+	caption?: string;
+	class?: string;
+}
+
+const { headers, rows, caption, class: className = "" } = Astro.props;
+---
+
+<div class={`comparison-table ${className}`}>
+	{caption && <div class="comparison-table__caption">{caption}</div>}
+	<div class="comparison-table__container">
+		<table class="comparison-table__table">
+			<thead>
+				<tr>
+					{headers.map((header) => <th class="comparison-table__header">{header}</th>)}
+				</tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((row) => (
+						<tr
+							class={`comparison-table__row ${row.highlight ? "comparison-table__row--highlight" : ""} ${row.class || ""}`}
+							id={row.id}
+						>
+							{row.cells.map((cell) => (
+								<td class="comparison-table__cell">{cell}</td>
+							))}
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<style>
+	.comparison-table {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		overflow: hidden;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.comparison-table__caption {
+		font-weight: 600;
+		font-size: 1.125rem;
+		color: var(--color-text);
+		padding: 1.5rem 1.5rem 0;
+		text-align: center;
+	}
+
+	.comparison-table__container {
+		overflow-x: auto;
+	}
+
+	.comparison-table__table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.875rem;
+	}
+
+	.comparison-table__header {
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-weight: 600;
+		padding: 1rem;
+		text-align: left;
+		border-bottom: var(--border-width) solid var(--color-border);
+		white-space: nowrap;
+	}
+
+	.comparison-table__row {
+		transition: all 0.2s ease;
+	}
+
+	.comparison-table__row:hover {
+		background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+	}
+
+	.comparison-table__row--highlight {
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		font-weight: 600;
+	}
+
+	.comparison-table__row--highlight:hover {
+		background: color-mix(in srgb, var(--color-primary) 15%, var(--color-surface));
+	}
+
+	.comparison-table__cell {
+		padding: 0.875rem 1rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+		color: var(--color-text);
+		vertical-align: top;
+	}
+
+	.comparison-table__row:last-child .comparison-table__cell {
+		border-bottom: none;
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.comparison-table__header,
+		.comparison-table__cell {
+			padding: 0.75rem 0.5rem;
+			font-size: 0.8125rem;
+		}
+
+		.comparison-table__caption {
+			padding: 1rem;
+			font-size: 1rem;
+		}
+	}
+
+	/* Color variants for common use cases */
+	.comparison-table.bmi-categories .comparison-table__row:nth-child(1) {
+		background: color-mix(in srgb, #3366ff 8%, var(--color-surface));
+	}
+
+	.comparison-table.bmi-categories .comparison-table__row:nth-child(2) {
+		background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface));
+	}
+
+	.comparison-table.bmi-categories .comparison-table__row:nth-child(3) {
+		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+	}
+
+	.comparison-table.bmi-categories .comparison-table__row:nth-child(4) {
+		background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+	}
+</style>

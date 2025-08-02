@@ -1,0 +1,108 @@
+---
+export interface Props {
+	value: number | string;
+	unit?: string;
+	precision?: number;
+	size?: "sm" | "md" | "lg" | "xl";
+	color?: "default" | "primary" | "success" | "warning" | "danger";
+	class?: string;
+	id?: string;
+}
+
+const {
+	value,
+	unit = "",
+	precision = 1,
+	size = "lg",
+	color = "primary",
+	class: className = "",
+	id,
+} = Astro.props;
+
+// Format the value based on precision
+const formatValue = (val: number | string): string => {
+	if (typeof val === "string") return val;
+	if (Number.isInteger(val)) return val.toString();
+	return val.toFixed(precision);
+};
+
+const formattedValue = formatValue(value);
+---
+
+<div class={`result-value result-value--${size} result-value--${color} ${className}`} id={id}>
+	<span class="result-value__number">{formattedValue}</span>
+	{unit && <span class="result-value__unit">{unit}</span>}
+</div>
+
+<style>
+	.result-value {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.25rem;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.result-value__number {
+		font-family: "JetBrains Mono", monospace;
+		font-weight: 800;
+	}
+
+	.result-value__unit {
+		font-weight: 600;
+		opacity: 0.8;
+	}
+
+	/* Size variants */
+	.result-value--sm {
+		font-size: 1rem;
+	}
+
+	.result-value--md {
+		font-size: 1.25rem;
+	}
+
+	.result-value--lg {
+		font-size: 2rem;
+	}
+
+	.result-value--xl {
+		font-size: 2.5rem;
+	}
+
+	/* Color variants */
+	.result-value--default {
+		color: var(--color-text);
+	}
+
+	.result-value--primary {
+		color: var(--color-primary);
+	}
+
+	.result-value--success {
+		color: var(--color-success);
+	}
+
+	.result-value--warning {
+		color: var(--color-warning);
+	}
+
+	.result-value--danger {
+		color: var(--color-danger);
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 768px) {
+		.result-value--xl {
+			font-size: 2rem;
+		}
+
+		.result-value--lg {
+			font-size: 1.75rem;
+		}
+
+		.result-value--md {
+			font-size: 1.125rem;
+		}
+	}
+</style>

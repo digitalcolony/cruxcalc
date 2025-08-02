@@ -1,0 +1,88 @@
+---
+export interface Props {
+	title?: string;
+	variant?: "default" | "primary" | "success" | "warning" | "danger";
+	class?: string;
+}
+
+const { title, variant = "default", class: className = "" } = Astro.props;
+---
+
+<div class={`result-card result-card--${variant} ${className}`}>
+	{title && <h3 class="result-card__title">{title}</h3>}
+	<div class="result-card__content">
+		<slot />
+	</div>
+	{
+		Astro.slots.badge && (
+			<div class="result-card__badge">
+				<slot name="badge" />
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.result-card {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+	}
+
+	.result-card:hover {
+		box-shadow: var(--shadow-md);
+	}
+
+	.result-card__title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-text);
+		margin: 0 0 1rem 0;
+		text-align: center;
+	}
+
+	.result-card__content {
+		text-align: center;
+	}
+
+	.result-card__badge {
+		margin-top: 1rem;
+		display: flex;
+		justify-content: center;
+	}
+
+	/* Variant styles */
+	.result-card--primary {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+	}
+
+	.result-card--success {
+		border-color: var(--color-success);
+		background: color-mix(in srgb, var(--color-success) 5%, var(--color-surface));
+	}
+
+	.result-card--warning {
+		border-color: var(--color-warning);
+		background: color-mix(in srgb, var(--color-warning) 5%, var(--color-surface));
+	}
+
+	.result-card--danger {
+		border-color: var(--color-danger);
+		background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.result-card {
+			padding: 1.5rem;
+		}
+
+		.result-card__title {
+			font-size: 1.125rem;
+		}
+	}
+</style>
