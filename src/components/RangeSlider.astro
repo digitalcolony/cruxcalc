@@ -1,0 +1,277 @@
+---
+export interface Props {
+	id: string;
+	label: string;
+	min: number;
+	max: number;
+	step?: number;
+	value: number;
+	unit: string;
+	helpText?: string;
+	class?: string;
+	sharedKey?: string; // For SharedValues integration
+}
+
+const {
+	id,
+	label,
+	min,
+	max,
+	step = 1,
+	value,
+	unit,
+	helpText,
+	class: className = "",
+	sharedKey,
+} = Astro.props;
+---
+
+<div class={`input-group ${className}`}>
+	<label for={id}>{label}</label>
+	<div class="input-container">
+		<input
+			type="range"
+			id={id}
+			min={min}
+			max={max}
+			step={step}
+			value={value}
+			data-shared-key={sharedKey}
+		/>
+		<div class="input-display">
+			<span id={`${id}-display`}>{value}</span>
+			<span class="unit">{unit}</span>
+		</div>
+	</div>
+	{helpText && <p class="input-help">{helpText}</p>}
+</div>
+
+<style>
+	.input-group {
+		margin-bottom: 2rem;
+		display: block;
+	}
+
+	.input-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-group label {
+		display: block;
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--color-text);
+		margin-bottom: 0.75rem;
+	}
+
+	.input-container {
+		position: relative;
+		margin-bottom: 1rem;
+		width: 100%;
+	}
+
+	.input-container:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		margin-top: 0.5rem;
+		font-size: 1.125rem;
+	}
+
+	.unit {
+		margin-left: 0.25rem;
+		color: var(--color-text-muted);
+	}
+
+	input[type="range"] {
+		width: 100%;
+		height: 8px;
+		border-radius: 0;
+		background: var(--color-bg);
+		outline: none;
+		border: var(--border-width) solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+		appearance: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	input[type="range"]:hover {
+		box-shadow: var(--shadow-hover);
+	}
+
+	input[type="range"]:focus {
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		appearance: none;
+		height: 24px;
+		width: 24px;
+		border-radius: 0;
+		background: var(--color-primary);
+		border: var(--border-width) solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	input[type="range"]::-webkit-slider-thumb:hover {
+		background: var(--color-secondary);
+		box-shadow: var(--shadow-hover);
+	}
+
+	input[type="range"]::-moz-range-thumb {
+		height: 20px;
+		width: 20px;
+		border-radius: 0;
+		background: var(--color-primary);
+		border: var(--border-width) solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	input[type="range"]::-moz-range-thumb:hover {
+		background: var(--color-secondary);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.input-help {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin-top: 0.5rem;
+		margin-bottom: 0;
+		line-height: 1.4;
+	}
+</style>
+
+<script>
+	// Extend Window interface for SharedValues
+	declare global {
+		interface Window {
+			SharedValues: any;
+		}
+	}
+
+	// Range slider functionality with SharedValues integration
+	class RangeSliderComponent {
+		private container: HTMLElement;
+		private input: HTMLInputElement | null;
+		private display: HTMLElement | null;
+		private sharedKey: string | undefined;
+		private sharedValues: any;
+
+		constructor(container: HTMLElement) {
+			this.container = container;
+			this.input = container.querySelector('input[type="range"]') as HTMLInputElement;
+			this.display = container.querySelector(`#${this.input?.id}-display`);
+			this.sharedKey = this.input?.dataset.sharedKey;
+
+			// Initialize SharedValues if available and sharedKey is provided
+			if (typeof window !== "undefined" && (window as any).SharedValues && this.sharedKey) {
+				this.sharedValues = new (window as any).SharedValues();
+				this.loadFromSharedValues();
+			}
+
+			this.attachEventListeners();
+		}
+
+		private loadFromSharedValues(): void {
+			if (this.sharedValues && this.sharedKey) {
+				const savedValue = this.sharedValues.get(this.sharedKey);
+				if (savedValue !== undefined && savedValue !== null && this.input) {
+					this.input.value = savedValue;
+					this.updateDisplay();
+				}
+			}
+		}
+
+		private attachEventListeners(): void {
+			if (!this.input) return;
+
+			// Debounced input handler
+			let debounceTimer: NodeJS.Timeout;
+			this.input.addEventListener("input", () => {
+				this.updateDisplay();
+
+				// Debounced SharedValues update
+				if (this.sharedValues && this.sharedKey && this.input) {
+					clearTimeout(debounceTimer);
+					debounceTimer = setTimeout(() => {
+						if (this.input) {
+							this.sharedValues.set(this.sharedKey, parseFloat(this.input.value));
+
+							// Dispatch custom event for other components
+							this.container.dispatchEvent(
+								new CustomEvent("range-slider-change", {
+									detail: {
+										id: this.input.id,
+										value: parseFloat(this.input.value),
+										sharedKey: this.sharedKey,
+									},
+									bubbles: true,
+								})
+							);
+						}
+					}, 150);
+				}
+			});
+
+			// Listen for refresh requests from unit changes
+			this.container.addEventListener("refresh-from-shared-values", () => {
+				this.loadFromSharedValues();
+			});
+
+			// Immediate display update for smooth UX
+			this.input.addEventListener("input", () => {
+				this.updateDisplay();
+			});
+		}
+
+		private updateDisplay(): void {
+			if (this.display && this.input) {
+				// Handle decimal precision
+				const value = parseFloat(this.input.value);
+				const step = parseFloat(this.input.step);
+
+				if (step < 1) {
+					// For decimal steps, show appropriate precision
+					const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+					this.display.textContent = value.toFixed(decimalPlaces);
+				} else {
+					this.display.textContent = Math.round(value).toString();
+				}
+			}
+		}
+
+		// Public method to update value programmatically
+		public setValue(newValue: string | number): void {
+			if (this.input) {
+				this.input.value = newValue.toString();
+				this.updateDisplay();
+				if (this.sharedValues && this.sharedKey) {
+					this.sharedValues.set(this.sharedKey, parseFloat(newValue.toString()));
+				}
+			}
+		}
+
+		// Public method to get current value
+		public getValue(): number {
+			return this.input ? parseFloat(this.input.value) : 0;
+		}
+	}
+
+	// Initialize all range sliders on the page
+	document.addEventListener("DOMContentLoaded", () => {
+		const rangeSliders = document.querySelectorAll('.input-group:has(input[type="range"])');
+		rangeSliders.forEach((container) => {
+			new RangeSliderComponent(container as HTMLElement);
+		});
+	});
+</script>

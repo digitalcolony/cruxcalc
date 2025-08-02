@@ -1,0 +1,222 @@
+---
+export interface Props {
+	options: Array<{
+		value: string;
+		label: string;
+	}>;
+	activeValue: string;
+	dataAttribute?: string;
+	class?: string;
+}
+
+const { options, activeValue, dataAttribute = "unit", class: className = "" } = Astro.props;
+---
+
+<div class={`unit-toggle ${className}`}>
+	{
+		options.map((option) => (
+			<button
+				class={`unit-btn ${option.value === activeValue ? "active" : ""}`}
+				data-unit={option.value}
+			>
+				{option.label}
+			</button>
+		))
+	}
+</div>
+
+<style>
+	.unit-toggle {
+		display: flex;
+		gap: 0;
+		margin-bottom: 1rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		box-shadow: var(--shadow-sm);
+		background: var(--color-surface);
+	}
+
+	.unit-btn {
+		flex: 1;
+		padding: 0.75rem 1rem;
+		border: none;
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-weight: 600;
+		font-family: "JetBrains Mono", monospace;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-right: var(--border-width) solid var(--color-border);
+		position: relative;
+	}
+
+	.unit-btn:last-child {
+		border-right: none;
+	}
+
+	.unit-btn:hover {
+		background: var(--color-bg);
+	}
+
+	.unit-btn.active {
+		background: var(--color-primary);
+		color: white;
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.unit-btn.active:hover {
+		background: var(--color-primary);
+	}
+
+	/* Add subtle animation for state changes */
+	.unit-btn::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: var(--color-primary);
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		z-index: -1;
+	}
+
+	.unit-btn.active::before {
+		opacity: 1;
+	}
+</style>
+
+<script>
+	// Unit toggle functionality
+	class UnitToggleComponent {
+		private container: HTMLElement;
+		private buttons: NodeListOf<HTMLElement>;
+		private dataAttribute: string;
+		private sharedValues: any;
+
+		constructor(container: HTMLElement) {
+			this.container = container;
+			this.buttons = container.querySelectorAll(".unit-btn");
+			this.dataAttribute = this.getDataAttribute();
+
+			// Initialize SharedValues if available
+			if (typeof window !== "undefined" && (window as any).SharedValues) {
+				this.sharedValues = new (window as any).SharedValues();
+				this.initializeFromSharedValues();
+			}
+
+			this.attachEventListeners();
+		}
+
+		initializeFromSharedValues() {
+			if (!this.sharedValues) return;
+
+			// Determine which SharedValues key to use based on context
+			const inputGroup = this.container.closest(".input-group");
+			if (!inputGroup) return;
+
+			const label = inputGroup.querySelector("label");
+			if (!label) return;
+
+			const labelText = label.textContent?.toLowerCase() || "";
+			let unitKey: string | null = null;
+
+			if (labelText.includes("height")) {
+				unitKey = "heightUnit";
+			} else if (labelText.includes("weight")) {
+				unitKey = "weightUnit";
+			}
+
+			if (unitKey) {
+				const savedUnit = this.sharedValues.get(unitKey);
+				if (savedUnit) {
+					console.log(`Setting ${unitKey} to ${savedUnit} from SharedValues`);
+					this.setActiveValue(savedUnit);
+				} else {
+					// If no saved value, ensure at least one button is active
+					const activeButton = this.container.querySelector(".unit-btn.active");
+					if (!activeButton && this.buttons.length > 0) {
+						console.log(`No saved ${unitKey}, setting first button as active`);
+						this.buttons[0]?.classList.add("active");
+					}
+				}
+			}
+		}
+
+		getDataAttribute() {
+			// Extract data attribute name from the first button
+			const firstButton = this.buttons[0];
+			if (firstButton) {
+				const attributes = Array.from(firstButton.attributes);
+				const dataAttr = attributes.find(
+					(attr) => attr.name.startsWith("data-") && attr.name !== "data-astro-cid"
+				);
+				return dataAttr ? dataAttr.name.replace("data-", "") : "unit";
+			}
+			return "unit";
+		}
+
+		attachEventListeners() {
+			this.buttons.forEach((button: HTMLElement) => {
+				button.addEventListener("click", (e) => {
+					e.preventDefault();
+					this.handleToggle(button);
+				});
+			});
+		}
+
+		handleToggle(clickedButton: HTMLElement) {
+			// Remove active class from all buttons
+			this.buttons.forEach((btn) => btn.classList.remove("active"));
+
+			// Add active class to clicked button
+			clickedButton.classList.add("active");
+
+			// Get the selected value
+			const selectedValue = clickedButton.getAttribute(`data-${this.dataAttribute}`);
+
+			// Dispatch custom event
+			this.container.dispatchEvent(
+				new CustomEvent("unit-toggle-change", {
+					detail: {
+						attribute: this.dataAttribute,
+						value: selectedValue,
+						previousValue: (this.container.dataset.previousValue as string) || null,
+					},
+					bubbles: true,
+				})
+			);
+
+			// Store current value for next change event
+			if (selectedValue) {
+				this.container.dataset.previousValue = selectedValue;
+			}
+		}
+
+		// Public method to set active value programmatically
+		setActiveValue(value: string) {
+			this.buttons.forEach((button: HTMLElement) => {
+				button.classList.remove("active");
+				if (button.getAttribute(`data-${this.dataAttribute}`) === value) {
+					button.classList.add("active");
+				}
+			});
+		}
+
+		// Public method to get current active value
+		getActiveValue(): string | null {
+			const activeButton = this.container.querySelector(".unit-btn.active") as HTMLElement;
+			return activeButton ? activeButton.getAttribute(`data-${this.dataAttribute}`) : null;
+		}
+	}
+
+	// Initialize all unit toggles on the page
+	document.addEventListener("DOMContentLoaded", () => {
+		const unitToggles = document.querySelectorAll(".unit-toggle");
+		unitToggles.forEach((container) => {
+			new UnitToggleComponent(container as HTMLElement);
+		});
+	});
+</script>

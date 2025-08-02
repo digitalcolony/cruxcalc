@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Unit Switching Test</title>
+	</head>
+	<body>
+		<h1>Unit Switching Test</h1>
+		<p>This test verifies that unit switching works correctly on the BMI calculator.</p>
+
+		<h2>Test Instructions:</h2>
+		<ol>
+			<li>Go to <a href="http://localhost:4322/bmi" target="_blank">BMI Calculator</a></li>
+			<li>Try switching height units from ft/in to cm and back</li>
+			<li>Try switching weight units from lbs to kg and back</li>
+			<li>
+				Verify that:
+				<ul>
+					<li>The input fields change appropriately</li>
+					<li>Values are converted correctly</li>
+					<li>BMI calculation updates</li>
+				</ul>
+			</li>
+		</ol>
+
+		<h2>Expected Behavior:</h2>
+		<ul>
+			<li>
+				<strong>Height switching:</strong> When switching from ft/in to cm, the separate feet/inches
+				inputs should hide and a single cm input should appear
+			</li>
+			<li>
+				<strong>Weight switching:</strong> When switching from lbs to kg, the lbs input should hide
+				and kg input should appear
+			</li>
+			<li>
+				<strong>Value conversion:</strong> Values should be automatically converted between units
+			</li>
+			<li><strong>BMI update:</strong> BMI result should update immediately after unit change</li>
+		</ul>
+
+		<h2>Debug Console:</h2>
+		<p>Open browser developer tools (F12) and check the console for debug messages like:</p>
+		<ul>
+			<li>"Unit change event received: {attribute: 'unit', value: 'metric'}"</li>
+			<li>"Label text: height New value: metric"</li>
+			<li>"Updating height unit to: metric"</li>
+		</ul>
+
+		<script>
+			// Simple validation script
+			console.log("Unit switching test page loaded");
+			console.log("Navigate to BMI calculator and test unit switching functionality");
+		</script>
+	</body>
+</html>

@@ -1,5 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+
+// Initialize SharedValues on the server side
+const sharedValues = {
+	heightUnit: "imperial",
+	weightUnit: "imperial",
+};
 ---
 
 <Layout
@@ -17,59 +25,83 @@ import Layout from "../layouts/Layout.astro";
 				<div class="calculator-inputs">
 					<div class="input-group">
 						<label for="height">Height</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">ft/in</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
+						<UnitToggle
+							options={[
+								{ value: "imperial", label: "ft/in" },
+								{ value: "metric", label: "cm" },
+							]}
+							activeValue={sharedValues.heightUnit}
+							dataAttribute="unit"
+						/>
 
 						<div class="height-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="height-feet" min="4" max="7" value="5" />
-								<div class="input-display">
-									<span id="height-feet-display">5</span> ft
-								</div>
-							</div>
-							<div class="input-container">
-								<input type="range" id="height-inches" min="0" max="11.5" step="0.5" value="8" />
-								<div class="input-display">
-									<span id="height-inches-display">8</span> in
-								</div>
-							</div>
+							<RangeSlider
+								id="height-feet"
+								label=""
+								min={4}
+								max={7}
+								value={5}
+								unit="ft"
+								sharedKey="heightFeet"
+							/>
+							<RangeSlider
+								id="height-inches"
+								label=""
+								min={0}
+								max={11.5}
+								step={0.5}
+								value={8}
+								unit="in"
+								sharedKey="heightInches"
+							/>
 						</div>
 
 						<div class="height-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="height-cm" min="120" max="220" value="173" />
-								<div class="input-display">
-									<span id="height-cm-display">173</span> cm
-								</div>
-							</div>
+							<RangeSlider
+								id="height-cm"
+								label=""
+								min={120}
+								max={220}
+								value={173}
+								unit="cm"
+								sharedKey="heightCm"
+							/>
 						</div>
 					</div>
 
 					<div class="input-group">
 						<label for="weight">Weight</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">lbs</button>
-							<button class="unit-btn" data-unit="metric">kg</button>
-						</div>
+						<UnitToggle
+							options={[
+								{ value: "imperial", label: "lbs" },
+								{ value: "metric", label: "kg" },
+							]}
+							activeValue={sharedValues.weightUnit}
+							dataAttribute="unit"
+						/>
 
 						<div class="weight-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="weight-lbs" min="80" max="400" value="160" />
-								<div class="input-display">
-									<span id="weight-lbs-display">160</span> lbs
-								</div>
-							</div>
+							<RangeSlider
+								id="weight-lbs"
+								label=""
+								min={80}
+								max={400}
+								value={160}
+								unit="lbs"
+								sharedKey="weightLbs"
+							/>
 						</div>
 
 						<div class="weight-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="weight-kg" min="35" max="180" value="73" />
-								<div class="input-display">
-									<span id="weight-kg-display">73</span> kg
-								</div>
-							</div>
+							<RangeSlider
+								id="weight-kg"
+								label=""
+								min={35}
+								max={180}
+								value={73}
+								unit="kg"
+								sharedKey="weightKg"
+							/>
 						</div>
 					</div>
 
@@ -551,154 +583,253 @@ import Layout from "../layouts/Layout.astro";
 
 <script src="/sharedValues.js" is:inline></script>
 <script>
-	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Load shared values on page load
-	const values = new window.SharedValues().load();
-	const sharedValues = new window.SharedValues();
-	let currentHeightUnit = values.heightUnit;
-	let currentWeightUnit = values.weightUnit;
+	// Extend Window interface for SharedValues
+	declare global {
+		interface Window {
+			SharedValues: any;
+			bmiCalculator: BMICalculator;
+		}
+	}
 
-	// Initialize the calculator when DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		// Get DOM elements
-		const asianScale = document.getElementById("asian-scale");
-		const heightFeet = document.getElementById("height-feet");
-		const heightInches = document.getElementById("height-inches");
-		const heightCm = document.getElementById("height-cm");
-		const weightLbs = document.getElementById("weight-lbs");
-		const weightKg = document.getElementById("weight-kg");
+	// BMI Calculator with Component Integration
+	class BMICalculator {
+		private sharedValues: any;
+		private bmiNumber: HTMLElement | null = null;
+		private bmiCategory: HTMLElement | null = null;
+		private bmiExplanation: HTMLElement | null = null;
+		private scaleIndicator: HTMLElement | null = null;
+		private asianScale: HTMLInputElement | null = null;
 
-		const heightFeetDisplay = document.getElementById("height-feet-display");
-		const heightInchesDisplay = document.getElementById("height-inches-display");
-		const heightCmDisplay = document.getElementById("height-cm-display");
-		const weightLbsDisplay = document.getElementById("weight-lbs-display");
-		const weightKgDisplay = document.getElementById("weight-kg-display");
-		const bmiNumber = document.getElementById("bmi-number");
-		const bmiCategory = document.getElementById("bmi-category");
-		const bmiExplanation = document.getElementById("bmi-explanation");
-		const scaleIndicator = document.getElementById("scale-indicator");
+		constructor() {
+			this.sharedValues = new (window as any).SharedValues();
+			this.initializeElements();
+			this.loadSharedValues();
+			this.attachEventListeners();
+			this.calculate();
+		}
 
-		// Initialize inputs with shared values
-		function initializeInputs() {
-			if (heightFeet) heightFeet.value = values.heightFeet.toString();
-			if (heightInches) heightInches.value = values.heightInches.toString();
-			if (heightCm) heightCm.value = values.heightCm.toString();
-			if (weightLbs) weightLbs.value = values.weightLbs.toString();
-			if (weightKg) weightKg.value = values.weightKg.toString();
+		private initializeElements(): void {
+			// Result display elements
+			this.bmiNumber = document.getElementById("bmi-number");
+			this.bmiCategory = document.getElementById("bmi-category");
+			this.bmiExplanation = document.getElementById("bmi-explanation");
+			this.scaleIndicator = document.getElementById("scale-indicator");
+			this.asianScale = document.getElementById("asian-scale") as HTMLInputElement;
+		}
 
-			// Restore Asian BMI scale preference
-			if (asianScale) {
-				asianScale.checked = values.useAsianBMI || false;
+		private loadSharedValues(): void {
+			const values = this.sharedValues.load();
+			console.log("Loaded SharedValues:", values);
+
+			// Load Asian scale preference
+			if (this.asianScale) {
+				this.asianScale.checked = values.useAsianBMI || false;
 			}
 
-			// Set unit toggles to match saved preferences
-			document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-				const isHeightToggle =
-					toggle.closest(".input-group")?.querySelector("label")?.textContent?.toLowerCase() ===
-					"height";
-				const targetUnit = isHeightToggle ? currentHeightUnit : currentWeightUnit;
+			// Delay unit toggle initialization to ensure DOM is ready
+			setTimeout(() => {
+				this.initializeUnitToggles(values);
+			}, 100);
 
-				toggle.querySelectorAll(".unit-btn").forEach((btn) => {
+			// Show appropriate input containers
+			this.showCurrentUnitInputs();
+		}
+
+		private initializeUnitToggles(values: any): void {
+			console.log("Initializing unit toggles with values:", values);
+
+			// Find and update height unit toggle
+			const heightToggle = document.querySelector(
+				'.input-group:has(label[for="height"]) .unit-toggle'
+			);
+			if (heightToggle) {
+				const heightButtons = heightToggle.querySelectorAll(".unit-btn");
+				heightButtons.forEach((btn) => {
 					btn.classList.remove("active");
-					if (btn.dataset.unit === targetUnit) {
+					if (btn.getAttribute("data-unit") === values.heightUnit) {
 						btn.classList.add("active");
+						console.log("Set height unit toggle to:", values.heightUnit);
 					}
 				});
+			}
 
-				// Show/hide appropriate inputs
-				const inputGroup = toggle.closest(".input-group");
-				if (isHeightToggle) {
-					inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(targetUnit) ? "flex" : "none";
-					});
+			// Find and update weight unit toggle
+			const weightToggle = document.querySelector(
+				'.input-group:has(label[for="weight"]) .unit-toggle'
+			);
+			if (weightToggle) {
+				const weightButtons = weightToggle.querySelectorAll(".unit-btn");
+				weightButtons.forEach((btn) => {
+					btn.classList.remove("active");
+					if (btn.getAttribute("data-unit") === values.weightUnit) {
+						btn.classList.add("active");
+						console.log("Set weight unit toggle to:", values.weightUnit);
+					}
+				});
+			}
+
+			// Update the range sliders to show current values
+			this.updateRangeSliders(values);
+		}
+
+		private updateRangeSliders(values: any): void {
+			console.log("Updating range sliders with values:", values);
+
+			// Find all range sliders and trigger their update
+			const rangeSliders = document.querySelectorAll(".range-slider");
+			rangeSliders.forEach((slider) => {
+				// Dispatch a custom event to tell the slider to refresh from SharedValues
+				slider.dispatchEvent(
+					new CustomEvent("refresh-from-shared-values", {
+						bubbles: true,
+					})
+				);
+			});
+		}
+
+		private showCurrentUnitInputs(): void {
+			const values = this.sharedValues.load();
+
+			// Show/hide height inputs based on current unit
+			const heightInputs = document.querySelectorAll(".height-inputs");
+			heightInputs.forEach((input) => {
+				const htmlInput = input as HTMLElement;
+				if (input.classList.contains(values.heightUnit)) {
+					htmlInput.style.display = "flex";
 				} else {
-					inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(targetUnit) ? "block" : "none";
-					});
+					htmlInput.style.display = "none";
+				}
+			});
+
+			// Show/hide weight inputs based on current unit
+			const weightInputs = document.querySelectorAll(".weight-inputs");
+			weightInputs.forEach((input) => {
+				const htmlInput = input as HTMLElement;
+				if (input.classList.contains(values.weightUnit)) {
+					htmlInput.style.display = "block";
+				} else {
+					htmlInput.style.display = "none";
 				}
 			});
 		}
 
-		// Save current values to shared storage
-		function saveCurrentValues() {
-			const currentValues = {
-				heightFeet: parseInt(heightFeet?.value || "5"),
-				heightInches: parseFloat(heightInches?.value || "8"),
-				heightCm: parseInt(heightCm?.value || "173"),
-				weightLbs: parseInt(weightLbs?.value || "160"),
-				weightKg: parseInt(weightKg?.value || "73"),
-				heightUnit: currentHeightUnit,
-				weightUnit: currentWeightUnit,
-				useAsianBMI: asianScale?.checked || false,
-			};
-			sharedValues.update(currentValues);
+		private attachEventListeners(): void {
+			// Listen for unit toggle changes
+			document.addEventListener("unit-toggle-change", (event) => {
+				this.handleUnitChange(event as CustomEvent);
+			});
+
+			// Listen for range slider changes (from our components)
+			document.addEventListener("range-slider-change", () => {
+				this.calculate();
+			});
+
+			// Asian scale checkbox
+			if (this.asianScale) {
+				this.asianScale.addEventListener("change", () => {
+					this.sharedValues.set("useAsianBMI", this.asianScale?.checked);
+					this.calculate();
+				});
+			}
 		}
 
-		// BMI categories and explanations
-		const bmiCategories = {
-			standard: {
-				underweight: {
-					name: "Underweight",
-					color: "#3366ff",
-					explanation:
-						"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
-				},
-				normal: {
-					name: "Normal Weight",
-					color: "var(--color-success)",
-					explanation:
-						"Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
-				},
-				overweight: {
-					name: "Overweight",
-					color: "var(--color-warning)",
-					explanation:
-						"Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
-				},
-				obese: {
-					name: "Obese",
-					color: "var(--color-danger)",
-					explanation:
-						"Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
-				},
-			},
-			asian: {
-				underweight: {
-					name: "Underweight",
-					color: "#3366ff",
-					explanation:
-						"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
-				},
-				normal: {
-					name: "Normal Weight",
-					color: "var(--color-success)",
-					explanation:
-						"Your BMI falls within the normal weight range for Asian populations. This suggests a healthy weight for your height.",
-				},
-				overweight: {
-					name: "Overweight",
-					color: "var(--color-warning)",
-					explanation:
-						"Your BMI indicates you may be overweight according to Asian BMI standards. Consider consulting with a healthcare provider about healthy weight management.",
-				},
-				obese: {
-					name: "Obese",
-					color: "var(--color-danger)",
-					explanation:
-						"Your BMI indicates obesity according to Asian BMI standards. We recommend consulting with a healthcare provider for personalized advice.",
-				},
-			},
-		};
+		private handleUnitChange(event: CustomEvent): void {
+			console.log("Unit change event received:", event.detail);
 
-		function getBMICategory(bmi, useAsianScale = false) {
+			if (event.detail.attribute === "unit") {
+				// Get the unit toggle that dispatched this event
+				const unitToggle = event.target as HTMLElement;
+				const inputGroup = unitToggle?.closest(".input-group");
+
+				if (!inputGroup) {
+					console.error("Could not find input group for unit toggle");
+					return;
+				}
+
+				const label = inputGroup.querySelector("label");
+				if (!label) {
+					console.error("Could not find label in input group");
+					return;
+				}
+
+				const labelText = label.textContent?.toLowerCase() || "";
+				console.log("Label text:", labelText, "New value:", event.detail.value);
+
+				if (labelText.includes("height")) {
+					console.log("Updating height unit to:", event.detail.value);
+					this.sharedValues.set("heightUnit", event.detail.value);
+					if (event.detail.value === "metric") {
+						this.sharedValues.syncHeightUnits("metric");
+					} else {
+						this.sharedValues.syncHeightUnits("imperial");
+					}
+				} else if (labelText.includes("weight")) {
+					console.log("Updating weight unit to:", event.detail.value);
+					this.sharedValues.set("weightUnit", event.detail.value);
+					if (event.detail.value === "metric") {
+						this.sharedValues.syncWeightUnits("metric");
+					} else {
+						this.sharedValues.syncWeightUnits("imperial");
+					}
+				}
+
+				// Refresh range sliders to show converted values
+				this.updateRangeSliders(this.sharedValues.load());
+				this.showCurrentUnitInputs();
+				this.calculate();
+			}
+		}
+
+		public calculate(): void {
+			const values = this.sharedValues.load();
+			let heightInMeters, weightInKg;
+
+			// Convert height to meters
+			if (values.heightUnit === "imperial") {
+				const totalInches = values.heightFeet * 12 + values.heightInches;
+				heightInMeters = totalInches * 0.0254;
+			} else {
+				heightInMeters = values.heightCm / 100;
+			}
+
+			// Convert weight to kg
+			if (values.weightUnit === "imperial") {
+				weightInKg = values.weightLbs * 0.453592;
+			} else {
+				weightInKg = values.weightKg;
+			}
+
+			const bmi = weightInKg / (heightInMeters * heightInMeters);
+			this.updateDisplay(bmi, values.useAsianBMI || false);
+		}
+
+		private updateDisplay(bmi: number, useAsianScale: boolean): void {
+			const category = this.getBMICategory(bmi, useAsianScale);
+			const categoryData = this.getCategoryData(category, useAsianScale);
+
+			if (this.bmiNumber) {
+				this.bmiNumber.textContent = bmi.toFixed(1);
+			}
+
+			if (this.bmiCategory) {
+				this.bmiCategory.textContent = categoryData.name;
+				this.bmiCategory.style.backgroundColor = categoryData.color;
+			}
+
+			if (this.bmiExplanation) {
+				this.bmiExplanation.textContent = categoryData.explanation;
+			}
+
+			this.updateScaleIndicator(bmi, useAsianScale);
+		}
+
+		private getBMICategory(bmi: number, useAsianScale: boolean): string {
 			if (useAsianScale) {
-				// Asian BMI scale thresholds
 				if (bmi < 18.5) return "underweight";
 				if (bmi < 23) return "normal";
 				if (bmi < 27.5) return "overweight";
 				return "obese";
 			} else {
-				// Standard BMI scale thresholds
 				if (bmi < 18.5) return "underweight";
 				if (bmi < 25) return "normal";
 				if (bmi < 30) return "overweight";
@@ -706,148 +837,215 @@ import Layout from "../layouts/Layout.astro";
 			}
 		}
 
-		function calculateBMI() {
-			let heightInMeters, weightInKg;
+		private getCategoryData(category: string, useAsianScale: boolean): any {
+			const categories = {
+				underweight: {
+					name: "Underweight",
+					color: "#3366ff",
+					explanation:
+						"Your BMI indicates you may be underweight. Consider consulting with a healthcare provider about healthy weight gain strategies.",
+				},
+				normal: {
+					name: "Normal Weight",
+					color: "var(--color-success)",
+					explanation: useAsianScale
+						? "Your BMI falls within the normal weight range for Asian populations. This suggests a healthy weight for your height."
+						: "Your BMI falls within the normal weight range. This suggests a healthy weight for your height.",
+				},
+				overweight: {
+					name: "Overweight",
+					color: "var(--color-warning)",
+					explanation: useAsianScale
+						? "Your BMI indicates you may be overweight according to Asian BMI standards. Consider consulting with a healthcare provider about healthy weight management."
+						: "Your BMI indicates you may be overweight. Consider consulting with a healthcare provider about healthy weight management.",
+				},
+				obese: {
+					name: "Obese",
+					color: "var(--color-danger)",
+					explanation: useAsianScale
+						? "Your BMI indicates obesity according to Asian BMI standards. We recommend consulting with a healthcare provider for personalized advice."
+						: "Your BMI indicates obesity. We recommend consulting with a healthcare provider for personalized advice.",
+				},
+			};
 
-			// Convert height to meters
-			if (currentHeightUnit === "imperial") {
-				const feet = parseInt(heightFeet?.value || "5");
-				const inches = parseFloat(heightInches?.value || "8");
-				const totalInches = feet * 12 + inches;
-				heightInMeters = totalInches * 0.0254;
-			} else {
-				heightInMeters = parseInt(heightCm?.value || "173") / 100;
-			}
-
-			// Convert weight to kg
-			if (currentWeightUnit === "imperial") {
-				weightInKg = parseInt(weightLbs?.value || "160") * 0.453592;
-			} else {
-				weightInKg = parseInt(weightKg?.value || "73");
-			}
-
-			const bmi = weightInKg / (heightInMeters * heightInMeters);
-			return bmi;
+			return categories[category as keyof typeof categories];
 		}
 
-		function updateBMIDisplay() {
-			const bmi = calculateBMI();
-			const useAsianScale = asianScale?.checked || false;
-			const scaleType = useAsianScale ? "asian" : "standard";
-			const category = getBMICategory(bmi, useAsianScale);
-			const categoryData = bmiCategories[scaleType][category];
+		private updateScaleIndicator(bmi: number, useAsianScale: boolean): void {
+			if (!this.scaleIndicator) return;
 
-			if (bmiNumber) bmiNumber.textContent = bmi.toFixed(1);
-			if (bmiCategory) {
-				bmiCategory.textContent = categoryData.name;
-				bmiCategory.style.backgroundColor = categoryData.color;
-			}
-			if (bmiExplanation) bmiExplanation.textContent = categoryData.explanation;
-
-			// Update scale indicator position based on the selected scale
 			let position;
 			if (useAsianScale) {
-				// Asian scale: underweight < 18.5, normal 18.5-22.9, overweight 23-27.4, obese ≥ 27.5
+				// Asian scale thresholds
 				if (bmi < 18.5) position = (bmi / 18.5) * 25;
 				else if (bmi < 23) position = 25 + ((bmi - 18.5) / 4.5) * 25;
 				else if (bmi < 27.5) position = 50 + ((bmi - 23) / 4.5) * 25;
 				else position = 75 + Math.min(((bmi - 27.5) / 7.5) * 25, 25);
 			} else {
-				// Standard scale: underweight < 18.5, normal 18.5-24.9, overweight 25-29.9, obese ≥ 30
+				// Standard scale thresholds
 				if (bmi < 18.5) position = (bmi / 18.5) * 25;
 				else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
 				else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
 				else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
 			}
 
-			if (scaleIndicator) scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+			this.scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+		}
+	}
 
-			// Save values after calculation
-			saveCurrentValues();
+	// Initialize BMI calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		// Ensure SharedValues is available
+		if (typeof (window as any).SharedValues === "undefined") {
+			console.error("SharedValues not loaded");
+			return;
 		}
 
-		function updateDisplays() {
-			if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
-			if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
-			if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
-			if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
-			if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
-		}
+		const sharedValues = new (window as any).SharedValues();
+		const values = sharedValues.load();
 
-		// Debounced calculation
-		let calculationTimeout;
-		function debouncedCalculation() {
-			clearTimeout(calculationTimeout);
-			calculationTimeout = setTimeout(updateBMIDisplay, 100);
-		}
+		console.log("Initializing BMI page with values:", values);
 
-		// Event listeners for sliders
-		[heightFeet, heightInches, heightCm, weightLbs, weightKg].forEach((slider) => {
-			if (slider) {
-				slider.addEventListener("input", () => {
-					updateDisplays();
-					debouncedCalculation();
-				});
+		// Initialize unit toggles first - ensure at least one button is active
+		function initializeUnitToggles() {
+			// Height unit toggle
+			const heightButtons = document.querySelectorAll(
+				'.input-group:has(label[for="height"]) .unit-btn'
+			);
+			let heightActiveSet = false;
+			heightButtons.forEach((btn) => {
+				btn.classList.remove("active");
+				if (btn.getAttribute("data-unit") === values.heightUnit) {
+					btn.classList.add("active");
+					heightActiveSet = true;
+				}
+			});
+			if (!heightActiveSet && heightButtons.length > 0) {
+				heightButtons[0].classList.add("active");
+				sharedValues.set("heightUnit", heightButtons[0].getAttribute("data-unit"));
 			}
-		});
 
-		// Event listener for Asian scale checkbox
-		if (asianScale) {
-			asianScale.addEventListener("change", () => {
-				// Save the preference immediately when changed
-				saveCurrentValues();
-				debouncedCalculation();
+			// Weight unit toggle
+			const weightButtons = document.querySelectorAll(
+				'.input-group:has(label[for="weight"]) .unit-btn'
+			);
+			let weightActiveSet = false;
+			weightButtons.forEach((btn) => {
+				btn.classList.remove("active");
+				if (btn.getAttribute("data-unit") === values.weightUnit) {
+					btn.classList.add("active");
+					weightActiveSet = true;
+				}
+			});
+			if (!weightActiveSet && weightButtons.length > 0) {
+				weightButtons[0].classList.add("active");
+				sharedValues.set("weightUnit", weightButtons[0].getAttribute("data-unit"));
+			}
+		}
+
+		// Show/hide appropriate input containers based on units
+		function showCurrentUnitInputs() {
+			const currentValues = sharedValues.load();
+
+			// Height inputs
+			document.querySelectorAll(".height-inputs").forEach((input) => {
+				const htmlInput = input as HTMLElement;
+				if (input.classList.contains(currentValues.heightUnit)) {
+					htmlInput.style.display = "flex";
+				} else {
+					htmlInput.style.display = "none";
+				}
+			});
+
+			// Weight inputs
+			document.querySelectorAll(".weight-inputs").forEach((input) => {
+				const htmlInput = input as HTMLElement;
+				if (input.classList.contains(currentValues.weightUnit)) {
+					htmlInput.style.display = "block";
+				} else {
+					htmlInput.style.display = "none";
+				}
 			});
 		}
 
-		// Unit toggle functionality
-		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-			toggle.addEventListener("click", (e) => {
-				const target = e.target;
-				if (!target?.classList.contains("unit-btn")) return;
+		// Update range sliders with current values
+		function updateRangeSliders() {
+			const currentValues = sharedValues.load();
+			const sliderUpdates = [
+				{ id: "height-feet", key: "heightFeet" },
+				{ id: "height-inches", key: "heightInches" },
+				{ id: "height-cm", key: "heightCm" },
+				{ id: "weight-lbs", key: "weightLbs" },
+				{ id: "weight-kg", key: "weightKg" },
+			];
 
-				const unitType = target
-					.closest(".input-group")
-					?.querySelector("label")
-					?.textContent?.toLowerCase();
-				const unit = target.dataset.unit;
+			sliderUpdates.forEach(({ id, key }) => {
+				const slider = document.getElementById(id) as HTMLInputElement;
+				const display = document.getElementById(id + "-display");
+				if (slider && currentValues[key] !== undefined) {
+					slider.value = currentValues[key];
+					if (display) {
+						const value = parseFloat(currentValues[key]);
+						const step = parseFloat(slider.step || "1");
+						if (step < 1) {
+							const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+							display.textContent = value.toFixed(decimalPlaces);
+						} else {
+							display.textContent = Math.round(value).toString();
+						}
+					}
+				}
+			});
+		}
 
-				// Update active state
-				toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
-				target.classList.add("active");
+		// Initialize everything
+		setTimeout(() => {
+			initializeUnitToggles();
+			showCurrentUnitInputs();
+			updateRangeSliders();
 
-				// Show/hide appropriate inputs
-				const inputGroup = target.closest(".input-group");
-				if (unitType === "height") {
-					currentHeightUnit = unit || "imperial";
-					sharedValues.syncHeightUnits(currentHeightUnit);
-					inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(unit || "imperial") ? "flex" : "none";
-					});
-				} else {
-					currentWeightUnit = unit || "imperial";
-					sharedValues.syncWeightUnits(currentWeightUnit);
-					inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
-					});
+			// Initialize BMI calculator
+			(window as any).bmiCalculator = new BMICalculator();
+		}, 200);
+
+		// Handle unit toggle changes
+		document.addEventListener("unit-toggle-change", function (event: Event) {
+			const customEvent = event as CustomEvent;
+			console.log("Unit toggle change detected:", customEvent.detail);
+
+			if (customEvent.detail.attribute === "unit") {
+				const unitToggle = customEvent.target as HTMLElement;
+				const inputGroup = unitToggle?.closest(".input-group");
+				const label = inputGroup?.querySelector("label");
+				const labelText = label?.textContent?.toLowerCase() || "";
+
+				if (labelText.includes("height")) {
+					console.log("Updating height unit to:", customEvent.detail.value);
+					sharedValues.set("heightUnit", customEvent.detail.value);
+					if (customEvent.detail.value === "metric") {
+						sharedValues.syncHeightUnits("metric");
+					} else {
+						sharedValues.syncHeightUnits("imperial");
+					}
+				} else if (labelText.includes("weight")) {
+					console.log("Updating weight unit to:", customEvent.detail.value);
+					sharedValues.set("weightUnit", customEvent.detail.value);
+					if (customEvent.detail.value === "metric") {
+						sharedValues.syncWeightUnits("metric");
+					} else {
+						sharedValues.syncWeightUnits("imperial");
+					}
 				}
 
-				// Update sliders with converted values after unit change
-				const updatedValues = sharedValues.load();
-				if (heightFeet) heightFeet.value = updatedValues.heightFeet.toString();
-				if (heightInches) heightInches.value = updatedValues.heightInches.toString();
-				if (heightCm) heightCm.value = updatedValues.heightCm.toString();
-				if (weightLbs) weightLbs.value = updatedValues.weightLbs.toString();
-				if (weightKg) weightKg.value = updatedValues.weightKg.toString();
+				// Refresh everything
+				showCurrentUnitInputs();
+				updateRangeSliders();
 
-				updateDisplays();
-				debouncedCalculation();
-			});
+				// Trigger BMI recalculation if calculator exists
+				if ((window as any).bmiCalculator && (window as any).bmiCalculator.calculate) {
+					(window as any).bmiCalculator.calculate();
+				}
+			}
 		});
-
-		// Initialize the calculator
-		initializeInputs();
-		updateDisplays();
-		updateBMIDisplay();
 	});
 </script>

@@ -1,0 +1,430 @@
+---
+import Layout from "../layouts/Layout.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import GenderToggle from "../components/GenderToggle.astro";
+---
+
+<Layout
+	title="Component Showcase - CruxCalc Components"
+	description="Interactive showcase of reusable CruxCalc components for testing and documentation."
+>
+	<section class="showcase-page">
+		<div class="container">
+			<div class="showcase-header">
+				<h1>Component Showcase</h1>
+				<p>Interactive examples of all reusable components</p>
+			</div>
+
+			<div class="component-section">
+				<h2>RangeSlider Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Height (Imperial)</h3>
+						<RangeSlider
+							id="height-feet"
+							label="Feet"
+							min={4}
+							max={7}
+							value={5}
+							unit="ft"
+							sharedKey="heightFeet"
+						/>
+						<RangeSlider
+							id="height-inches"
+							label="Inches"
+							min={0}
+							max={11.5}
+							step={0.5}
+							value={8}
+							unit="in"
+							sharedKey="heightInches"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Weight (Metric)</h3>
+						<RangeSlider
+							id="weight-kg"
+							label="Weight"
+							min={35}
+							max={180}
+							value={73}
+							unit="kg"
+							helpText="Enter your current weight in kilograms"
+							sharedKey="weightKg"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Age</h3>
+						<RangeSlider
+							id="age"
+							label="Age"
+							min={15}
+							max={100}
+							value={30}
+							unit="years"
+							helpText="Your age in years"
+							sharedKey="age"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Body Fat Percentage</h3>
+						<RangeSlider
+							id="body-fat"
+							label="Body Fat"
+							min={3}
+							max={50}
+							step={0.1}
+							value={15.5}
+							unit="%"
+							helpText="Enter your body fat percentage if known"
+						/>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>UnitToggle Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Height Units</h3>
+						<UnitToggle
+							options={[
+								{ value: "imperial", label: "ft/in" },
+								{ value: "metric", label: "cm" },
+							]}
+							activeValue="imperial"
+							dataAttribute="height-unit"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Weight Units</h3>
+						<UnitToggle
+							options={[
+								{ value: "imperial", label: "lbs" },
+								{ value: "metric", label: "kg" },
+							]}
+							activeValue="imperial"
+							dataAttribute="weight-unit"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Distance Units</h3>
+						<UnitToggle
+							options={[
+								{ value: "miles", label: "Miles" },
+								{ value: "kilometers", label: "km" },
+							]}
+							activeValue="miles"
+							dataAttribute="distance-unit"
+						/>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>GenderToggle Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Gender Selection</h3>
+						<GenderToggle activeGender="male" />
+					</div>
+
+					<div class="example">
+						<h3>Gender Selection (Female Default)</h3>
+						<GenderToggle activeGender="female" />
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>SharedValues Integration Test</h2>
+				<div class="shared-values-display">
+					<h3>Current SharedValues:</h3>
+					<div id="shared-values-output">
+						<p>Loading SharedValues...</p>
+					</div>
+					<button id="clear-shared-values" class="test-button">Clear All SharedValues</button>
+					<button id="refresh-display" class="test-button">Refresh Display</button>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>Event Testing</h2>
+				<div class="event-log">
+					<h3>Range Slider Events:</h3>
+					<div id="event-log" class="event-output">
+						<p>Move sliders above to see events...</p>
+					</div>
+					<button id="clear-log" class="test-button">Clear Log</button>
+				</div>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<script src="/sharedValues.js" is:inline></script>
+<script>
+	// Extend Window interface for SharedValues
+	declare global {
+		interface Window {
+			SharedValues: any;
+		}
+	}
+
+	// SharedValues display functionality
+	class ShowcaseManager {
+		private sharedValues: any;
+		private eventLog: HTMLElement | null;
+		private sharedValuesOutput: HTMLElement | null;
+
+		constructor() {
+			this.sharedValues = new (window as any).SharedValues();
+			this.eventLog = document.getElementById("event-log");
+			this.sharedValuesOutput = document.getElementById("shared-values-output");
+
+			this.attachEventListeners();
+			this.updateSharedValuesDisplay();
+		}
+
+		private attachEventListeners(): void {
+			// Listen for range slider changes
+			document.addEventListener("range-slider-change", (event) => {
+				const customEvent = event as CustomEvent;
+				this.logEvent("Range Slider Change", customEvent.detail);
+				this.updateSharedValuesDisplay();
+			});
+
+			// Listen for unit toggle changes
+			document.addEventListener("unit-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				this.logEvent("Unit Toggle Change", customEvent.detail);
+			});
+
+			// Listen for gender toggle changes
+			document.addEventListener("gender-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				this.logEvent("Gender Toggle Change", customEvent.detail);
+				this.updateSharedValuesDisplay();
+			});
+
+			// Button event listeners
+			document.getElementById("clear-shared-values")?.addEventListener("click", () => {
+				this.sharedValues.clear();
+				this.updateSharedValuesDisplay();
+				this.logEvent("SharedValues Cleared", {});
+			});
+
+			document.getElementById("refresh-display")?.addEventListener("click", () => {
+				this.updateSharedValuesDisplay();
+				this.logEvent("Display Refreshed", {});
+			});
+
+			document.getElementById("clear-log")?.addEventListener("click", () => {
+				if (this.eventLog) {
+					this.eventLog.innerHTML = "<p>Event log cleared...</p>";
+				}
+			});
+		}
+
+		private updateSharedValuesDisplay(): void {
+			const values = this.sharedValues.load();
+			const html = Object.entries(values)
+				.map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+				.join("");
+
+			if (this.sharedValuesOutput) {
+				this.sharedValuesOutput.innerHTML = html || "<p>No SharedValues found</p>";
+			}
+		}
+
+		private logEvent(eventName: string, detail: any): void {
+			const timestamp = new Date().toLocaleTimeString();
+			const eventItem = document.createElement("div");
+			eventItem.className = "event-item";
+			eventItem.innerHTML = `
+				<strong>${timestamp} - ${eventName}</strong><br>
+				<code>${JSON.stringify(detail, null, 2)}</code>
+			`;
+
+			if (this.eventLog) {
+				this.eventLog.insertBefore(eventItem, this.eventLog.firstChild);
+
+				// Keep only the last 10 events
+				const events = this.eventLog.querySelectorAll(".event-item");
+				if (events.length > 10) {
+					events[events.length - 1].remove();
+				}
+			}
+		}
+	}
+
+	// Initialize showcase manager
+	document.addEventListener("DOMContentLoaded", () => {
+		new ShowcaseManager();
+	});
+</script>
+
+<style>
+	.showcase-page {
+		padding: 2rem 0;
+	}
+
+	.showcase-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.showcase-header h1 {
+		font-size: 3rem;
+		font-weight: 800;
+		color: var(--color-text);
+		margin-bottom: 1rem;
+	}
+
+	.showcase-header p {
+		font-size: 1.25rem;
+		color: var(--color-text-muted);
+	}
+
+	.component-section {
+		margin-bottom: 4rem;
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 2rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	.component-section h2 {
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 1.5rem;
+		color: var(--color-primary);
+	}
+
+	.component-examples {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+	}
+
+	.example {
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		padding: 1.5rem;
+		border-radius: var(--border-radius);
+	}
+
+	.example h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 1rem;
+		color: var(--color-text);
+	}
+
+	.shared-values-display {
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		padding: 1.5rem;
+		border-radius: var(--border-radius);
+	}
+
+	.shared-values-display h3 {
+		margin-bottom: 1rem;
+		color: var(--color-text);
+	}
+
+	#shared-values-output {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		padding: 1rem;
+		margin-bottom: 1rem;
+		border-radius: var(--border-radius);
+		font-family: "JetBrains Mono", monospace;
+		max-height: 200px;
+		overflow-y: auto;
+	}
+
+	.test-button {
+		background: var(--color-accent);
+		color: white;
+		border: var(--border-width) solid var(--color-border);
+		padding: 0.75rem 1.5rem;
+		margin-right: 1rem;
+		margin-bottom: 0.5rem;
+		cursor: pointer;
+		font-weight: 600;
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+	}
+
+	.test-button:hover {
+		background: var(--color-primary);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.event-log {
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		padding: 1.5rem;
+		border-radius: var(--border-radius);
+	}
+
+	.event-log h3 {
+		margin-bottom: 1rem;
+		color: var(--color-text);
+	}
+
+	.event-output {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		padding: 1rem;
+		margin-bottom: 1rem;
+		border-radius: var(--border-radius);
+		font-family: "JetBrains Mono", monospace;
+		max-height: 300px;
+		overflow-y: auto;
+	}
+
+	.event-item {
+		margin-bottom: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.event-item:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+	}
+
+	.event-item code {
+		background: var(--color-bg);
+		padding: 0.5rem;
+		display: block;
+		margin-top: 0.5rem;
+		border-radius: var(--border-radius);
+		font-size: 0.875rem;
+		white-space: pre-wrap;
+	}
+
+	@media (max-width: 768px) {
+		.component-examples {
+			grid-template-columns: 1fr;
+		}
+
+		.showcase-header h1 {
+			font-size: 2rem;
+		}
+
+		.test-button {
+			margin-right: 0.5rem;
+		}
+	}
+</style>
