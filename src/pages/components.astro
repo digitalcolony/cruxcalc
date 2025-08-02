@@ -5,6 +5,7 @@ import CategoryBadge from "../components/CategoryBadge.astro";
 import ComparisonTable from "../components/ComparisonTable.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
@@ -403,6 +404,64 @@ import GenderToggle from "../components/GenderToggle.astro";
 			</div>
 
 			<div class="component-section">
+				<h2>ValidationDisplay Component (Phase 4)</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Reactive Validation</h3>
+						<p style="margin-bottom: 1rem; color: var(--color-text-muted);">
+							This component automatically validates SharedValues in real-time. Change values above
+							to see validation updates.
+						</p>
+						<ValidationDisplay />
+					</div>
+
+					<div class="example">
+						<h3>Compact Version</h3>
+						<ValidationDisplay compact={true} />
+					</div>
+
+					<div class="example">
+						<h3>Without Icon</h3>
+						<ValidationDisplay showIcon={false} />
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>Enhanced SharedValues System (Phase 4)</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Event-Driven Updates</h3>
+						<div
+							id="reactive-demo"
+							style="padding: 1.5rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--border-radius);"
+						>
+							<p><strong>Reactive Updates Demo:</strong></p>
+							<p>Value change count: <span id="change-counter">0</span></p>
+							<p>Last changed: <span id="last-changed">None</span></p>
+							<p>Current age: <span id="current-age">Loading...</span></p>
+							<button id="demo-update" class="test-button" style="margin-top: 1rem;"
+								>Update Age (+1)</button
+							>
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Component Registration</h3>
+						<div
+							style="padding: 1.5rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--border-radius);"
+						>
+							<p><strong>Registered Components:</strong></p>
+							<div id="subscribers-list">Loading...</div>
+							<button id="demo-subscribe" class="test-button" style="margin-top: 1rem;"
+								>Register Demo Component</button
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
 				<h2>SharedValues Integration Test</h2>
 				<div class="shared-values-display">
 					<h3>Current SharedValues:</h3>
@@ -429,6 +488,7 @@ import GenderToggle from "../components/GenderToggle.astro";
 </Layout>
 
 <script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// Extend Window interface for SharedValues
 	declare global {
@@ -440,16 +500,99 @@ import GenderToggle from "../components/GenderToggle.astro";
 	// SharedValues display functionality
 	class ShowcaseManager {
 		private sharedValues: any;
+		private reactiveSharedValues: any;
 		private eventLog: HTMLElement | null;
 		private sharedValuesOutput: HTMLElement | null;
+		private changeCounter: number = 0;
 
 		constructor() {
 			this.sharedValues = new (window as any).SharedValues();
+
+			// Initialize ReactiveSharedValues if available
+			if ((window as any).ReactiveSharedValues) {
+				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
+				this.setupReactiveDemo();
+			}
+
 			this.eventLog = document.getElementById("event-log");
 			this.sharedValuesOutput = document.getElementById("shared-values-output");
 
 			this.attachEventListeners();
 			this.updateSharedValuesDisplay();
+		}
+
+		private setupReactiveDemo(): void {
+			// Demo elements
+			const changeCounterEl = document.getElementById("change-counter");
+			const lastChangedEl = document.getElementById("last-changed");
+			const currentAgeEl = document.getElementById("current-age");
+			const subscribersListEl = document.getElementById("subscribers-list");
+
+			// Update current age display
+			if (currentAgeEl) {
+				currentAgeEl.textContent = this.reactiveSharedValues.get("age").toString();
+			}
+
+			// Listen for changes
+			this.reactiveSharedValues.addEventListener("change", (event: CustomEvent) => {
+				this.changeCounter++;
+				if (changeCounterEl) {
+					changeCounterEl.textContent = this.changeCounter.toString();
+				}
+				if (lastChangedEl) {
+					const changedKeys = Object.keys(event.detail.changed).join(", ");
+					lastChangedEl.textContent = changedKeys || "None";
+				}
+			});
+
+			// Listen for age changes specifically
+			this.reactiveSharedValues.addEventListener("change:age", (event: CustomEvent) => {
+				if (currentAgeEl) {
+					currentAgeEl.textContent = event.detail.newValue.toString();
+				}
+			});
+
+			// Update subscribers list
+			this.updateSubscribersList();
+
+			// Demo buttons
+			const demoUpdateBtn = document.getElementById("demo-update");
+			const demoSubscribeBtn = document.getElementById("demo-subscribe");
+
+			if (demoUpdateBtn) {
+				demoUpdateBtn.addEventListener("click", () => {
+					const currentAge = this.reactiveSharedValues.get("age");
+					this.reactiveSharedValues.set("age", currentAge + 1);
+				});
+			}
+
+			if (demoSubscribeBtn) {
+				demoSubscribeBtn.addEventListener("click", () => {
+					const componentId = `demo-component-${Date.now()}`;
+					this.reactiveSharedValues.subscribe(
+						componentId,
+						(event: any) => {
+							console.log(`${componentId} received update:`, event);
+						},
+						["age", "weight"]
+					);
+
+					this.updateSubscribersList();
+				});
+			}
+		}
+
+		private updateSubscribersList(): void {
+			const subscribersListEl = document.getElementById("subscribers-list");
+			if (subscribersListEl && this.reactiveSharedValues) {
+				const subscriberCount = this.reactiveSharedValues.subscribers.size;
+				subscribersListEl.innerHTML = `
+					<p>Active subscriptions: <strong>${subscriberCount}</strong></p>
+					<p style="font-size: 0.875rem; color: var(--color-text-muted);">
+						Components: ${Array.from(this.reactiveSharedValues.subscribers.keys()).join(", ") || "None"}
+					</p>
+				`;
+			}
 		}
 
 		private attachEventListeners(): void {

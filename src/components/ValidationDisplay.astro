@@ -1,0 +1,320 @@
+---
+export interface Props {
+	class?: string;
+	showIcon?: boolean;
+	compact?: boolean;
+}
+
+const { class: className = "", showIcon = true, compact = false } = Astro.props;
+---
+
+<div
+	class={`validation-display ${className} ${compact ? "validation-display--compact" : ""}`}
+	id="validation-display"
+>
+	<div class="validation-display__content">
+		{
+			showIcon && (
+				<div class="validation-display__icon">
+					<svg
+						class="validation-display__icon-success"
+						width="20"
+						height="20"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<svg
+						class="validation-display__icon-error"
+						width="20"
+						height="20"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+				</div>
+			)
+		}
+		<div class="validation-display__message">
+			<span class="validation-display__text">All values are valid</span>
+		</div>
+	</div>
+</div>
+
+<style>
+	.validation-display {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+		margin-bottom: 1rem;
+		transition: all 0.2s ease;
+	}
+
+	.validation-display--compact {
+		padding: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.validation-display__content {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.validation-display__icon {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+		position: relative;
+	}
+
+	.validation-display__icon-success,
+	.validation-display__icon-error {
+		position: absolute;
+		top: 0;
+		left: 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.validation-display__icon-success {
+		color: var(--color-success);
+		opacity: 1;
+	}
+
+	.validation-display__icon-error {
+		color: var(--color-danger);
+		opacity: 0;
+	}
+
+	.validation-display__message {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.validation-display__text {
+		font-size: 0.875rem;
+		color: var(--color-text);
+		font-weight: 500;
+	}
+
+	/* Error state */
+	.validation-display--error {
+		background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
+	}
+
+	.validation-display--error .validation-display__icon-success {
+		opacity: 0;
+	}
+
+	.validation-display--error .validation-display__icon-error {
+		opacity: 1;
+	}
+
+	.validation-display--error .validation-display__text {
+		color: var(--color-danger);
+	}
+
+	/* Warning state */
+	.validation-display--warning {
+		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+	}
+
+	.validation-display--warning .validation-display__text {
+		color: var(--color-warning);
+	}
+
+	/* Success state */
+	.validation-display--success {
+		background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+	}
+
+	.validation-display--success .validation-display__text {
+		color: var(--color-success);
+	}
+
+	/* Error list */
+	.validation-display__errors {
+		margin-top: 0.5rem;
+		padding-left: 0;
+		list-style: none;
+	}
+
+	.validation-display__error-item {
+		font-size: 0.8125rem;
+		color: var(--color-danger);
+		margin-bottom: 0.25rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.validation-display__error-item:before {
+		content: "•";
+		color: var(--color-danger);
+		font-weight: bold;
+	}
+
+	.validation-display__error-item:last-child {
+		margin-bottom: 0;
+	}
+
+	/* Hidden state */
+	.validation-display--hidden {
+		display: none;
+	}
+
+	/* Loading state */
+	.validation-display--loading .validation-display__text {
+		color: var(--color-text-muted);
+	}
+
+	.validation-display--loading .validation-display__icon {
+		animation: validation-pulse 1.5s ease-in-out infinite;
+	}
+
+	@keyframes validation-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.validation-display {
+			padding: 0.875rem;
+		}
+
+		.validation-display--compact {
+			padding: 0.625rem;
+		}
+
+		.validation-display__content {
+			gap: 0.5rem;
+		}
+
+		.validation-display__text {
+			font-size: 0.8125rem;
+		}
+	}
+</style>
+
+<script>
+	// TypeScript declarations for global objects
+	declare global {
+		interface Window {
+			ReactiveSharedValues: any;
+			ValidationDisplay: any;
+		}
+	}
+
+	// ValidationDisplay Component Logic
+	class ValidationDisplay {
+		private element: HTMLElement;
+		private textElement: HTMLElement;
+		private sharedValues: any;
+
+		constructor(element: HTMLElement) {
+			this.element = element;
+			this.textElement = element.querySelector(".validation-display__text") as HTMLElement;
+
+			// Initialize with ReactiveSharedValues if available
+			if (window.ReactiveSharedValues) {
+				this.sharedValues = new window.ReactiveSharedValues();
+				this.bindToSharedValues();
+			}
+		}
+
+		private bindToSharedValues(): void {
+			// Subscribe to all changes
+			this.sharedValues.subscribe("validation-display", (event: any) => {
+				this.updateValidation();
+			});
+
+			// Initial validation
+			this.updateValidation();
+		}
+
+		private updateValidation(): void {
+			if (!this.sharedValues) return;
+
+			const errors = this.sharedValues.getValidationErrors();
+			const errorKeys = Object.keys(errors);
+
+			// Remove all validation state classes
+			this.element.classList.remove(
+				"validation-display--success",
+				"validation-display--error",
+				"validation-display--warning"
+			);
+
+			// Remove existing error list
+			const existingErrors = this.element.querySelector(".validation-display__errors");
+			if (existingErrors) {
+				existingErrors.remove();
+			}
+
+			if (errorKeys.length === 0) {
+				// All valid
+				this.element.classList.add("validation-display--success");
+				this.textElement.textContent = "All values are valid";
+			} else {
+				// Has errors
+				this.element.classList.add("validation-display--error");
+				this.textElement.textContent = `Found ${errorKeys.length} validation error${errorKeys.length === 1 ? "" : "s"}`;
+
+				// Add error list
+				const errorList = document.createElement("ul");
+				errorList.className = "validation-display__errors";
+
+				errorKeys.forEach((key) => {
+					const listItem = document.createElement("li");
+					listItem.className = "validation-display__error-item";
+					listItem.textContent = errors[key];
+					errorList.appendChild(listItem);
+				});
+
+				this.element.querySelector(".validation-display__content")?.appendChild(errorList);
+			}
+		}
+
+		// Public method to manually trigger validation
+		public validate(): boolean {
+			this.updateValidation();
+			return this.sharedValues ? this.sharedValues.isValid() : true;
+		}
+
+		// Public method to show/hide
+		public setVisible(visible: boolean): void {
+			this.element.classList.toggle("validation-display--hidden", !visible);
+		}
+	}
+
+	// Auto-initialize when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		const validationDisplays = document.querySelectorAll(".validation-display");
+		validationDisplays.forEach((element) => {
+			new ValidationDisplay(element as HTMLElement);
+		});
+	});
+
+	// Export for manual initialization
+	window.ValidationDisplay = ValidationDisplay;
+</script>
