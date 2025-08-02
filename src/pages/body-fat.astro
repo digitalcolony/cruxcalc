@@ -1,1057 +1,430 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import GenderToggle from "../components/GenderToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import CategoryBadge from "../components/CategoryBadge.astro";
+import ComparisonTable from "../components/ComparisonTable.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
 ---
 
 <Layout
 	title="Body Fat Calculator - Navy Method Body Fat Percentage"
 	description="Calculate body fat percentage using the proven Navy circumference method. Get accurate body composition analysis."
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>Body Fat Percentage Calculator</h1>
-				<p>Get accurate body composition analysis using the Navy circumference method</p>
+	<CalculatorLayout
+		title="Body Fat Percentage Calculator"
+		description="Get accurate body composition analysis using the Navy circumference method"
+	>
+		<div slot="inputs">
+			<InputGroup label="Gender" helpText="Select your biological gender for accurate calculations">
+				<GenderToggle activeGender="male" />
+			</InputGroup>
+
+			<InputGroup label="Height" helpText="Select your preferred unit system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "ft/in" },
+						{ value: "metric", label: "cm" },
+					]}
+					activeValue="imperial"
+					dataAttribute="height-unit"
+				/>
+			</InputGroup>
+
+			<div class="height-inputs" data-unit-group="imperial">
+				<InputGroup label="Feet" class="inline">
+					<RangeSlider
+						id="height-feet"
+						label=""
+						min={4}
+						max={7}
+						value={5}
+						unit="ft"
+						sharedKey="heightFeet"
+					/>
+				</InputGroup>
+
+				<InputGroup label="Inches" class="inline">
+					<RangeSlider
+						id="height-inches"
+						label=""
+						min={0}
+						max={11.5}
+						step={0.5}
+						value={10}
+						unit="in"
+						sharedKey="heightInches"
+					/>
+				</InputGroup>
 			</div>
 
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="gender">Gender</label>
-						<div class="gender-toggle">
-							<button class="gender-btn active" data-gender="male">Male</button>
-							<button class="gender-btn" data-gender="female">Female</button>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="height">Height</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">ft/in</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
-
-						<div class="height-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="height-feet" min="4" max="7" value="5" />
-								<div class="input-display">
-									<span id="height-feet-display">5</span> ft
-								</div>
-							</div>
-							<div class="input-container">
-								<input type="range" id="height-inches" min="0" max="11" value="10" />
-								<div class="input-display">
-									<span id="height-inches-display">10</span> in
-								</div>
-							</div>
-						</div>
-
-						<div class="height-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="height-cm" min="120" max="220" value="178" />
-								<div class="input-display">
-									<span id="height-cm-display">178</span> cm
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="neck">Neck Circumference</label>
-						<div class="input-container">
-							<input type="range" id="neck" min="10" max="25" value="15" step="0.1" />
-							<div class="input-display">
-								<span id="neck-display">15.0</span>
-								<span id="neck-unit">inches</span>
-							</div>
-						</div>
-						<p class="input-help">Measure below the larynx, tape sloping downward to front</p>
-					</div>
-
-					<div class="input-group">
-						<label for="waist">Waist Circumference</label>
-						<div class="input-container">
-							<input type="range" id="waist" min="20" max="60" value="32" step="0.1" />
-							<div class="input-display">
-								<span id="waist-display">32.0</span>
-								<span id="waist-unit">inches</span>
-							</div>
-						</div>
-						<p class="input-help">
-							<span class="male-help">Measure at navel level</span>
-							<span class="female-help" style="display: none;">Measure at smallest width</span>
-						</p>
-					</div>
-
-					<div class="input-group hip-group" style="display: none;">
-						<label for="hips">Hip Circumference (female)</label>
-						<div class="input-container">
-							<input type="range" id="hips" min="25" max="65" value="38" step="0.1" />
-							<div class="input-display">
-								<span id="hips-display">38.0</span>
-								<span id="hips-unit">inches</span>
-							</div>
-						</div>
-						<p class="input-help">Measure at largest horizontal circumference</p>
-					</div>
-				</div>
-
-				<div class="calculator-results">
-					<div class="result-card navy-primary">
-						<h3>Body Fat Percentage (Navy Method)</h3>
-						<div class="result-section">
-							<div class="result-value primary-result">
-								<span id="navy-result">15.3</span>
-								<span class="result-unit">%</span>
-							</div>
-							<div class="category-badge" id="category-badge">
-								<span id="category-label">Fitness</span>
-							</div>
-						</div>
-					</div>
-
-					<div class="result-card categories-card">
-						<h3>Body Fat Categories</h3>
-						<div class="categories-table">
-							<table>
-								<thead>
-									<tr>
-										<th>Category</th>
-										<th>Men</th>
-										<th>Women</th>
-										<th>Description</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr class="essential">
-										<td>Essential</td>
-										<td>2-5%</td>
-										<td>10-13%</td>
-										<td>Minimum fat needed for health</td>
-									</tr>
-									<tr class="athletic">
-										<td>Athletic</td>
-										<td>6-13%</td>
-										<td>14-20%</td>
-										<td>Typical for athletes</td>
-									</tr>
-									<tr class="fitness">
-										<td>Fitness</td>
-										<td>14-17%</td>
-										<td>21-24%</td>
-										<td>Fit and healthy appearance</td>
-									</tr>
-									<tr class="average">
-										<td>Average</td>
-										<td>18-24%</td>
-										<td>25-31%</td>
-										<td>Typical for general population</td>
-									</tr>
-									<tr class="obese">
-										<td>Obese</td>
-										<td>25%+</td>
-										<td>32%+</td>
-										<td>Higher health risk levels</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-
-					<div class="result-card method-info-card">
-						<h3>About the Navy Method</h3>
-						<p>
-							Developed by the Naval Health Research Center, this method uses body circumferences to
-							estimate body fat. It's widely validated and used by the U.S. military for fitness
-							assessments.
-						</p>
-						<ul>
-							<li>Accuracy: ±3-4% standard error</li>
-							<li>Based on circumference measurements</li>
-							<li>Works well for most body types</li>
-							<li>Less accurate for very lean or obese individuals</li>
-						</ul>
-					</div>
-				</div>
+			<div class="height-inputs" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Height">
+					<RangeSlider
+						id="height-cm"
+						label=""
+						min={120}
+						max={220}
+						value={178}
+						unit="cm"
+						sharedKey="heightCm"
+					/>
+				</InputGroup>
 			</div>
+
+			<InputGroup
+				label="Neck Circumference"
+				helpText="Measure below the larynx, tape sloping downward to front"
+			>
+				<RangeSlider
+					id="neck"
+					label=""
+					min={10}
+					max={25}
+					value={15}
+					step={0.1}
+					unit="inches"
+					sharedKey="neckCircumference"
+				/>
+			</InputGroup>
+
+			<InputGroup
+				label="Waist Circumference"
+				helpText="Men: Measure at navel level | Women: Measure at smallest width"
+			>
+				<RangeSlider
+					id="waist"
+					label=""
+					min={20}
+					max={60}
+					value={32}
+					step={0.1}
+					unit="inches"
+					sharedKey="waistCircumference"
+				/>
+			</InputGroup>
+
+			<div class="hip-group" style="display: none;">
+				<InputGroup
+					label="Hip Circumference (Female)"
+					helpText="Measure at largest horizontal circumference"
+				>
+					<RangeSlider
+						id="hips"
+						label=""
+						min={25}
+						max={65}
+						value={38}
+						step={0.1}
+						unit="inches"
+						sharedKey="hipCircumference"
+					/>
+				</InputGroup>
+			</div>
+
+			<ValidationDisplay />
 		</div>
-	</section>
+
+		<div slot="results">
+			<ResultCard title="Body Fat Percentage (Navy Method)" variant="primary">
+				<ResultValue id="navy-result" value={15.3} unit="%" size="xl" color="primary" />
+				<slot name="badge">
+					<CategoryBadge id="category-badge" category="Fitness" class="fitness" />
+				</slot>
+			</ResultCard>
+
+			<ResultCard title="Body Fat Categories">
+				<ComparisonTable
+					headers={["Category", "Men", "Women", "Description"]}
+					rows={[
+						{
+							cells: ["Essential", "2-5%", "10-13%", "Minimum fat needed for health"],
+							class: "essential",
+						},
+						{ cells: ["Athletic", "6-13%", "14-20%", "Typical for athletes"], class: "athletic" },
+						{
+							cells: ["Fitness", "14-17%", "21-24%", "Fit and healthy appearance"],
+							class: "fitness",
+						},
+						{
+							cells: ["Average", "18-24%", "25-31%", "Typical for general population"],
+							class: "average",
+						},
+						{ cells: ["Obese", "≥25%", "≥32%", "Higher health risks"], class: "obese" },
+					]}
+					class="body-fat-categories"
+				/>
+			</ResultCard>
+
+			<ResultCard title="Calculation Methods">
+				<ComparisonTable
+					headers={["Method", "Accuracy", "Equipment"]}
+					rows={[
+						{ cells: ["Navy Circumference", "±3-4%", "Measuring tape"], highlight: true },
+						{ cells: ["DEXA Scan", "±1-2%", "Professional equipment"] },
+						{ cells: ["Bod Pod", "±2-3%", "Air displacement"] },
+						{ cells: ["Hydrostatic", "±1-2%", "Water tank"] },
+					]}
+				/>
+			</ResultCard>
+		</div>
+	</CalculatorLayout>
 </Layout>
 
 <script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
 <script>
-	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Body Fat Calculator Implementation
+	// Body Fat Calculator - Refactored with Components
 	class BodyFatCalculator {
+		private sharedValues: any;
+		private reactiveSharedValues: any;
+
 		constructor() {
-			this.sharedValues = new window.SharedValues();
-			this.currentGender = "male";
-			this.isMetricHeight = false;
-			this.isMetricCircumference = false;
+			// Initialize SharedValues systems
+			this.sharedValues = new (window as any).SharedValues();
 
-			this.initializeElements();
-			this.loadSharedValues();
-			this.attachEventListeners();
+			if ((window as any).ReactiveSharedValues) {
+				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
+			}
+
+			this.init();
+		}
+
+		private init(): void {
+			// Set up event listeners
+			this.setupEventListeners();
+
+			// Initial calculation
 			this.calculate();
 		}
 
-		initializeElements() {
-			// Gender controls
-			this.genderButtons = document.querySelectorAll(".gender-btn");
+		private setupEventListeners(): void {
+			// Listen for input changes
+			document.addEventListener("range-slider-change", (event) => {
+				this.calculate();
+			});
 
-			// Height controls - use more specific selector
-			this.heightUnitButtons = document.querySelectorAll(".input-group .unit-btn");
-			this.heightFeetSlider = document.getElementById("height-feet");
-			this.heightInchesSlider = document.getElementById("height-inches");
-			this.heightCmSlider = document.getElementById("height-cm");
-			this.heightFeetDisplay = document.getElementById("height-feet-display");
-			this.heightInchesDisplay = document.getElementById("height-inches-display");
-			this.heightCmDisplay = document.getElementById("height-cm-display");
+			document.addEventListener("gender-toggle-change", (event) => {
+				this.toggleGenderSpecificInputs();
+				this.calculate();
+			});
 
-			// Circumference controls
-			this.neckSlider = document.getElementById("neck");
-			this.waistSlider = document.getElementById("waist");
-			this.hipsSlider = document.getElementById("hips");
-			this.neckDisplay = document.getElementById("neck-display");
-			this.waistDisplay = document.getElementById("waist-display");
-			this.hipsDisplay = document.getElementById("hips-display");
-
-			// Unit displays
-			this.neckUnit = document.getElementById("neck-unit");
-			this.waistUnit = document.getElementById("waist-unit");
-			this.hipsUnit = document.getElementById("hips-unit");
-
-			// Result displays
-			this.navyResult = document.getElementById("navy-result");
-			this.categoryBadge = document.getElementById("category-badge");
-			this.categoryLabel = document.getElementById("category-label");
-
-			// Gender-specific elements
-			this.hipGroup = document.querySelector(".hip-group");
-			this.maleHelp = document.querySelectorAll(".male-help");
-			this.femaleHelp = document.querySelectorAll(".female-help");
-			this.maleTip = document.querySelectorAll(".male-tip");
-			this.femaleTip = document.querySelectorAll(".female-tip");
-		}
-
-		loadSharedValues() {
-			const values = this.sharedValues.load();
-
-			// Set height
-			if (values.heightUnit === "metric") {
-				this.toggleHeightUnit("metric");
-				this.heightCmSlider.value = values.heightCm;
-				this.heightCmDisplay.textContent = values.heightCm;
-			} else {
-				this.heightFeetSlider.value = values.heightFeet;
-				this.heightInchesSlider.value = values.heightInches;
-				this.heightFeetDisplay.textContent = values.heightFeet;
-				this.heightInchesDisplay.textContent = values.heightInches;
-			}
-
-			// Set gender
-			this.setGender(values.gender);
-
-			// Load body fat specific values
-			this.loadBodyFatValues();
-		}
-
-		loadBodyFatValues() {
-			try {
-				const neck = localStorage.getItem("cruxcalc-bf-neck") || "15.0";
-				const waist = localStorage.getItem("cruxcalc-bf-waist") || "32.0";
-				const hips = localStorage.getItem("cruxcalc-bf-hips") || "38.0";
-				const units = localStorage.getItem("cruxcalc-bf-units") || "imperial";
-
-				this.neckSlider.value = neck;
-				this.waistSlider.value = waist;
-				this.hipsSlider.value = hips;
-
-				this.updateCircumferenceDisplays();
-
-				if (units === "metric") {
-					this.toggleCircumferenceUnit("metric");
+			document.addEventListener("unit-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				if (customEvent.detail.attribute === "height-unit") {
+					this.toggleHeightUnits(customEvent.detail.value);
 				}
-			} catch (error) {
-				console.warn("Error loading body fat values:", error);
-			}
-		}
-
-		saveBodyFatValues() {
-			try {
-				localStorage.setItem("cruxcalc-bf-neck", this.neckSlider.value);
-				localStorage.setItem("cruxcalc-bf-waist", this.waistSlider.value);
-				localStorage.setItem("cruxcalc-bf-hips", this.hipsSlider.value);
-				localStorage.setItem(
-					"cruxcalc-bf-units",
-					this.isMetricCircumference ? "metric" : "imperial"
-				);
-			} catch (error) {
-				console.warn("Error saving body fat values:", error);
-			}
-		}
-
-		attachEventListeners() {
-			// Gender buttons
-			this.genderButtons.forEach((btn) => {
-				btn.addEventListener("click", (e) => {
-					this.setGender(e.target.dataset.gender);
-				});
-			});
-
-			// Height controls
-			this.heightUnitButtons.forEach((btn) => {
-				btn.addEventListener("click", (e) => {
-					this.toggleHeightUnit(e.target.dataset.unit);
-				});
-			});
-
-			[this.heightFeetSlider, this.heightInchesSlider].forEach((slider) => {
-				if (slider) {
-					slider.addEventListener(
-						"input",
-						debounce(() => {
-							this.updateHeightDisplays();
-							this.saveHeightValues();
-							this.calculate();
-						}, 100)
-					);
-				}
-			});
-
-			if (this.heightCmSlider) {
-				this.heightCmSlider.addEventListener(
-					"input",
-					debounce(() => {
-						this.updateHeightDisplays();
-						this.saveHeightValues();
-						this.calculate();
-					}, 100)
-				);
-			}
-
-			// Circumference sliders
-			[this.neckSlider, this.waistSlider, this.hipsSlider].forEach((slider) => {
-				if (slider) {
-					slider.addEventListener(
-						"input",
-						debounce(() => {
-							this.updateCircumferenceDisplays();
-							this.saveBodyFatValues();
-							this.calculate();
-						}, 100)
-					);
-				}
+				this.calculate();
 			});
 		}
 
-		setGender(gender) {
-			this.currentGender = gender;
+		private toggleGenderSpecificInputs(): void {
+			const gender = this.sharedValues.get("gender") || "male";
+			const hipGroup = document.querySelector(".hip-group") as HTMLElement;
 
-			// Update button states
-			this.genderButtons.forEach((btn) => {
-				btn.classList.toggle("active", btn.dataset.gender === gender);
-			});
-
-			// Toggle female-only input tags
-			const femaleOnlyTags = document.querySelectorAll(".input-tag.female-only");
-			femaleOnlyTags.forEach((tag) => {
-				tag.style.display = gender === "female" ? "inline-block" : "none";
-			});
-
-			// Show/hide hip measurement for females
-			if (gender === "female") {
-				this.hipGroup.style.display = "block";
-				this.maleHelp.forEach((el) => (el.style.display = "none"));
-				this.femaleHelp.forEach((el) => (el.style.display = "inline"));
-				this.maleTip.forEach((el) => (el.style.display = "none"));
-				this.femaleTip.forEach((el) => (el.style.display = "block"));
-			} else {
-				this.hipGroup.style.display = "none";
-				this.maleHelp.forEach((el) => (el.style.display = "inline"));
-				this.femaleHelp.forEach((el) => (el.style.display = "none"));
-				this.maleTip.forEach((el) => (el.style.display = "block"));
-				this.femaleTip.forEach((el) => (el.style.display = "none"));
-			}
-
-			this.saveSharedValue("gender", gender);
-			this.calculate();
-		}
-
-		toggleHeightUnit(unit) {
-			this.isMetricHeight = unit === "metric";
-
-			// Update button states
-			this.heightUnitButtons.forEach((btn) => {
-				btn.classList.toggle("active", btn.dataset.unit === unit);
-			});
-
-			// Show/hide appropriate inputs
-			const imperialInputs = document.querySelector(".height-inputs.imperial");
-			const metricInputs = document.querySelector(".height-inputs.metric");
-
-			if (this.isMetricHeight) {
-				imperialInputs.style.display = "none";
-				metricInputs.style.display = "block";
-				this.syncHeightToMetric();
-			} else {
-				imperialInputs.style.display = "block";
-				metricInputs.style.display = "none";
-				this.syncHeightToImperial();
-			}
-
-			this.saveSharedValue("heightUnit", unit);
-			this.calculate();
-		}
-
-		toggleCircumferenceUnit(unit) {
-			this.isMetricCircumference = unit === "metric";
-
-			if (this.isMetricCircumference) {
-				// Convert to cm and update displays
-				this.neckSlider.value = (parseFloat(this.neckSlider.value) * 2.54).toFixed(1);
-				this.waistSlider.value = (parseFloat(this.waistSlider.value) * 2.54).toFixed(1);
-				this.hipsSlider.value = (parseFloat(this.hipsSlider.value) * 2.54).toFixed(1);
-
-				// Update ranges for cm
-				this.neckSlider.min = "25";
-				this.neckSlider.max = "64";
-				this.waistSlider.min = "51";
-				this.waistSlider.max = "152";
-				this.hipsSlider.min = "64";
-				this.hipsSlider.max = "165";
-
-				this.neckUnit.textContent = "cm";
-				this.waistUnit.textContent = "cm";
-				this.hipsUnit.textContent = "cm";
-			} else {
-				// Convert to inches and update displays
-				this.neckSlider.value = (parseFloat(this.neckSlider.value) / 2.54).toFixed(1);
-				this.waistSlider.value = (parseFloat(this.waistSlider.value) / 2.54).toFixed(1);
-				this.hipsSlider.value = (parseFloat(this.hipsSlider.value) / 2.54).toFixed(1);
-
-				// Update ranges for inches
-				this.neckSlider.min = "10";
-				this.neckSlider.max = "25";
-				this.waistSlider.min = "20";
-				this.waistSlider.max = "60";
-				this.hipsSlider.min = "25";
-				this.hipsSlider.max = "65";
-
-				this.neckUnit.textContent = "inches";
-				this.waistUnit.textContent = "inches";
-				this.hipsUnit.textContent = "inches";
-			}
-
-			this.updateCircumferenceDisplays();
-			this.saveBodyFatValues();
-			this.calculate();
-		}
-
-		syncHeightToMetric() {
-			const feet = parseInt(this.heightFeetSlider.value);
-			const inches = parseInt(this.heightInchesSlider.value);
-			const totalInches = feet * 12 + inches;
-			const cm = Math.round(totalInches * 2.54);
-
-			this.heightCmSlider.value = cm.toString();
-			this.heightCmDisplay.textContent = cm.toString();
-		}
-
-		syncHeightToImperial() {
-			const cm = parseInt(this.heightCmSlider.value);
-			const totalInches = Math.round(cm / 2.54);
-			const feet = Math.floor(totalInches / 12);
-			const inches = totalInches % 12;
-
-			this.heightFeetSlider.value = feet.toString();
-			this.heightInchesSlider.value = inches.toString();
-			this.heightFeetDisplay.textContent = feet.toString();
-			this.heightInchesDisplay.textContent = inches.toString();
-		}
-
-		updateHeightDisplays() {
-			if (this.isMetricHeight) {
-				this.heightCmDisplay.textContent = this.heightCmSlider.value;
-			} else {
-				this.heightFeetDisplay.textContent = this.heightFeetSlider.value;
-				this.heightInchesDisplay.textContent = this.heightInchesSlider.value;
+			if (hipGroup) {
+				hipGroup.style.display = gender === "female" ? "block" : "none";
 			}
 		}
 
-		updateCircumferenceDisplays() {
-			this.neckDisplay.textContent = parseFloat(this.neckSlider.value).toFixed(1);
-			this.waistDisplay.textContent = parseFloat(this.waistSlider.value).toFixed(1);
-			this.hipsDisplay.textContent = parseFloat(this.hipsSlider.value).toFixed(1);
-		}
+		private toggleHeightUnits(unit: string): void {
+			const imperialInputs = document.querySelector('[data-unit-group="imperial"]') as HTMLElement;
+			const metricInputs = document.querySelector('[data-unit-group="metric"]') as HTMLElement;
 
-		saveSharedValue(key, value) {
-			const update = {};
-			update[key] = value;
-			this.sharedValues.save(update);
-		}
-
-		saveHeightValues() {
-			if (this.isMetricHeight) {
-				this.syncHeightToImperial(); // Sync for storage
-				this.saveSharedValue("heightCm", parseInt(this.heightCmSlider.value));
-			} else {
-				this.syncHeightToMetric(); // Sync for storage
-			}
-
-			this.saveSharedValue("heightFeet", parseInt(this.heightFeetSlider.value));
-			this.saveSharedValue("heightInches", parseInt(this.heightInchesSlider.value));
-			this.saveSharedValue("heightUnit", this.isMetricHeight ? "metric" : "imperial");
-		}
-
-		getHeightInches() {
-			if (this.isMetricHeight) {
-				return parseFloat(this.heightCmSlider.value) / 2.54;
-			} else {
-				const feet = parseInt(this.heightFeetSlider.value);
-				const inches = parseInt(this.heightInchesSlider.value);
-				return feet * 12 + inches;
-			}
-		}
-
-		getCircumferenceInches(value) {
-			if (this.isMetricCircumference) {
-				return parseFloat(value) / 2.54;
-			} else {
-				return parseFloat(value);
-			}
-		}
-
-		calculate() {
-			const heightInches = this.getHeightInches();
-			const neckInches = this.getCircumferenceInches(this.neckSlider.value);
-			const waistInches = this.getCircumferenceInches(this.waistSlider.value);
-			const hipsInches =
-				this.currentGender === "female" ? this.getCircumferenceInches(this.hipsSlider.value) : 0;
-
-			// Calculate Navy method
-			const navyBF = this.calculateNavyBodyFat(
-				this.currentGender,
-				heightInches,
-				neckInches,
-				waistInches,
-				hipsInches
-			);
-
-			// Update displays
-			this.navyResult.textContent = navyBF.toFixed(1);
-			this.updateCategoryBadge(navyBF);
-		}
-
-		updateCategoryBadge(bodyFat) {
-			const categories = this.getBodyFatCategories(this.currentGender);
-			let category = "average";
-
-			for (const [cat, range] of Object.entries(categories)) {
-				if (bodyFat >= range.min && bodyFat <= range.max) {
-					category = cat;
-					break;
-				}
-			}
-
-			// Handle extreme values
-			if (bodyFat < categories.essential.min) category = "essential";
-			if (bodyFat > categories.obese.min) category = "obese";
-
-			this.categoryLabel.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-			this.categoryBadge.className = `category-badge ${category}`;
-		}
-
-		getBodyFatCategories(gender) {
-			if (gender === "male") {
-				return {
-					essential: { min: 2, max: 5 },
-					athletic: { min: 6, max: 13 },
-					fitness: { min: 14, max: 17 },
-					average: { min: 18, max: 24 },
-					obese: { min: 25, max: 50 },
-				};
-			} else {
-				return {
-					essential: { min: 10, max: 13 },
-					athletic: { min: 14, max: 20 },
-					fitness: { min: 21, max: 24 },
-					average: { min: 25, max: 31 },
-					obese: { min: 32, max: 50 },
-				};
-			}
-		}
-
-		calculateNavyBodyFat(gender, heightInches, neck, waist, hips) {
-			try {
-				if (gender === "male") {
-					// Men: 495 / (1.0324 - 0.19077×log10(waist-neck) + 0.15456×log10(height)) - 450
-					const logWaistNeck = Math.log10(waist - neck);
-					const logHeight = Math.log10(heightInches);
-					const bodyFat = 495 / (1.0324 - 0.19077 * logWaistNeck + 0.15456 * logHeight) - 450;
-					return Math.max(2, Math.min(50, bodyFat)); // Clamp between 2-50%
+			if (imperialInputs && metricInputs) {
+				if (unit === "imperial") {
+					imperialInputs.style.display = "block";
+					metricInputs.style.display = "none";
 				} else {
-					// Women: 495 / (1.29579 - 0.35004×log10(waist+hip-neck) + 0.22100×log10(height)) - 450
-					const logWaistHipNeck = Math.log10(waist + hips - neck);
-					const logHeight = Math.log10(heightInches);
-					const bodyFat = 495 / (1.29579 - 0.35004 * logWaistHipNeck + 0.221 * logHeight) - 450;
-					return Math.max(10, Math.min(50, bodyFat)); // Clamp between 10-50%
+					imperialInputs.style.display = "none";
+					metricInputs.style.display = "block";
 				}
+			}
+		}
+
+		private getHeightInInches(): number {
+			const heightUnit = this.sharedValues.get("heightUnit") || "imperial";
+
+			if (heightUnit === "imperial") {
+				const feet = this.sharedValues.get("heightFeet") || 5;
+				const inches = this.sharedValues.get("heightInches") || 10;
+				return feet * 12 + inches;
+			} else {
+				const cm = this.sharedValues.get("heightCm") || 178;
+				return cm / 2.54; // Convert cm to inches
+			}
+		}
+
+		private calculate(): void {
+			try {
+				const gender = this.sharedValues.get("gender") || "male";
+				const heightInches = this.getHeightInInches();
+				const neck = this.sharedValues.get("neckCircumference") || 15;
+				const waist = this.sharedValues.get("waistCircumference") || 32;
+				const hips = this.sharedValues.get("hipCircumference") || 38;
+
+				let bodyFat: number;
+
+				if (gender === "male") {
+					// Navy formula for men: 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
+					bodyFat =
+						495 /
+							(1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(heightInches)) -
+						450;
+				} else {
+					// Navy formula for women: 495 / (1.29579 - 0.35004 * log10(waist + hips - neck) + 0.22100 * log10(height)) - 450
+					bodyFat =
+						495 /
+							(1.29579 -
+								0.35004 * Math.log10(waist + hips - neck) +
+								0.221 * Math.log10(heightInches)) -
+						450;
+				}
+
+				// Ensure reasonable bounds
+				bodyFat = Math.max(1, Math.min(60, bodyFat));
+
+				// Update result display
+				this.updateResults(bodyFat, gender);
 			} catch (error) {
-				console.warn("Error calculating Navy body fat:", error);
-				return gender === "male" ? 15 : 25; // Default values
+				console.error("Calculation error:", error);
+				this.updateResults(0, "male");
+			}
+		}
+
+		private updateResults(bodyFat: number, gender: string): void {
+			// Update result value
+			const resultElement = document.getElementById("navy-result");
+			if (resultElement) {
+				resultElement.textContent = bodyFat.toFixed(1);
+			}
+
+			// Update category badge
+			const category = this.getBodyFatCategory(bodyFat, gender);
+			const categoryBadge = document.getElementById("category-badge");
+			if (categoryBadge) {
+				categoryBadge.textContent = category.name;
+				categoryBadge.className = `category-badge ${category.class}`;
+			}
+
+			// Highlight appropriate row in table
+			this.highlightCategoryRow(category.class);
+		}
+
+		private getBodyFatCategory(bodyFat: number, gender: string): { name: string; class: string } {
+			if (gender === "male") {
+				if (bodyFat < 6) return { name: "Essential", class: "essential" };
+				if (bodyFat < 14) return { name: "Athletic", class: "athletic" };
+				if (bodyFat < 18) return { name: "Fitness", class: "fitness" };
+				if (bodyFat < 25) return { name: "Average", class: "average" };
+				return { name: "Obese", class: "obese" };
+			} else {
+				if (bodyFat < 14) return { name: "Essential", class: "essential" };
+				if (bodyFat < 21) return { name: "Athletic", class: "athletic" };
+				if (bodyFat < 25) return { name: "Fitness", class: "fitness" };
+				if (bodyFat < 32) return { name: "Average", class: "average" };
+				return { name: "Obese", class: "obese" };
+			}
+		}
+
+		private highlightCategoryRow(categoryClass: string): void {
+			// Remove existing highlights
+			const rows = document.querySelectorAll(".body-fat-categories tbody tr");
+			rows.forEach((row) => row.classList.remove("highlight"));
+
+			// Add highlight to matching row
+			const targetRow = document.querySelector(`.body-fat-categories .${categoryClass}`);
+			if (targetRow) {
+				targetRow.classList.add("highlight");
 			}
 		}
 	}
 
-	// Debounce utility function
-	function debounce(func, wait) {
-		let timeout;
-		return function executedFunction(...args) {
-			const later = () => {
-				clearTimeout(timeout);
-				func(...args);
-			};
-			clearTimeout(timeout);
-			timeout = setTimeout(later, wait);
-		};
-	}
-
-	// Initialize calculator when DOM is loaded
+	// Initialize calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
 		new BodyFatCalculator();
 	});
 </script>
 
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem;
-		min-height: 100vh;
-	}
-
-	.calculator-header {
-		text-align: center;
-		margin-bottom: 3rem;
-	}
-
-	.calculator-header h1 {
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
-	.calculator-header p {
-		color: var(--color-text-muted);
-		font-size: 1.125rem;
-	}
-
-	.calculator-layout {
-		display: grid;
-		grid-template-columns: 1fr 1.5fr;
-		gap: 3rem;
-		max-width: 1400px;
-		margin: 0 auto;
-	}
-
-	.calculator-inputs {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		height: fit-content;
-		box-shadow: var(--shadow-md);
-	}
-
-	.input-group {
-		margin-bottom: 2rem;
-		display: block;
-	}
-
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		font-size: 1rem;
-		color: var(--color-text);
-		margin-bottom: 0.75rem;
-	}
-
-	.input-container {
-		position: relative;
-		margin-bottom: 1rem;
-		width: 100%;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.125rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.input-help {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		margin: 0.5rem 0 0 0;
-		padding-left: 1rem;
-		font-style: italic;
-	}
-
-	.calculator-results {
-		display: flex;
-		flex-direction: column;
-		gap: 2rem;
-	}
-
-	.result-card {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 2rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.result-card h3 {
-		margin: 0 0 1rem 0;
-		color: var(--color-text);
-	}
-
-	/* Method input indicators */
-	.method-inputs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-bottom: 1.5rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.input-tag {
-		display: inline-block;
-		padding: 0.25rem 0.75rem;
-		background: var(--color-bg-secondary);
-		border: 1px solid var(--color-border);
-		border-radius: var(--border-radius);
-		font-size: 0.8rem;
-		font-weight: 600;
-		color: var(--color-text-secondary);
-	}
-
-	.navy-primary .input-tag {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	.input-tag.female-only {
-		display: none;
-	}
-
-	/* Gender toggle buttons */
-	.gender-toggle {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.gender-btn {
-		flex: 1;
-		padding: 0.75rem;
-		border: var(--border-width) solid var(--color-border);
-		background: var(--color-surface);
-		font-weight: 700;
-		cursor: pointer;
-		transition: all 0.1s ease;
-		border-radius: var(--border-radius);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.gender-btn:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--shadow-md);
-	}
-
-	.gender-btn.active {
-		background: var(--color-primary);
-		color: white;
-	}
-
-	/* Unit toggle buttons */
-	.unit-toggle {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.unit-btn {
-		padding: 0.5rem 1rem;
-		border: var(--border-width) solid var(--color-border);
-		background: var(--color-surface);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.1s ease;
-		border-radius: var(--border-radius);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.unit-btn:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--shadow-md);
-	}
-
-	.unit-btn.active {
-		background: var(--color-primary);
-		color: white;
-	}
-
-	/* Height inputs layout */
+	/* Component-specific styles */
 	.height-inputs {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
+		margin-bottom: 1rem;
 	}
 
-	.height-inputs.metric {
-		grid-template-columns: 1fr;
+	.hip-group {
+		transition: all 0.3s ease;
 	}
 
-	/* Results styling */
-	.results-grid {
-		display: grid;
-		gap: 1.5rem;
+	/* Body fat category styling */
+	.body-fat-categories .essential {
+		background: color-mix(in srgb, var(--color-info) 10%, transparent);
 	}
 
-	.navy-primary {
+	.body-fat-categories .athletic {
+		background: color-mix(in srgb, var(--color-success) 10%, transparent);
+	}
+
+	.body-fat-categories .fitness {
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+	}
+
+	.body-fat-categories .average {
+		background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+	}
+
+	.body-fat-categories .obese {
+		background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+	}
+
+	.body-fat-categories .highlight {
+		background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+		font-weight: 600;
+	}
+
+	/* Category badge colors */
+	:global(.category-badge.essential) {
+		background: color-mix(in srgb, var(--color-info) 20%, transparent);
+		color: var(--color-info);
+		border-color: var(--color-info);
+	}
+
+	:global(.category-badge.athletic) {
+		background: color-mix(in srgb, var(--color-success) 20%, transparent);
+		color: var(--color-success);
+		border-color: var(--color-success);
+	}
+
+	:global(.category-badge.fitness) {
+		background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+		color: var(--color-primary);
 		border-color: var(--color-primary);
-		box-shadow: 4px 4px 0 var(--color-primary);
 	}
 
-	.primary-result {
-		font-size: 2.5rem;
-		font-weight: 900;
-		color: var(--color-primary);
+	:global(.category-badge.average) {
+		background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+		color: var(--color-warning);
+		border-color: var(--color-warning);
 	}
 
-	.result-value {
-		display: flex;
-		align-items: baseline;
-		gap: 0.25rem;
+	:global(.category-badge.obese) {
+		background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+		color: var(--color-danger);
+		border-color: var(--color-danger);
 	}
 
-	/* Category badge */
-	.category-badge {
-		display: inline-block;
-		padding: 0.5rem 1rem;
-		margin-top: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 0.9rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		border: 2px solid;
-		text-align: left;
-	}
-
-	.category-badge.essential {
-		background: #e3f2fd;
-		color: #1565c0;
-		border-color: #1565c0;
-	}
-
-	.category-badge.athletic {
-		background: #e8f5e8;
-		color: #2e7d32;
-		border-color: #2e7d32;
-	}
-
-	.category-badge.fitness {
-		background: #fff3e0;
-		color: #ef6c00;
-		border-color: #ef6c00;
-	}
-
-	.category-badge.average {
-		background: #fce4ec;
-		color: #c2185b;
-		border-color: #c2185b;
-	}
-
-	.category-badge.obese {
-		background: #ffebee;
-		color: #d32f2f;
-		border-color: #d32f2f;
-	}
-
-	.result-unit {
-		font-size: 1.2rem;
-		font-weight: 600;
-		color: var(--color-text-secondary);
-	}
-
-	.result-label {
-		font-weight: 600;
-		color: var(--color-text-secondary);
-		margin-top: 0.5rem;
-		text-align: left;
-	}
-
-	.result-section {
-		text-align: left;
-	}
-
-	.result-details {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 2px solid var(--color-border);
-	}
-
-	.detail-item {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 0.5rem;
-	}
-
-	.detail-label {
-		font-weight: 600;
-		color: var(--color-text-secondary);
-	}
-
-	.detail-value {
-		font-weight: 700;
-		color: var(--color-text);
-	}
-
-	/* Categories table */
-	.categories-table {
-		overflow-x: auto;
-	}
-
-	.categories-table table {
-		width: 100%;
-		border-collapse: collapse;
-		border: var(--border-width) solid var(--color-border);
-	}
-
-	.categories-table th,
-	.categories-table td {
-		padding: 1rem;
-		text-align: left;
-		border: 2px solid var(--color-border);
-	}
-
-	.categories-table th {
-		background: var(--color-primary);
-		color: white;
-		font-weight: 700;
-	}
-
-	.categories-table tr.essential {
-		background: #e3f2fd;
-	}
-
-	.categories-table tr.athletic {
-		background: #e8f5e8;
-	}
-
-	.categories-table tr.fitness {
-		background: #fff3e0;
-	}
-
-	.categories-table tr.average {
-		background: #fce4ec;
-	}
-
-	.categories-table tr.obese {
-		background: #ffebee;
-	}
-
-	/* Method info card */
-	.method-info-card ul {
-		list-style: none;
-		padding: 0;
-		margin-top: 1rem;
-	}
-
-	.method-info-card li {
-		padding: 0.5rem 0;
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.method-info-card li:before {
-		content: "✓ ";
-		color: var(--color-primary);
-		font-weight: 700;
-	}
-
-	.method-info-card li:last-child {
-		border-bottom: none;
-	}
-
-	/* Mobile Responsive */
+	/* Responsive design */
 	@media (max-width: 768px) {
-		.calculator-layout {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
-
 		.height-inputs {
 			grid-template-columns: 1fr;
-			gap: 1rem;
-		}
-
-		.categories-table {
-			font-size: 0.9rem;
-		}
-
-		.categories-table th,
-		.categories-table td {
-			padding: 0.75rem;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.primary-result {
-			font-size: 2rem;
-		}
-
-		.gender-toggle {
-			flex-direction: column;
 		}
 	}
 </style>

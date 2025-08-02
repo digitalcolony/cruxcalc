@@ -50,6 +50,20 @@ import GenderToggle from "../components/GenderToggle.astro";
 					</div>
 
 					<div class="example">
+						<h3>Height (Metric)</h3>
+						<RangeSlider
+							id="height-cm"
+							label="Height"
+							min={120}
+							max={220}
+							value={175}
+							unit="cm"
+							helpText="Enter your height in centimeters"
+							sharedKey="heightCm"
+						/>
+					</div>
+
+					<div class="example">
 						<h3>Weight (Metric)</h3>
 						<RangeSlider
 							id="weight-kg"
@@ -60,6 +74,20 @@ import GenderToggle from "../components/GenderToggle.astro";
 							unit="kg"
 							helpText="Enter your current weight in kilograms"
 							sharedKey="weightKg"
+						/>
+					</div>
+
+					<div class="example">
+						<h3>Weight (Imperial)</h3>
+						<RangeSlider
+							id="weight-lbs"
+							label="Weight"
+							min={80}
+							max={400}
+							value={160}
+							unit="lbs"
+							helpText="Enter your current weight in pounds"
+							sharedKey="weightLbs"
 						/>
 					</div>
 
