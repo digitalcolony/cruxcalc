@@ -17,7 +17,7 @@ const { options, activeValue, dataAttribute = "unit", class: className = "" } = 
 		options.map((option) => (
 			<button
 				class={`unit-btn ${option.value === activeValue ? "active" : ""}`}
-				data-unit={option.value}
+				{...{ [`data-${dataAttribute}`]: option.value }}
 			>
 				{option.label}
 			</button>

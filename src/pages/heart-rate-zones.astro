@@ -1,833 +1,389 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import CategoryBadge from "../components/CategoryBadge.astro";
+import ComparisonTable from "../components/ComparisonTable.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
 ---
 
 <Layout
 	title="Heart Rate Zones Calculator - Potato Hack Fitness Calculators"
 	description="Calculate your heart rate training zones based on age and maximum heart rate. Get personalized zones for effective training intensity."
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>Heart Rate Zones Calculator</h1>
-				<p>
-					Calculate your heart rate training zones for optimal workout intensity and performance
-				</p>
+	<CalculatorLayout
+		title="Heart Rate Zones Calculator"
+		description="Calculate your heart rate training zones for optimal workout intensity and performance"
+	>
+		<div slot="inputs">
+			<InputGroup
+				label="Maximum Heart Rate Method"
+				helpText="Choose how to determine your max heart rate"
+			>
+				<UnitToggle
+					options={[
+						{ value: "formula", label: "Age Formula" },
+						{ value: "custom", label: "Known Max HR" },
+					]}
+					activeValue="formula"
+					dataAttribute="max-hr-method"
+				/>
+			</InputGroup>
+
+			<div class="age-group" data-method-group="formula">
+				<InputGroup label="Age" helpText="Your current age in years">
+					<RangeSlider
+						id="age"
+						label=""
+						min={15}
+						max={100}
+						value={30}
+						unit="years"
+						sharedKey="age"
+					/>
+				</InputGroup>
 			</div>
 
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="max-hr-method">Maximum Heart Rate Method</label>
-						<div class="method-selector">
-							<button class="method-btn active" data-method="formula">
-								<strong>Age Formula</strong>
-								<span>220 - age (estimate)</span>
-							</button>
-							<button class="method-btn" data-method="custom">
-								<strong>Known Max HR</strong>
-								<span>Enter your measured max HR</span>
-							</button>
-						</div>
-					</div>
-
-					<div class="input-group age-group">
-						<label for="age">Age</label>
-						<div class="input-container">
-							<input type="range" id="age" min="15" max="100" value="30" />
-							<div class="input-display">
-								<span id="age-display">30</span> years
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group custom-hr-group" style="display: none;">
-						<label for="custom-max-hr">Your Maximum Heart Rate</label>
-						<div class="input-container">
-							<input type="range" id="custom-max-hr" min="150" max="220" value="190" />
-							<div class="input-display">
-								<span id="custom-max-hr-display">190</span> bpm
-							</div>
-						</div>
-						<p class="input-help">Enter your highest recorded heart rate during intense exercise</p>
-					</div>
-
-					<div class="info-sections">
-						<div class="info-section">
-							<h3>How to Find Your True Max Heart Rate</h3>
-							<ul>
-								<li>
-									<strong>Field Test:</strong> Warm up, then run up a hill for 2 minutes at increasing
-									intensity
-								</li>
-								<li>
-									<strong>Recent Maximum:</strong> Use the highest heart rate seen during intense exercise
-									in the last 6 months
-								</li>
-								<li>
-									<strong>Age Formula:</strong> 220 minus your age (less accurate but widely used)
-								</li>
-							</ul>
-						</div>
-
-						<div class="info-section">
-							<h3>Zone Training Benefits</h3>
-							<ul>
-								<li>
-									<strong>Zone 1-2:</strong> Improves fat burning, builds aerobic base, aids recovery
-								</li>
-								<li><strong>Zone 3:</strong> Develops aerobic capacity and lactate buffering</li>
-								<li><strong>Zone 4:</strong> Improves lactate threshold and VO2 max</li>
-								<li>
-									<strong>Zone 5:</strong> Develops neuromuscular power and anaerobic capacity
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-
-				<div class="calculator-results">
-					<div class="max-hr-display">
-						<h3>Maximum Heart Rate</h3>
-						<div class="max-hr-value">
-							<span id="calculated-max-hr">190</span>
-							<span class="max-hr-unit">bpm</span>
-						</div>
-						<p class="max-hr-method" id="max-hr-method-text">Calculated using 220 - age formula</p>
-					</div>
-
-					<div class="zones-compact">
-						<h3>Training Zones</h3>
-						<div class="zones-table">
-							<div class="zone-row zone-1">
-								<div class="zone-label">
-									<div class="zone-number">1</div>
-									<div class="zone-name">Easy</div>
-								</div>
-								<div class="zone-range">
-									<span id="zone1-min">129</span> - <span id="zone1-max">139</span>
-								</div>
-								<div class="zone-percentage">68-73%</div>
-								<div class="zone-description">Recovery & base endurance</div>
-							</div>
-
-							<div class="zone-row zone-2">
-								<div class="zone-label">
-									<div class="zone-number">2</div>
-									<div class="zone-name">Steady</div>
-								</div>
-								<div class="zone-range">
-									<span id="zone2-min">139</span> - <span id="zone2-max">152</span>
-								</div>
-								<div class="zone-percentage">73-80%</div>
-								<div class="zone-description">Aerobic base & fat burning</div>
-							</div>
-
-							<div class="zone-row zone-3">
-								<div class="zone-label">
-									<div class="zone-number">3</div>
-									<div class="zone-name">Moderate</div>
-								</div>
-								<div class="zone-range">
-									<span id="zone3-min">152</span> - <span id="zone3-max">165</span>
-								</div>
-								<div class="zone-percentage">80-87%</div>
-								<div class="zone-description">Aerobic capacity</div>
-							</div>
-
-							<div class="zone-row zone-4">
-								<div class="zone-label">
-									<div class="zone-number">4</div>
-									<div class="zone-name">Hard</div>
-								</div>
-								<div class="zone-range">
-									<span id="zone4-min">165</span> - <span id="zone4-max">177</span>
-								</div>
-								<div class="zone-percentage">87-93%</div>
-								<div class="zone-description">Lactate threshold</div>
-							</div>
-
-							<div class="zone-row zone-5">
-								<div class="zone-label">
-									<div class="zone-number">5</div>
-									<div class="zone-name">Very Hard</div>
-								</div>
-								<div class="zone-range">
-									<span id="zone5-min">177</span> - <span id="zone5-max">190</span>
-								</div>
-								<div class="zone-percentage">93-100%</div>
-								<div class="zone-description">Neuromuscular power</div>
-							</div>
-						</div>
-						<div class="zones-unit">All values in beats per minute (bpm)</div>
-					</div>
-				</div>
+			<div class="custom-hr-group" data-method-group="custom" style="display: none;">
+				<InputGroup
+					label="Your Maximum Heart Rate"
+					helpText="Enter your highest recorded heart rate during intense exercise"
+				>
+					<RangeSlider
+						id="custom-max-hr"
+						label=""
+						min={150}
+						max={220}
+						value={190}
+						unit="bpm"
+						sharedKey="customMaxHR"
+					/>
+				</InputGroup>
 			</div>
+
+			<ResultCard title="Training Tips" variant="default">
+				<div class="info-sections">
+					<div class="info-section">
+						<h4>How to Find Your True Max Heart Rate</h4>
+						<ul>
+							<li>
+								<strong>Field Test:</strong> Warm up, then run up a hill for 2 minutes at increasing
+								intensity
+							</li>
+							<li>
+								<strong>Recent Maximum:</strong> Use the highest heart rate seen during intense exercise
+								in the last 6 months
+							</li>
+							<li>
+								<strong>Age Formula:</strong> 220 minus your age (less accurate but widely used)
+							</li>
+						</ul>
+					</div>
+
+					<div class="info-section">
+						<h4>Zone Training Benefits</h4>
+						<ul>
+							<li>
+								<strong>Zone 1-2:</strong> Improves fat burning, builds aerobic base, aids recovery
+							</li>
+							<li><strong>Zone 3:</strong> Develops aerobic capacity and lactate buffering</li>
+							<li><strong>Zone 4:</strong> Improves lactate threshold and VO2 max</li>
+							<li><strong>Zone 5:</strong> Develops neuromuscular power and anaerobic capacity</li>
+						</ul>
+					</div>
+				</div>
+			</ResultCard>
+
+			<ValidationDisplay />
 		</div>
-	</section>
+
+		<div slot="results">
+			<ResultCard title="Maximum Heart Rate" variant="primary">
+				<ResultValue id="calculated-max-hr" value={190} unit="bpm" size="xl" color="primary" />
+				<p id="max-hr-method-text" class="method-description">Calculated using 220 - age formula</p>
+			</ResultCard>
+
+			<ResultCard title="Training Zones">
+				<ComparisonTable
+					headers={["Zone", "Name", "Heart Rate", "%Max", "Purpose"]}
+					rows={[
+						{
+							cells: [
+								"1",
+								"Easy",
+								"<span id='zone1-range'>129-139</span>",
+								"68-73%",
+								"Recovery & base endurance",
+							],
+							class: "zone-1",
+						},
+						{
+							cells: [
+								"2",
+								"Steady",
+								"<span id='zone2-range'>139-152</span>",
+								"73-80%",
+								"Aerobic base building",
+							],
+							class: "zone-2",
+						},
+						{
+							cells: [
+								"3",
+								"Tempo",
+								"<span id='zone3-range'>152-171</span>",
+								"80-90%",
+								"Lactate threshold",
+							],
+							class: "zone-3",
+						},
+						{
+							cells: [
+								"4",
+								"Threshold",
+								"<span id='zone4-range'>171-181</span>",
+								"90-95%",
+								"VO2 max improvement",
+							],
+							class: "zone-4",
+						},
+						{
+							cells: [
+								"5",
+								"VO2 Max",
+								"<span id='zone5-range'>181-190</span>",
+								"95-100%",
+								"Neuromuscular power",
+							],
+							class: "zone-5",
+						},
+					]}
+					class="heart-rate-zones"
+				/>
+			</ResultCard>
+
+			<ResultCard title="Zone Distribution Guide">
+				<ComparisonTable
+					headers={["Training Goal", "Zone 1-2", "Zone 3", "Zone 4", "Zone 5"]}
+					rows={[
+						{ cells: ["Base Building", "80%", "15%", "5%", "0%"], highlight: true },
+						{ cells: ["General Fitness", "70%", "20%", "8%", "2%"] },
+						{ cells: ["Race Preparation", "60%", "25%", "12%", "3%"] },
+						{ cells: ["Peak Performance", "50%", "25%", "20%", "5%"] },
+					]}
+				/>
+			</ResultCard>
+		</div>
+	</CalculatorLayout>
 </Layout>
 
+<script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
+<script>
+	// Heart Rate Zones Calculator - Refactored with Components
+	class HeartRateZonesCalculator {
+		private sharedValues: any;
+		private reactiveSharedValues: any;
+
+		constructor() {
+			// Initialize SharedValues systems
+			this.sharedValues = new (window as any).SharedValues();
+
+			if ((window as any).ReactiveSharedValues) {
+				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
+			}
+
+			this.init();
+		}
+
+		private init(): void {
+			// Set up event listeners
+			this.setupEventListeners();
+
+			// Set default method
+			this.sharedValues.set("maxHRMethod", "formula");
+
+			// Initialize the UI state
+			this.toggleMaxHRMethod("formula");
+
+			// Initial calculation
+			this.calculate();
+		}
+
+		private setupEventListeners(): void {
+			// Listen for input changes
+			document.addEventListener("range-slider-change", (event) => {
+				this.calculate();
+			});
+
+			document.addEventListener("unit-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				if (customEvent.detail.attribute === "max-hr-method") {
+					this.toggleMaxHRMethod(customEvent.detail.value);
+					this.sharedValues.set("maxHRMethod", customEvent.detail.value);
+				}
+				this.calculate();
+			});
+		}
+
+		private toggleMaxHRMethod(method: string): void {
+			const ageGroup = document.querySelector(".age-group") as HTMLElement;
+			const customGroup = document.querySelector(".custom-hr-group") as HTMLElement;
+
+			if (ageGroup && customGroup) {
+				if (method === "formula") {
+					ageGroup.style.display = "block";
+					customGroup.style.display = "none";
+				} else {
+					ageGroup.style.display = "none";
+					customGroup.style.display = "block";
+				}
+			}
+		}
+
+		private calculate(): void {
+			try {
+				const method = this.sharedValues.get("maxHRMethod") || "formula";
+				let maxHR: number;
+
+				if (method === "formula") {
+					const age = this.sharedValues.get("age") || 30;
+					maxHR = 220 - age;
+				} else {
+					maxHR = this.sharedValues.get("customMaxHR") || 190;
+				}
+
+				// Update max HR display
+				this.updateMaxHR(maxHR, method);
+
+				// Calculate and update zones
+				this.updateZones(maxHR);
+			} catch (error) {
+				console.error("Calculation error:", error);
+			}
+		}
+
+		private updateMaxHR(maxHR: number, method: string): void {
+			const maxHRElement = document.getElementById("calculated-max-hr");
+			const methodTextElement = document.getElementById("max-hr-method-text");
+
+			if (maxHRElement) {
+				maxHRElement.textContent = maxHR.toString();
+			}
+
+			if (methodTextElement) {
+				if (method === "formula") {
+					methodTextElement.textContent = "Calculated using 220 - age formula";
+				} else {
+					methodTextElement.textContent = "Using your known maximum heart rate";
+				}
+			}
+		}
+
+		private updateZones(maxHR: number): void {
+			// Zone calculations (% of max HR)
+			const zones = [
+				{ min: 0.68, max: 0.73, id: "zone1-range" },
+				{ min: 0.73, max: 0.8, id: "zone2-range" },
+				{ min: 0.8, max: 0.9, id: "zone3-range" },
+				{ min: 0.9, max: 0.95, id: "zone4-range" },
+				{ min: 0.95, max: 1.0, id: "zone5-range" },
+			];
+
+			zones.forEach((zone) => {
+				const minHR = Math.round(maxHR * zone.min);
+				const maxHRZone = Math.round(maxHR * zone.max);
+				const element = document.getElementById(zone.id);
+
+				if (element) {
+					element.textContent = `${minHR}-${maxHRZone}`;
+				}
+			});
+		}
+	}
+
+	// Initialize calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		new HeartRateZonesCalculator();
+	});
+</script>
+
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem;
-		min-height: 100vh;
-	}
-
-	.calculator-header {
-		text-align: center;
-		margin-bottom: 3rem;
-	}
-
-	.calculator-header h1 {
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
-	.calculator-header p {
-		color: var(--color-text-muted);
-		font-size: 1.125rem;
-	}
-
-	.calculator-layout {
+	/* Component-specific styles */
+	.info-sections {
 		display: grid;
-		grid-template-columns: 1fr 1.5fr;
-		gap: 3rem;
-		max-width: 1400px;
-		margin: 0 auto;
+		gap: 1.5rem;
 	}
 
-	.calculator-inputs {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		height: fit-content;
-		box-shadow: var(--shadow-md);
-	}
-
-	.input-group {
-		margin-bottom: 2rem;
-		display: block;
-	}
-
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		font-size: 1rem;
+	.info-section h4 {
 		color: var(--color-text);
+		font-size: 1rem;
+		font-weight: 600;
 		margin-bottom: 0.75rem;
 	}
 
-	/* Ensure age group has proper block layout like BMR */
-	.age-group {
-		display: block;
-	}
-
-	.input-container {
-		position: relative;
-		margin-bottom: 1rem;
-		width: 100%;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
-	}
-
-	/* Ensure age group container matches BMR layout */
-	.age-group .input-container {
-		width: 100%;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.125rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
-	}
-
-	/* Ensure age slider uses full width like BMR page */
-	.age-group input[type="range"] {
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.input-help {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		margin: 0.5rem 0 0 0;
-		padding-left: 1rem;
-		font-style: italic;
-	}
-
-	.method-selector {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.method-btn {
-		font-family: inherit;
-		font-weight: 700;
-		padding: 1rem;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		background: var(--color-surface);
-		color: var(--color-text);
-		cursor: pointer;
-		transition: all 0.1s ease;
-		text-align: left;
-		box-shadow: var(--shadow-sm);
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.method-btn:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--shadow-md);
-	}
-
-	.method-btn.active {
-		background: var(--color-primary);
-		color: white;
-	}
-
-	.method-btn strong {
-		font-size: 1rem;
-	}
-
-	.method-btn span {
-		font-size: 0.875rem;
-		opacity: 0.8;
-	}
-
-	.calculator-results {
-		display: flex;
-		flex-direction: column;
-		gap: 2rem;
-	}
-
-	.max-hr-display {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 2rem;
-		text-align: center;
-		box-shadow: var(--shadow-md);
-	}
-
-	.max-hr-display h3 {
-		margin: 0 0 1rem 0;
-		color: var(--color-text);
-	}
-
-	.max-hr-value {
-		font-size: 3rem;
-		font-weight: 800;
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-	}
-
-	.max-hr-unit {
-		font-size: 1.5rem;
-		color: var(--color-text-muted);
-	}
-
-	.max-hr-method {
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-		margin: 0;
-	}
-
-	.zones-compact {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 2rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.zones-compact h3 {
-		margin: 0 0 1.5rem 0;
-		color: var(--color-text);
-		text-align: center;
-		font-size: 1.25rem;
-	}
-
-	.zones-table {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.zone-row {
-		display: grid;
-		grid-template-columns: 120px 1fr 80px 1.5fr;
-		gap: 1rem;
-		align-items: center;
-		padding: 0.75rem 1rem;
-		border-radius: var(--border-radius);
-		background: var(--color-bg);
-		border: 2px solid transparent;
-		transition: all 0.1s ease;
-	}
-
-	.zone-row:hover {
-		transform: translate(-1px, -1px);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.zone-label {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.zone-number {
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 800;
-		font-size: 1.125rem;
-		color: white;
-		flex-shrink: 0;
-	}
-
-	.zone-name {
-		font-weight: 600;
-		color: var(--color-text);
-		font-size: 1rem;
-	}
-
-	.zone-range {
-		font-weight: 800;
-		font-size: 1.125rem;
-		text-align: center;
-	}
-
-	.zone-percentage {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		text-align: center;
-		font-weight: 500;
-	}
-
-	.zone-description {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		margin: 0;
-	}
-
-	.zones-unit {
-		text-align: center;
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-		margin-top: 1rem;
-		font-style: italic;
-	}
-
-	/* Zone-specific colors */
-	.zone-1 {
-		border-left: 6px solid #00ff88;
-	}
-	.zone-1 .zone-number {
-		background: #00ff88;
-	}
-	.zone-1 .zone-range {
-		color: #00ff88;
-	}
-
-	.zone-2 {
-		border-left: 6px solid #33ccff;
-	}
-	.zone-2 .zone-number {
-		background: #33ccff;
-	}
-	.zone-2 .zone-range {
-		color: #33ccff;
-	}
-
-	.zone-3 {
-		border-left: 6px solid #ffcc00;
-	}
-	.zone-3 .zone-number {
-		background: #ffcc00;
-	}
-	.zone-3 .zone-range {
-		color: #ffcc00;
-	}
-
-	.zone-4 {
-		border-left: 6px solid #ff9900;
-	}
-	.zone-4 .zone-number {
-		background: #ff9900;
-	}
-	.zone-4 .zone-range {
-		color: #ff9900;
-	}
-
-	.zone-5 {
-		border-left: 6px solid #ff3366;
-	}
-	.zone-5 .zone-number {
-		background: #ff3366;
-	}
-	.zone-5 .zone-range {
-		color: #ff3366;
-	}
-
-	.info-sections {
-		margin-top: 2rem;
-		display: flex;
-		flex-direction: column;
-		gap: 2rem;
-	}
-
-	.info-section {
-		background: var(--color-bg);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 1.5rem;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.info-section h3 {
-		margin: 0 0 1rem 0;
-		color: var(--color-primary);
-		font-weight: 700;
-		font-size: 1rem;
-	}
-
-	.info-section p {
-		color: var(--color-text-muted);
-		line-height: 1.6;
-		margin: 0;
-		font-size: 0.875rem;
-	}
-
 	.info-section ul {
-		color: var(--color-text-muted);
-		line-height: 1.6;
+		list-style: none;
+		padding: 0;
 		margin: 0;
-		padding-left: 1.5rem;
-		font-size: 0.875rem;
 	}
 
 	.info-section li {
-		margin-bottom: 0.5rem;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--color-border);
+		font-size: 0.875rem;
+		line-height: 1.4;
 	}
 
-	.info-section strong {
-		color: var(--color-text);
+	.info-section li:last-child {
+		border-bottom: none;
 	}
 
-	/* Mobile Responsiveness */
-	@media (max-width: 1024px) {
-		.calculator-layout {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
+	.method-description {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		margin-top: 1rem;
+		text-align: center;
 	}
 
+	/* Heart rate zone styling */
+	.heart-rate-zones .zone-1 {
+		background: color-mix(in srgb, var(--color-success) 10%, transparent);
+	}
+
+	.heart-rate-zones .zone-2 {
+		background: color-mix(in srgb, var(--color-info) 10%, transparent);
+	}
+
+	.heart-rate-zones .zone-3 {
+		background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+	}
+
+	.heart-rate-zones .zone-4 {
+		background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+	}
+
+	.heart-rate-zones .zone-5 {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+	}
+
+	/* Method group toggling */
+	[data-method-group] {
+		transition: all 0.3s ease;
+	}
+
+	/* Responsive design */
 	@media (max-width: 768px) {
-		.calculator-header h1 {
-			font-size: 2rem;
+		.info-sections {
+			gap: 1rem;
 		}
 
-		.max-hr-value {
-			font-size: 2rem;
-		}
-
-		.zone-row {
-			grid-template-columns: 1fr;
-			gap: 0.5rem;
-			text-align: center;
-		}
-
-		.zone-label {
-			justify-content: center;
-		}
-
-		.zone-range {
-			font-size: 1rem;
-		}
-
-		.zone-percentage,
-		.zone-description {
-			font-size: 0.8rem;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.zones-compact {
-			padding: 1rem;
-		}
-
-		.zone-row {
-			padding: 0.5rem;
-		}
-
-		.zone-number {
-			width: 28px;
-			height: 28px;
-			font-size: 1rem;
+		.info-section li {
+			font-size: 0.8125rem;
 		}
 	}
 </style>
-
-<script src="/sharedValues.js" is:inline></script>
-<script>
-	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Load shared values on page load
-	const values = new window.SharedValues().load();
-	const sharedValues = new window.SharedValues();
-	let currentMethod = "formula"; // "formula" or "custom"
-
-	// Get DOM elements
-	const age = document.getElementById("age");
-	const customMaxHr = document.getElementById("custom-max-hr");
-	const ageDisplay = document.getElementById("age-display");
-	const customMaxHrDisplay = document.getElementById("custom-max-hr-display");
-	const customHrGroup = document.querySelector(".custom-hr-group");
-	const ageGroup = document.querySelector(".age-group");
-
-	// Result elements
-	const calculatedMaxHr = document.getElementById("calculated-max-hr");
-	const maxHrMethodText = document.getElementById("max-hr-method-text");
-
-	// Zone elements
-	const zone1Min = document.getElementById("zone1-min");
-	const zone1Max = document.getElementById("zone1-max");
-	const zone2Min = document.getElementById("zone2-min");
-	const zone2Max = document.getElementById("zone2-max");
-	const zone3Min = document.getElementById("zone3-min");
-	const zone3Max = document.getElementById("zone3-max");
-	const zone4Min = document.getElementById("zone4-min");
-	const zone4Max = document.getElementById("zone4-max");
-	const zone5Min = document.getElementById("zone5-min");
-	const zone5Max = document.getElementById("zone5-max");
-
-	// Initialize inputs with shared values
-	function initializeInputs() {
-		// Always load the latest shared values (from BMR or other calculators)
-		const latestValues = sharedValues.load();
-
-		// Start with shared values
-		if (age) age.value = latestValues.age.toString();
-		if (customMaxHr) customMaxHr.value = "190";
-
-		// Load saved method from localStorage
-		const savedMethod = localStorage.getItem("cruxcalc-hr-method");
-		if (savedMethod) {
-			currentMethod = savedMethod;
-			updateMethodDisplay();
-		}
-
-		// Load saved custom max HR from localStorage
-		const savedCustomMaxHr = localStorage.getItem("cruxcalc-hr-custom-max");
-		if (savedCustomMaxHr && customMaxHr) {
-			customMaxHr.value = savedCustomMaxHr;
-		}
-	}
-
-	// Check for updated shared values when page becomes visible
-	function checkForUpdatedValues() {
-		const latestValues = sharedValues.load();
-		const currentAge = parseInt(age?.value || "30");
-
-		// If shared age is different from current age, update it
-		if (latestValues.age !== currentAge) {
-			if (age) {
-				age.value = latestValues.age.toString();
-				updateDisplays();
-				calculateZones();
-			}
-		}
-	}
-
-	// Update method display
-	function updateMethodDisplay() {
-		document.querySelectorAll(".method-btn").forEach((btn) => {
-			btn.classList.remove("active");
-			if (btn.dataset.method === currentMethod) {
-				btn.classList.add("active");
-			}
-		});
-
-		if (customHrGroup) {
-			customHrGroup.style.display = currentMethod === "custom" ? "block" : "none";
-		}
-
-		if (ageGroup) {
-			ageGroup.style.display = currentMethod === "formula" ? "block" : "none";
-		}
-	}
-
-	// Calculate maximum heart rate
-	function calculateMaxHeartRate() {
-		const ageValue = parseInt(age?.value || "30");
-
-		if (currentMethod === "formula") {
-			return 220 - ageValue;
-		} else {
-			return parseInt(customMaxHr?.value || "190");
-		}
-	}
-
-	// Calculate heart rate zones
-	function calculateZones() {
-		const maxHr = calculateMaxHeartRate();
-		const ageValue = parseInt(age?.value || "30");
-
-		// Update max HR display
-		if (calculatedMaxHr) calculatedMaxHr.textContent = maxHr.toString();
-
-		// Update method text
-		if (maxHrMethodText) {
-			if (currentMethod === "formula") {
-				maxHrMethodText.textContent = `Calculated using 220 - age formula (220 - ${ageValue} = ${maxHr})`;
-			} else {
-				maxHrMethodText.textContent = "Using your custom maximum heart rate";
-			}
-		}
-
-		// Zone 1: Easy (68% - 73%)
-		const zone1MinValue = Math.round(maxHr * 0.68);
-		const zone1MaxValue = Math.round(maxHr * 0.73);
-		if (zone1Min) zone1Min.textContent = zone1MinValue.toString();
-		if (zone1Max) zone1Max.textContent = zone1MaxValue.toString();
-
-		// Zone 2: Steady (73% - 80%)
-		const zone2MinValue = Math.round(maxHr * 0.73);
-		const zone2MaxValue = Math.round(maxHr * 0.8);
-		if (zone2Min) zone2Min.textContent = zone2MinValue.toString();
-		if (zone2Max) zone2Max.textContent = zone2MaxValue.toString();
-
-		// Zone 3: Moderately Hard (80% - 87%)
-		const zone3MinValue = Math.round(maxHr * 0.8);
-		const zone3MaxValue = Math.round(maxHr * 0.87);
-		if (zone3Min) zone3Min.textContent = zone3MinValue.toString();
-		if (zone3Max) zone3Max.textContent = zone3MaxValue.toString();
-
-		// Zone 4: Hard (87% - 93%)
-		const zone4MinValue = Math.round(maxHr * 0.87);
-		const zone4MaxValue = Math.round(maxHr * 0.93);
-		if (zone4Min) zone4Min.textContent = zone4MinValue.toString();
-		if (zone4Max) zone4Max.textContent = zone4MaxValue.toString();
-
-		// Zone 5: Very Hard (93% - 100%)
-		const zone5MinValue = Math.round(maxHr * 0.93);
-		const zone5MaxValue = maxHr;
-		if (zone5Min) zone5Min.textContent = zone5MinValue.toString();
-		if (zone5Max) zone5Max.textContent = zone5MaxValue.toString();
-
-		// Save values to localStorage
-		saveCurrentValues();
-	}
-
-	// Save current values to localStorage
-	function saveCurrentValues() {
-		// Don't save age to HR-specific localStorage - always use shared values
-		localStorage.setItem("cruxcalc-hr-method", currentMethod);
-		if (customMaxHr) localStorage.setItem("cruxcalc-hr-custom-max", customMaxHr.value);
-
-		// Always update shared values for age so other pages can see it
-		sharedValues.set("age", parseInt(age?.value || "30"));
-	}
-
-	// Update displays
-	function updateDisplays() {
-		if (ageDisplay && age) ageDisplay.textContent = age.value;
-		if (customMaxHrDisplay && customMaxHr) customMaxHrDisplay.textContent = customMaxHr.value;
-	}
-
-	// Debounced calculation
-	let calculationTimeout;
-	function debouncedCalculation() {
-		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(calculateZones, 100);
-	}
-
-	// Event listeners for sliders
-	if (age) {
-		age.addEventListener("input", () => {
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}
-
-	if (customMaxHr) {
-		customMaxHr.addEventListener("input", () => {
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}
-
-	// Method selection functionality
-	document.querySelectorAll(".method-btn").forEach((btn) => {
-		btn.addEventListener("click", () => {
-			currentMethod = btn.dataset.method || "formula";
-			updateMethodDisplay();
-			debouncedCalculation();
-		});
-	});
-
-	// Listen for page visibility changes to check for updated shared values
-	document.addEventListener("visibilitychange", () => {
-		if (!document.hidden) {
-			checkForUpdatedValues();
-		}
-	});
-
-	// Also check when the page gains focus (for navigation between tabs/pages)
-	window.addEventListener("focus", () => {
-		checkForUpdatedValues();
-	});
-
-	// Initialize the calculator when DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		initializeInputs();
-		updateDisplays();
-		calculateZones();
-	});
-</script>
