@@ -1,0 +1,169 @@
+---
+export interface Props {
+	title: string;
+	description?: string;
+	class?: string;
+}
+
+const { title, description, class: className = "" } = Astro.props;
+---
+
+<div class={`calculator-layout ${className}`}>
+	<div class="calculator-layout__header">
+		<h1 class="calculator-layout__title">{title}</h1>
+		{description && <p class="calculator-layout__description">{description}</p>}
+	</div>
+
+	<div class="calculator-layout__container">
+		<div class="calculator-layout__inputs">
+			<slot name="inputs" />
+		</div>
+
+		<div class="calculator-layout__results">
+			<slot name="results" />
+		</div>
+	</div>
+
+	<div class="calculator-layout__footer">
+		<slot name="footer" />
+	</div>
+</div>
+
+<style>
+	.calculator-layout {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 2rem 1rem;
+	}
+
+	.calculator-layout__header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.calculator-layout__title {
+		font-size: 3rem;
+		font-weight: 800;
+		color: var(--color-text);
+		margin-bottom: 1rem;
+		line-height: 1.1;
+	}
+
+	.calculator-layout__description {
+		font-size: 1.25rem;
+		color: var(--color-text-muted);
+		max-width: 600px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	.calculator-layout__container {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 3rem;
+		align-items: start;
+	}
+
+	.calculator-layout__inputs {
+		background: var(--color-surface);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius-lg);
+		padding: 2rem;
+		box-shadow: var(--shadow-md);
+		position: sticky;
+		top: 2rem;
+	}
+
+	.calculator-layout__results {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.calculator-layout__footer {
+		margin-top: 3rem;
+		text-align: center;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 968px) {
+		.calculator-layout__container {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.calculator-layout__inputs {
+			position: static;
+		}
+
+		.calculator-layout__title {
+			font-size: 2.5rem;
+		}
+
+		.calculator-layout__description {
+			font-size: 1.125rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.calculator-layout {
+			padding: 1.5rem 1rem;
+		}
+
+		.calculator-layout__header {
+			margin-bottom: 2rem;
+		}
+
+		.calculator-layout__title {
+			font-size: 2rem;
+		}
+
+		.calculator-layout__description {
+			font-size: 1rem;
+		}
+
+		.calculator-layout__inputs {
+			padding: 1.5rem;
+		}
+
+		.calculator-layout__container {
+			gap: 1.5rem;
+		}
+	}
+
+	/* Variant Support */
+	.calculator-layout.compact .calculator-layout__header {
+		margin-bottom: 2rem;
+	}
+
+	.calculator-layout.compact .calculator-layout__title {
+		font-size: 2.5rem;
+	}
+
+	.calculator-layout.wide {
+		max-width: 1400px;
+	}
+
+	.calculator-layout.single-column .calculator-layout__container {
+		grid-template-columns: 1fr;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	/* Print Styles */
+	@media print {
+		.calculator-layout {
+			padding: 1rem;
+		}
+
+		.calculator-layout__container {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
+		.calculator-layout__inputs {
+			box-shadow: none;
+			border: 1px solid #000;
+		}
+	}
+</style>

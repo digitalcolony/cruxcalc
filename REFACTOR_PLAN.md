@@ -57,22 +57,24 @@ Refactoring the CruxCalc calculators to use reusable Astro components for better
 - **Features**: Responsive design, row highlighting, custom styling
 - **Status**: ✅ Complete
 
-## Phase 3: Layout Components
+## Phase 3: Layout Components ✅ COMPLETE
 
 **Priority 3 - Structural consistency**
 
-### 3.1 `CalculatorLayout.astro` Component
+### 3.1 `CalculatorLayout.astro` Component ✅
 
-- **Usage**: Standardized two-column layout
-- **Props**: `title`, `description`
-- **Slots**: `inputs`, `results`
-- **Status**: ⏳ Planned
+- **Usage**: Standardized two-column layout for all calculators
+- **Props**: `title`, `description`, `class`
+- **Slots**: `inputs`, `results`, `footer`
+- **Features**: Responsive grid, sticky inputs, variant support (compact/wide/single-column)
+- **Status**: ✅ Complete
 
-### 3.2 `InputGroup.astro` Component
+### 3.2 `InputGroup.astro` Component ✅
 
-- **Usage**: Label + input + help text wrapper
-- **Props**: `label`, `helpText`, `required`
-- **Status**: ⏳ Planned
+- **Usage**: Label + input + help text wrapper for consistent form styling
+- **Props**: `label`, `helpText`, `required`, `error`, various class props
+- **Features**: Error states, size variants, component integration, inline layout, accessibility
+- **Status**: ✅ Complete
 
 ## Phase 4: Enhanced SharedValues System
 

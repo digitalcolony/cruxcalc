@@ -1,0 +1,238 @@
+---
+export interface Props {
+	label: string;
+	helpText?: string;
+	required?: boolean;
+	error?: string;
+	class?: string;
+	labelClass?: string;
+	inputClass?: string;
+	helpClass?: string;
+	errorClass?: string;
+}
+
+const {
+	label,
+	helpText,
+	required = false,
+	error,
+	class: className = "",
+	labelClass = "",
+	inputClass = "",
+	helpClass = "",
+	errorClass = "",
+} = Astro.props;
+---
+
+<div class={`input-group ${className} ${error ? "input-group--error" : ""}`}>
+	{
+		className.includes("inline") ? (
+			<>
+				<div class="input-group__content">
+					<label class={`input-group__label ${labelClass}`}>
+						{label}
+						{required && <span class="input-group__required">*</span>}
+					</label>
+
+					<div class={`input-group__input-wrapper ${inputClass}`}>
+						<slot />
+					</div>
+				</div>
+
+				{helpText && !error && <p class={`input-group__help ${helpClass}`}>{helpText}</p>}
+				{error && <p class={`input-group__error ${errorClass}`}>{error}</p>}
+			</>
+		) : (
+			<>
+				<label class={`input-group__label ${labelClass}`}>
+					{label}
+					{required && <span class="input-group__required">*</span>}
+				</label>
+
+				<div class={`input-group__input-wrapper ${inputClass}`}>
+					<slot />
+				</div>
+
+				{helpText && !error && <p class={`input-group__help ${helpClass}`}>{helpText}</p>}
+				{error && <p class={`input-group__error ${errorClass}`}>{error}</p>}
+			</>
+		)
+	}
+</div>
+
+<style>
+	.input-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.input-group__label {
+		display: block;
+		font-weight: 600;
+		color: var(--color-text);
+		margin-bottom: 0.5rem;
+		font-size: 0.875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+	}
+
+	.input-group__required {
+		color: var(--color-danger);
+		margin-left: 0.25rem;
+	}
+
+	.input-group__input-wrapper {
+		position: relative;
+	}
+
+	/* Style direct input children */
+	.input-group__input-wrapper :global(input),
+	.input-group__input-wrapper :global(select),
+	.input-group__input-wrapper :global(textarea) {
+		width: 100%;
+		padding: 0.75rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-size: 1rem;
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+	}
+
+	.input-group__input-wrapper :global(input:focus),
+	.input-group__input-wrapper :global(select:focus),
+	.input-group__input-wrapper :global(textarea:focus) {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+	}
+
+	.input-group__input-wrapper :global(input::placeholder),
+	.input-group__input-wrapper :global(textarea::placeholder) {
+		color: var(--color-text-muted);
+		opacity: 1;
+	}
+
+	/* Component integration styles */
+	.input-group__input-wrapper :global(.range-slider),
+	.input-group__input-wrapper :global(.unit-toggle),
+	.input-group__input-wrapper :global(.gender-toggle) {
+		margin: 0;
+	}
+
+	.input-group__help {
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		margin-top: 0.5rem;
+		line-height: 1.4;
+	}
+
+	.input-group__error {
+		font-size: 0.8125rem;
+		color: var(--color-danger);
+		margin-top: 0.5rem;
+		line-height: 1.4;
+		font-weight: 500;
+	}
+
+	/* Error state styling */
+	.input-group--error .input-group__label {
+		color: var(--color-danger);
+	}
+
+	.input-group--error .input-group__input-wrapper :global(input),
+	.input-group--error .input-group__input-wrapper :global(select),
+	.input-group--error .input-group__input-wrapper :global(textarea) {
+		border-color: var(--color-danger);
+		background: color-mix(in srgb, var(--color-danger) 5%, var(--color-bg));
+	}
+
+	.input-group--error .input-group__input-wrapper :global(input:focus),
+	.input-group--error .input-group__input-wrapper :global(select:focus),
+	.input-group--error .input-group__input-wrapper :global(textarea:focus) {
+		border-color: var(--color-danger);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 20%, transparent);
+	}
+
+	/* Size variants */
+	.input-group.compact {
+		margin-bottom: 1rem;
+	}
+
+	.input-group.compact .input-group__label {
+		font-size: 0.8125rem;
+		margin-bottom: 0.375rem;
+	}
+
+	.input-group.compact .input-group__input-wrapper :global(input),
+	.input-group.compact .input-group__input-wrapper :global(select),
+	.input-group.compact .input-group__input-wrapper :global(textarea) {
+		padding: 0.5rem;
+		font-size: 0.875rem;
+		box-sizing: border-box;
+	}
+
+	.input-group.large .input-group__label {
+		font-size: 1rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.input-group.large .input-group__input-wrapper :global(input),
+	.input-group.large .input-group__input-wrapper :global(select),
+	.input-group.large .input-group__input-wrapper :global(textarea) {
+		padding: 1rem;
+		font-size: 1.125rem;
+		box-sizing: border-box;
+	}
+
+	/* Inline layout for toggles */
+	.input-group.inline {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.input-group.inline .input-group__content {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.input-group.inline .input-group__label {
+		margin-bottom: 0;
+		flex-shrink: 0;
+		min-width: 120px;
+	}
+
+	.input-group.inline .input-group__input-wrapper {
+		flex: 1;
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.input-group.inline .input-group__content {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0.5rem;
+		}
+
+		.input-group.inline .input-group__label {
+			min-width: auto;
+		}
+	}
+
+	/* Focus-within for accessibility */
+	.input-group:focus-within .input-group__label {
+		color: var(--color-primary);
+	}
+
+	/* Disabled state */
+	.input-group__input-wrapper :global(input:disabled),
+	.input-group__input-wrapper :global(select:disabled),
+	.input-group__input-wrapper :global(textarea:disabled) {
+		opacity: 0.6;
+		cursor: not-allowed;
+		background: color-mix(in srgb, var(--color-bg) 50%, var(--color-border));
+	}
+</style>

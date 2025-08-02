@@ -3,6 +3,8 @@ import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
 import ComparisonTable from "../components/ComparisonTable.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
@@ -280,6 +282,122 @@ import GenderToggle from "../components/GenderToggle.astro";
 								{ cells: ["Body Fat", "15%"] },
 							]}
 						/>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>CalculatorLayout Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Basic Layout Structure</h3>
+						<div
+							style="border: 2px dashed var(--color-border); padding: 1rem; border-radius: var(--border-radius); background: var(--color-bg);"
+						>
+							<CalculatorLayout
+								title="BMI Calculator"
+								description="Calculate your Body Mass Index to assess your weight category"
+							>
+								<div slot="inputs">
+									<p
+										style="padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius); text-align: center; color: var(--color-text-muted);"
+									>
+										📝 Input components would go here
+									</p>
+								</div>
+								<div slot="results">
+									<p
+										style="padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius); text-align: center; color: var(--color-text-muted);"
+									>
+										📊 Result components would go here
+									</p>
+								</div>
+							</CalculatorLayout>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
+				<h2>InputGroup Component</h2>
+				<div class="component-examples">
+					<div class="example">
+						<h3>Basic Input Groups</h3>
+						<InputGroup label="Full Name" helpText="Enter your first and last name">
+							<input type="text" placeholder="John Doe" />
+						</InputGroup>
+
+						<InputGroup
+							label="Email Address"
+							required={true}
+							helpText="We'll never share your email"
+						>
+							<input type="email" placeholder="john@example.com" />
+						</InputGroup>
+
+						<InputGroup label="Message" helpText="Tell us what you think">
+							<textarea placeholder="Your message here..." rows="3"></textarea>
+						</InputGroup>
+					</div>
+
+					<div class="example">
+						<h3>Error States</h3>
+						<InputGroup
+							label="Password"
+							required={true}
+							error="Password must be at least 8 characters"
+						>
+							<input type="password" placeholder="Enter password" />
+						</InputGroup>
+
+						<InputGroup label="Confirm Password" required={true} error="Passwords do not match">
+							<input type="password" placeholder="Confirm password" />
+						</InputGroup>
+					</div>
+
+					<div class="example">
+						<h3>Component Integration</h3>
+						<InputGroup label="Height Units" helpText="Select your preferred unit system">
+							<UnitToggle
+								options={[
+									{ value: "imperial", label: "ft/in" },
+									{ value: "metric", label: "cm" },
+								]}
+								activeValue="imperial"
+								dataAttribute="height-unit"
+							/>
+						</InputGroup>
+
+						<InputGroup label="Body Weight" helpText="Use the slider to set your current weight">
+							<RangeSlider id="weight-demo" label="" min={35} max={180} value={70} unit="kg" />
+						</InputGroup>
+
+						<InputGroup
+							label="Gender Selection"
+							helpText="Select your biological gender for accurate calculations"
+							class="inline"
+						>
+							<GenderToggle activeGender="male" />
+						</InputGroup>
+					</div>
+
+					<div class="example">
+						<h3>Size Variants</h3>
+						<InputGroup
+							label="Compact Size"
+							helpText="Smaller spacing for dense forms"
+							class="compact"
+						>
+							<input type="text" placeholder="Compact input" />
+						</InputGroup>
+
+						<InputGroup
+							label="Large Size"
+							helpText="Larger spacing for important inputs"
+							class="large"
+						>
+							<input type="text" placeholder="Large input" />
+						</InputGroup>
 					</div>
 				</div>
 			</div>
