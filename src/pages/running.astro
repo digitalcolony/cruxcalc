@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import InputGroup from "../components/InputGroup.astro";
 ---
@@ -11,347 +12,291 @@ import InputGroup from "../components/InputGroup.astro";
 	imageAlt="Running Pace Calculator - Calculate Race Finish Times"
 	canonical="/running"
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>Running Pace Calculator</h1>
-				<p>See your finish times for different race distances based on your pace per mile</p>
-			</div>
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<InputGroup label="Pace Control">
-						<RangeSlider
-							id="pace-slider"
-							label="Pace per Mile"
-							sharedKey="runningPace"
-							min={240}
-							max={1440}
-							step={5}
-							value={490}
-							unit=""
-							formatAsPace={true}
-						/>
-						<div class="pace-range">
-							<span class="range-label">4:00 (Fast)</span>
-							<span class="range-label">24:00 (Slow)</span>
-						</div>
-					</InputGroup>
-
-					<div class="pace-category-section">
-						<div class="pace-value">
-							<span id="pace-category">Recreational</span>
-						</div>
-						<div class="pace-description">
-							<span id="pace-description">A comfortable pace for most recreational runners</span>
-						</div>
-					</div>
+	<CalculatorLayout
+		title="Running Pace Calculator"
+		description="See your finish times for different race distances based on your pace per mile"
+	>
+		<div slot="inputs">
+			<InputGroup label="">
+				<RangeSlider
+					id="pace-slider"
+					label="Pace per Mile"
+					sharedKey="runningPace"
+					min={240}
+					max={1440}
+					step={5}
+					value={490}
+					unit=""
+					formatAsPace={true}
+				/>
+				<div class="pace-range">
+					<span class="range-label">4:00 (Fast)</span>
+					<span class="range-label">24:00 (Slow)</span>
 				</div>
-				<div class="calculator-results">
-					<div class="race-times">
-						<div class="race-card">
-							<h3>5K</h3>
-							<div class="distance">3.11 miles</div>
-							<div class="finish-time" id="time-5k">24:52</div>
-						</div>
+			</InputGroup>
 
-						<div class="race-card">
-							<h3>10K</h3>
-							<div class="distance">6.21 miles</div>
-							<div class="finish-time" id="time-10k">49:41</div>
-						</div>
-
-						<div class="race-card">
-							<h3>Half Marathon</h3>
-							<div class="distance">13.11 miles</div>
-							<div class="finish-time" id="time-half">1:44:53</div>
-						</div>
-
-						<div class="race-card">
-							<h3>Full Marathon</h3>
-							<div class="distance">26.22 miles</div>
-							<div class="finish-time" id="time-full">3:29:46</div>
-						</div>
-					</div>
+			<div class="pace-category-section">
+				<div class="pace-value">
+					<span id="pace-category">Recreational</span>
+				</div>
+				<div class="pace-description">
+					<span id="pace-description">A comfortable pace for most recreational runners</span>
 				</div>
 			</div>
 		</div>
-	</section>
-	<script src="/reactiveSharedValues.js" is:inline></script>
-	<script>
-		// Race distances in miles
-		const DISTANCES = {
-			"5k": 3.10686,
-			"10k": 6.21371,
-			half: 13.1094,
-			full: 26.2188,
-		};
 
-		// Pace categories with descriptions
-		const PACE_CATEGORIES = [
-			{ max: 300, name: "Elite", description: "World-class competitive pace", color: "#d4af37" },
-			{
-				max: 360,
-				name: "Sub-Elite",
-				description: "Highly competitive racing pace",
-				color: "#c0392b",
-			},
-			{
-				max: 420,
-				name: "Competitive",
-				description: "Strong competitive runner pace",
-				color: "#e74c3c",
-			},
-			{ max: 480, name: "Advanced", description: "Experienced runner pace", color: "#f39c12" },
-			{
-				max: 540,
-				name: "Intermediate",
-				description: "Regular training runner pace",
-				color: "#27ae60",
-			},
-			{
-				max: 600,
-				name: "Recreational",
-				description: "Comfortable recreational pace",
-				color: "#3498db",
-			},
-			{
-				max: 720,
-				name: "Beginner",
-				description: "New runner or easy training pace",
-				color: "#9b59b6",
-			},
-			{
-				max: 900,
-				name: "Walking/Jogging",
-				description: "Walk-jog combination pace",
-				color: "#95a5a6",
-			},
-			{
-				max: 1440,
-				name: "Walking",
-				description: "Brisk to moderate walking pace",
-				color: "#7f8c8d",
-			},
-		];
+		<div slot="results">
+			<div class="race-times">
+				<div class="race-card">
+					<h3>5K</h3>
+					<div class="distance">3.11 miles</div>
+					<div class="finish-time" id="time-5k">24:52</div>
+				</div>
 
-		function formatTime(totalSeconds: number) {
-			const hours = Math.floor(totalSeconds / 3600);
-			const minutes = Math.floor((totalSeconds % 3600) / 60);
-			const seconds = Math.round(totalSeconds % 60);
+				<div class="race-card">
+					<h3>10K</h3>
+					<div class="distance">6.21 miles</div>
+					<div class="finish-time" id="time-10k">49:41</div>
+				</div>
 
-			if (hours > 0) {
-				return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-			} else {
-				return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-			}
-		}
+				<div class="race-card">
+					<h3>Half Marathon</h3>
+					<div class="distance">13.11 miles</div>
+					<div class="finish-time" id="time-half">1:44:53</div>
+				</div>
 
-		function formatPace(totalSeconds: number) {
-			const minutes = Math.floor(totalSeconds / 60);
-			const seconds = Math.round(totalSeconds % 60);
-			return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-		}
-		function calculateRaceTimes(paceSeconds: number) {
-			const times: Record<string, number> = {
-				"5k": 0,
-				"10k": 0,
-				half: 0,
-				full: 0,
-			};
-			for (const [race, distance] of Object.entries(DISTANCES)) {
-				times[race] = distance * paceSeconds;
-			}
-			return times;
-		}
-
-		function getPaceCategory(paceSeconds: number) {
-			for (const category of PACE_CATEGORIES) {
-				if (paceSeconds <= category.max) {
-					return category;
-				}
-			}
-			return PACE_CATEGORIES[PACE_CATEGORIES.length - 1];
-		}
-		function savePaceValue(paceSeconds: number) {
-			try {
-				localStorage.setItem("cruxcalc-running-pace", paceSeconds.toString());
-				// Also sync with ReactiveSharedValues for cross-calculator integration if available
-				if (typeof ReactiveSharedValues !== "undefined") {
-					(ReactiveSharedValues as any).set("runningPace", paceSeconds);
-				}
-			} catch (error) {
-				console.warn("Error saving pace value to localStorage:", error);
-			}
-		}
-
-		function loadPaceValue() {
-			try {
-				const savedPace = localStorage.getItem("cruxcalc-running-pace");
-				if (savedPace) {
-					return parseInt(savedPace);
-				}
-			} catch (error) {
-				console.warn("Error loading pace value from localStorage:", error);
-			}
-			// Default to 8:10 (490 seconds) if no saved value
-			return 490;
-		}
-
-		function updateCalculations() {
-			console.log("updateCalculations called");
-
-			// Read pace from the slider
-			const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
-			if (!paceSlider) {
-				console.log("Could not find pace slider");
-				return;
-			}
-
-			const paceSeconds = parseInt(paceSlider.value);
-			console.log("Current pace value:", paceSeconds);
-
-			// Calculate and display race times
-			const raceTimes = calculateRaceTimes(paceSeconds);
-			console.log("Calculated race times:", raceTimes);
-
-			const time5k = document.getElementById("time-5k");
-			console.log("5K element found:", !!time5k);
-			if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
-
-			const time10k = document.getElementById("time-10k");
-			console.log("10K element found:", !!time10k);
-			if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
-
-			const timeHalf = document.getElementById("time-half");
-			console.log("Half element found:", !!timeHalf);
-			if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
-
-			const timeFull = document.getElementById("time-full");
-			console.log("Full element found:", !!timeFull);
-			if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
-
-			// Update pace category
-			const category = getPaceCategory(paceSeconds);
-			console.log("Pace category:", category);
-			const categoryElement = document.getElementById("pace-category");
-			const descriptionElement = document.getElementById("pace-description");
-
-			console.log("Category element found:", !!categoryElement);
-			console.log("Description element found:", !!descriptionElement);
-
-			if (categoryElement) {
-				categoryElement.textContent = category.name;
-				categoryElement.style.backgroundColor = category.color;
-				console.log("Updated category to:", category.name, "with color:", category.color);
-			}
-
-			if (descriptionElement) {
-				descriptionElement.textContent = category.description;
-				console.log("Updated description to:", category.description);
-			}
-
-			// Save the pace value to localStorage
-			savePaceValue(paceSeconds);
-			console.log("Updated calculations complete");
-		}
-		// Initialize calculator
-		document.addEventListener("DOMContentLoaded", function () {
-			console.log("Running calculator initializing...");
-
-			// Load saved pace value or use default (8:10 = 490 seconds)
-			const savedPaceSeconds = loadPaceValue();
-			console.log("Loaded pace:", savedPaceSeconds);
-
-			// Function to handle any pace change
-			function handlePaceChange() {
-				console.log("Handle pace change called");
-				updateCalculations();
-			}
-
-			// Wait for components to load, then set up everything
-			setTimeout(() => {
-				console.log("Setting up slider...");
-
-				const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
-				if (paceSlider) {
-					// Set initial value
-					paceSlider.value = savedPaceSeconds.toString();
-					console.log("Set slider value to:", savedPaceSeconds);
-
-					// Add multiple event listeners to catch any change
-					paceSlider.addEventListener("input", handlePaceChange);
-					paceSlider.addEventListener("change", handlePaceChange);
-
-					console.log("Added event listeners to slider");
-				} else {
-					console.log("ERROR: Pace slider not found!");
-				}
-
-				// Also listen for the custom events
-				document.addEventListener("range-slider-change", handlePaceChange);
-
-				// Trigger initial calculation
-				console.log("Triggering initial calculation...");
-				updateCalculations();
-			}, 200);
-		});
-	</script>
+				<div class="race-card">
+					<h3>Full Marathon</h3>
+					<div class="distance">26.22 miles</div>
+					<div class="finish-time" id="time-full">3:29:46</div>
+				</div>
+			</div>
+		</div>
+	</CalculatorLayout>
 </Layout>
 
+<script src="/reactiveSharedValues.js" is:inline></script>
+<script>
+	// Race distances in miles
+	const DISTANCES = {
+		"5k": 3.10686,
+		"10k": 6.21371,
+		half: 13.1094,
+		full: 26.2188,
+	};
+
+	// Pace categories with descriptions
+	const PACE_CATEGORIES = [
+		{ max: 300, name: "Elite", description: "World-class competitive pace", color: "#d4af37" },
+		{
+			max: 360,
+			name: "Sub-Elite",
+			description: "Highly competitive racing pace",
+			color: "#c0392b",
+		},
+		{
+			max: 420,
+			name: "Competitive",
+			description: "Strong competitive runner pace",
+			color: "#e74c3c",
+		},
+		{ max: 480, name: "Advanced", description: "Experienced runner pace", color: "#f39c12" },
+		{
+			max: 540,
+			name: "Intermediate",
+			description: "Regular training runner pace",
+			color: "#27ae60",
+		},
+		{
+			max: 600,
+			name: "Recreational",
+			description: "Comfortable recreational pace",
+			color: "#3498db",
+		},
+		{
+			max: 720,
+			name: "Beginner",
+			description: "New runner or easy training pace",
+			color: "#9b59b6",
+		},
+		{
+			max: 900,
+			name: "Walking/Jogging",
+			description: "Walk-jog combination pace",
+			color: "#95a5a6",
+		},
+		{
+			max: 1440,
+			name: "Walking",
+			description: "Brisk to moderate walking pace",
+			color: "#7f8c8d",
+		},
+	];
+
+	function formatTime(totalSeconds: number) {
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = Math.round(totalSeconds % 60);
+
+		if (hours > 0) {
+			return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+		} else {
+			return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+		}
+	}
+
+	function formatPace(totalSeconds: number) {
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = Math.round(totalSeconds % 60);
+		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+	}
+	function calculateRaceTimes(paceSeconds: number) {
+		const times: Record<string, number> = {
+			"5k": 0,
+			"10k": 0,
+			half: 0,
+			full: 0,
+		};
+		for (const [race, distance] of Object.entries(DISTANCES)) {
+			times[race] = distance * paceSeconds;
+		}
+		return times;
+	}
+
+	function getPaceCategory(paceSeconds: number) {
+		for (const category of PACE_CATEGORIES) {
+			if (paceSeconds <= category.max) {
+				return category;
+			}
+		}
+		return PACE_CATEGORIES[PACE_CATEGORIES.length - 1];
+	}
+	function savePaceValue(paceSeconds: number) {
+		try {
+			localStorage.setItem("cruxcalc-running-pace", paceSeconds.toString());
+			// Also sync with ReactiveSharedValues for cross-calculator integration if available
+			if (typeof ReactiveSharedValues !== "undefined") {
+				(ReactiveSharedValues as any).set("runningPace", paceSeconds);
+			}
+		} catch (error) {
+			console.warn("Error saving pace value to localStorage:", error);
+		}
+	}
+
+	function loadPaceValue() {
+		try {
+			const savedPace = localStorage.getItem("cruxcalc-running-pace");
+			if (savedPace) {
+				return parseInt(savedPace);
+			}
+		} catch (error) {
+			console.warn("Error loading pace value from localStorage:", error);
+		}
+		// Default to 8:10 (490 seconds) if no saved value
+		return 490;
+	}
+
+	function updateCalculations() {
+		console.log("updateCalculations called");
+
+		// Read pace from the slider
+		const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
+		if (!paceSlider) {
+			console.log("Could not find pace slider");
+			return;
+		}
+
+		const paceSeconds = parseInt(paceSlider.value);
+		console.log("Current pace value:", paceSeconds);
+
+		// Calculate and display race times
+		const raceTimes = calculateRaceTimes(paceSeconds);
+		console.log("Calculated race times:", raceTimes);
+
+		const time5k = document.getElementById("time-5k");
+		console.log("5K element found:", !!time5k);
+		if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
+
+		const time10k = document.getElementById("time-10k");
+		console.log("10K element found:", !!time10k);
+		if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
+
+		const timeHalf = document.getElementById("time-half");
+		console.log("Half element found:", !!timeHalf);
+		if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
+
+		const timeFull = document.getElementById("time-full");
+		console.log("Full element found:", !!timeFull);
+		if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
+
+		// Update pace category
+		const category = getPaceCategory(paceSeconds);
+		console.log("Pace category:", category);
+		const categoryElement = document.getElementById("pace-category");
+		const descriptionElement = document.getElementById("pace-description");
+
+		console.log("Category element found:", !!categoryElement);
+		console.log("Description element found:", !!descriptionElement);
+
+		if (categoryElement) {
+			categoryElement.textContent = category.name;
+			categoryElement.style.backgroundColor = category.color;
+			console.log("Updated category to:", category.name, "with color:", category.color);
+		}
+
+		if (descriptionElement) {
+			descriptionElement.textContent = category.description;
+			console.log("Updated description to:", category.description);
+		}
+
+		// Save the pace value to localStorage
+		savePaceValue(paceSeconds);
+		console.log("Updated calculations complete");
+	}
+	// Initialize calculator
+	document.addEventListener("DOMContentLoaded", function () {
+		console.log("Running calculator initializing...");
+
+		// Load saved pace value or use default (8:10 = 490 seconds)
+		const savedPaceSeconds = loadPaceValue();
+		console.log("Loaded pace:", savedPaceSeconds);
+
+		// Function to handle any pace change
+		function handlePaceChange() {
+			console.log("Handle pace change called");
+			updateCalculations();
+		}
+
+		// Wait for components to load, then set up everything
+		setTimeout(() => {
+			console.log("Setting up slider...");
+
+			const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
+			if (paceSlider) {
+				// Set initial value
+				paceSlider.value = savedPaceSeconds.toString();
+				console.log("Set slider value to:", savedPaceSeconds);
+
+				// Add multiple event listeners to catch any change
+				paceSlider.addEventListener("input", handlePaceChange);
+				paceSlider.addEventListener("change", handlePaceChange);
+
+				console.log("Added event listeners to slider");
+			} else {
+				console.log("ERROR: Pace slider not found!");
+			}
+
+			// Also listen for the custom events
+			document.addEventListener("range-slider-change", handlePaceChange);
+
+			// Trigger initial calculation
+			console.log("Triggering initial calculation...");
+			updateCalculations();
+		}, 200);
+	});
+</script>
+
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem 0;
-	}
-
-	.calculator-header {
-		text-align: center;
-		margin-bottom: 3rem;
-	}
-
-	.calculator-header h1 {
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
-	.calculator-header p {
-		color: var(--color-text-muted);
-		font-size: 1.125rem;
-	}
-
-	.calculator-layout {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 3rem;
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	@media (max-width: 768px) {
-		.calculator-header {
-			margin-bottom: 2rem;
-			padding: 0 1rem;
-		}
-
-		.calculator-header h1 {
-			font-size: 2rem;
-		}
-
-		.calculator-layout {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
-	}
-
-	.calculator-inputs {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		height: fit-content;
-	}
-
 	.pace-range {
 		display: flex;
 		justify-content: space-between;

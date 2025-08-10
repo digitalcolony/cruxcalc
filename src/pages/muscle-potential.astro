@@ -6,7 +6,6 @@ import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
-import ValidationDisplay from "../components/ValidationDisplay.astro";
 ---
 
 <Layout
@@ -137,8 +136,6 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 			>
 				<RangeSlider id="body-fat" label="" min={5} max={20} step={0.5} value={10} unit="%" />
 			</InputGroup>
-
-			<ValidationDisplay />
 		</div>
 
 		<div slot="results">
