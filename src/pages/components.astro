@@ -5,7 +5,6 @@ import CategoryBadge from "../components/CategoryBadge.astro";
 import ComparisonTable from "../components/ComparisonTable.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
-import ValidationDisplay from "../components/ValidationDisplay.astro";
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
@@ -452,30 +451,6 @@ import GenderToggle from "../components/GenderToggle.astro";
 						>
 							<input type="text" placeholder="Large input" />
 						</InputGroup>
-					</div>
-				</div>
-			</div>
-
-			<div class="component-section">
-				<h2>ValidationDisplay Component (Phase 4)</h2>
-				<div class="component-examples">
-					<div class="example">
-						<h3>Reactive Validation</h3>
-						<p style="margin-bottom: 1rem; color: var(--color-text-muted);">
-							This component automatically validates SharedValues in real-time. Change values above
-							to see validation updates.
-						</p>
-						<ValidationDisplay />
-					</div>
-
-					<div class="example">
-						<h3>Compact Version</h3>
-						<ValidationDisplay compact={true} />
-					</div>
-
-					<div class="example">
-						<h3>Without Icon</h3>
-						<ValidationDisplay showIcon={false} />
 					</div>
 				</div>
 			</div>
