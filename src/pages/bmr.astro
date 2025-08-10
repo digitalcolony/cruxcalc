@@ -23,7 +23,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				<GenderToggle activeGender="male" />
 			</InputGroup>
 
-			<InputGroup label="Age" helpText="Age significantly impacts metabolic rate">
+			<InputGroup label="Age" helpText="Age impacts metabolic rate">
 				<RangeSlider id="age" label="" min={15} max={80} value={30} unit="years" sharedKey="age" />
 			</InputGroup>
 
@@ -39,7 +39,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			</InputGroup>
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
-				<InputGroup label="Height" helpText="" class="full-width">
+				<InputGroup label="" helpText="" class="full-width">
 					<RangeSlider
 						id="height-total-inches"
 						label=""
@@ -55,7 +55,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			</div>
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
-				<InputGroup label="Height" helpText="" class="full-width">
+				<InputGroup label="" helpText="" class="full-width">
 					<RangeSlider
 						id="height-cm"
 						label=""
@@ -80,7 +80,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			</InputGroup>
 
 			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
-				<InputGroup label="Weight (Imperial)" helpText="">
+				<InputGroup label="" helpText="">
 					<RangeSlider
 						id="weight-lbs"
 						label=""
@@ -94,7 +94,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			</div>
 
 			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
-				<InputGroup label="Weight (Metric)" helpText="">
+				<InputGroup label="" helpText="">
 					<RangeSlider
 						id="weight-kg"
 						label=""

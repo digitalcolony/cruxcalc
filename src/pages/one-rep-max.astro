@@ -6,7 +6,6 @@ import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
-import ValidationDisplay from "../components/ValidationDisplay.astro";
 
 // Initialize SharedValues on the server side
 const sharedValues = {
@@ -76,8 +75,6 @@ const sharedValues = {
 					sharedKey="repetitions"
 				/>
 			</InputGroup>
-
-			<ValidationDisplay />
 		</div>
 
 		<div slot="results">
