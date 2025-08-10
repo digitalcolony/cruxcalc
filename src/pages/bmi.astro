@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import RangeSlider from "../components/RangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
+import InputGroup from "../components/InputGroup.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
 import CategoryBadge from "../components/CategoryBadge.astro";
@@ -26,8 +27,7 @@ const sharedValues = {
 
 			<div class="calculator-layout">
 				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="height">Height</label>
+					<InputGroup label="Height" helpText="Choose your preferred measurement system">
 						<UnitToggle
 							options={[
 								{ value: "imperial", label: "ft/in" },
@@ -36,30 +36,26 @@ const sharedValues = {
 							activeValue={sharedValues.heightUnit}
 							dataAttribute="unit"
 						/>
+					</InputGroup>
 
-						<div class="height-inputs imperial">
+					<div class="height-inputs imperial-height" data-unit-group="imperial">
+						<InputGroup label="Height" helpText="" class="full-width">
 							<RangeSlider
-								id="height-feet"
+								id="height-total-inches"
 								label=""
-								min={4}
-								max={7}
-								value={5}
-								unit="ft"
-								sharedKey="heightFeet"
-							/>
-							<RangeSlider
-								id="height-inches"
-								label=""
-								min={0}
-								max={11.5}
+								min={48}
+								max={84}
 								step={0.5}
-								value={8}
-								unit="in"
-								sharedKey="heightInches"
+								value={68}
+								unit=""
+								sharedKey="heightTotalInches"
+								formatAsHeight={true}
 							/>
-						</div>
+						</InputGroup>
+					</div>
 
-						<div class="height-inputs metric" style="display: none;">
+					<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
+						<InputGroup label="Height" helpText="" class="full-width">
 							<RangeSlider
 								id="height-cm"
 								label=""
@@ -69,11 +65,10 @@ const sharedValues = {
 								unit="cm"
 								sharedKey="heightCm"
 							/>
-						</div>
+						</InputGroup>
 					</div>
 
-					<div class="input-group">
-						<label for="weight">Weight</label>
+					<InputGroup label="Weight" helpText="Choose your preferred measurement system">
 						<UnitToggle
 							options={[
 								{ value: "imperial", label: "lbs" },
@@ -82,8 +77,10 @@ const sharedValues = {
 							activeValue={sharedValues.weightUnit}
 							dataAttribute="unit"
 						/>
+					</InputGroup>
 
-						<div class="weight-inputs imperial">
+					<div class="weight-inputs imperial-weight" data-unit-group="imperial">
+						<InputGroup label="Weight" helpText="" class="full-width">
 							<RangeSlider
 								id="weight-lbs"
 								label=""
@@ -93,9 +90,11 @@ const sharedValues = {
 								unit="lbs"
 								sharedKey="weightLbs"
 							/>
-						</div>
+						</InputGroup>
+					</div>
 
-						<div class="weight-inputs metric" style="display: none;">
+					<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
+						<InputGroup label="Weight" helpText="" class="full-width">
 							<RangeSlider
 								id="weight-kg"
 								label=""
@@ -105,21 +104,20 @@ const sharedValues = {
 								unit="kg"
 								sharedKey="weightKg"
 							/>
-						</div>
+						</InputGroup>
 					</div>
 
-					<div class="input-group bmi-scale-group">
-						<label>BMI Scale</label>
+					<InputGroup
+						label="BMI Scale"
+						helpText="Asian populations have different BMI thresholds for health risks"
+					>
 						<div class="checkbox-container">
 							<label class="checkbox-label">
 								<input type="checkbox" id="asian-scale" />
 								<span class="checkbox-text">Use Asian BMI Scale</span>
 							</label>
 						</div>
-						<p class="input-help">
-							Asian populations have different BMI thresholds for health risks
-						</p>
-					</div>
+					</InputGroup>
 				</div>
 
 				<div class="calculator-results">
@@ -226,20 +224,7 @@ const sharedValues = {
 		height: fit-content;
 	}
 
-	/* Custom input group styling for BMI specific layouts */
-	.input-group {
-		margin-bottom: 2rem;
-	}
-
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
 	/* Checkbox styling */
-	.bmi-scale-group {
-		margin-top: 0.5rem;
-	}
-
 	.checkbox-container {
 		margin-bottom: 0.75rem;
 	}
@@ -268,14 +253,28 @@ const sharedValues = {
 		font-weight: 500;
 	}
 
-	/* Height inputs layout for imperial units */
+	/* Height inputs layout */
 	.height-inputs {
-		display: flex;
-		gap: 1rem;
+		display: block;
 	}
 
 	.height-inputs.metric {
 		display: block;
+	}
+
+	/* Full width height sliders */
+	.height-inputs .input-group {
+		width: 100%;
+	}
+
+	/* Full width styling */
+	.full-width {
+		width: 100%;
+	}
+
+	.height-inputs .full-width,
+	.weight-inputs .full-width {
+		flex: 1;
 	}
 
 	/* Results */
@@ -432,23 +431,9 @@ const sharedValues = {
 			font-size: 2rem;
 		}
 
-		.height-inputs {
-			flex-direction: column;
-			gap: 1rem;
-		}
-
-		.bmi-value span:first-child {
-			font-size: 2rem;
-		}
-
 		.scales-comparison {
 			grid-template-columns: 1fr;
 			gap: 0.75rem;
-		}
-
-		.checkmark {
-			width: 28px;
-			height: 28px;
 		}
 
 		.checkbox-text {
@@ -570,8 +555,8 @@ const sharedValues = {
 			const heightInputs = document.querySelectorAll(".height-inputs");
 			heightInputs.forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(values.heightUnit)) {
-					htmlInput.style.display = "flex";
+				if (input.classList.contains(`${values.heightUnit}-height`)) {
+					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
 				}
@@ -581,7 +566,7 @@ const sharedValues = {
 			const weightInputs = document.querySelectorAll(".weight-inputs");
 			weightInputs.forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(values.weightUnit)) {
+				if (input.classList.contains(`${values.weightUnit}-weight`)) {
 					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
@@ -662,7 +647,7 @@ const sharedValues = {
 
 			// Convert height to meters
 			if (values.heightUnit === "imperial") {
-				const totalInches = values.heightFeet * 12 + values.heightInches;
+				const totalInches = values.heightTotalInches || 68;
 				heightInMeters = totalInches * 0.0254;
 			} else {
 				heightInMeters = values.heightCm / 100;
@@ -832,8 +817,8 @@ const sharedValues = {
 			// Height inputs
 			document.querySelectorAll(".height-inputs").forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(currentValues.heightUnit)) {
-					htmlInput.style.display = "flex";
+				if (input.classList.contains(`${currentValues.heightUnit}-height`)) {
+					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
 				}
@@ -842,7 +827,7 @@ const sharedValues = {
 			// Weight inputs
 			document.querySelectorAll(".weight-inputs").forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(currentValues.weightUnit)) {
+				if (input.classList.contains(`${currentValues.weightUnit}-weight`)) {
 					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
@@ -854,8 +839,7 @@ const sharedValues = {
 		function updateRangeSliders() {
 			const currentValues = sharedValues.load();
 			const sliderUpdates = [
-				{ id: "height-feet", key: "heightFeet" },
-				{ id: "height-inches", key: "heightInches" },
+				{ id: "height-total-inches", key: "heightTotalInches" },
 				{ id: "height-cm", key: "heightCm" },
 				{ id: "weight-lbs", key: "weightLbs" },
 				{ id: "weight-kg", key: "weightKg" },
@@ -868,12 +852,21 @@ const sharedValues = {
 					slider.value = currentValues[key];
 					if (display) {
 						const value = parseFloat(currentValues[key]);
-						const step = parseFloat(slider.step || "1");
-						if (step < 1) {
-							const decimalPlaces = step.toString().split(".")[1]?.length || 1;
-							display.textContent = value.toFixed(decimalPlaces);
+
+						// Special handling for height-total-inches (formatAsHeight)
+						if (id === "height-total-inches") {
+							const feet = Math.floor(value / 12);
+							const inches = Math.round((value % 12) * 2) / 2;
+							display.textContent = `${feet}'${inches}"`;
 						} else {
-							display.textContent = Math.round(value).toString();
+							// Standard formatting
+							const step = parseFloat(slider.step || "1");
+							if (step < 1) {
+								const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+								display.textContent = value.toFixed(decimalPlaces);
+							} else {
+								display.textContent = Math.round(value).toString();
+							}
 						}
 					}
 				}

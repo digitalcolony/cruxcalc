@@ -31,7 +31,7 @@ const { headers, rows, caption, class: className = "" } = Astro.props;
 							id={row.id}
 						>
 							{row.cells.map((cell) => (
-								<td class="comparison-table__cell">{cell}</td>
+								<td class="comparison-table__cell" set:html={cell} />
 							))}
 						</tr>
 					))

@@ -1,5 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
 ---
 
 <Layout
@@ -9,407 +16,206 @@ import Layout from "../layouts/Layout.astro";
 	imageAlt="Muscle Potential Calculator - Casey Butt's Formula for Maximum Natural Muscle Growth"
 	canonical="/muscle-potential"
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>Muscle Potential Calculator</h1>
-				<p>
-					Estimate your maximum muscular potential using Casey Butt's formulas based on bone
-					structure
+	<CalculatorLayout
+		title="Muscle Potential Calculator"
+		description="Estimate your maximum muscular potential using Casey Butt's formulas based on bone structure"
+	>
+		<div slot="inputs">
+			<InputGroup label="Height" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "ft/in" },
+						{ value: "metric", label: "cm" },
+					]}
+					activeValue="imperial"
+					dataAttribute="height-unit"
+				/>
+			</InputGroup>
+
+			<div class="height-inputs imperial-height" data-unit-group="imperial">
+				<InputGroup label="Height" helpText="" class="full-width">
+					<RangeSlider
+						id="height-total-inches"
+						label=""
+						min={48}
+						max={84}
+						step={0.5}
+						value={68}
+						unit=""
+						formatAsHeight={true}
+					/>
+				</InputGroup>
+			</div>
+
+			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Height" helpText="" class="full-width">
+					<RangeSlider id="height-cm" label="" min={120} max={220} value={173} unit="cm" />
+				</InputGroup>
+			</div>
+
+			<InputGroup label="Wrist Circumference" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "inches" },
+						{ value: "metric", label: "cm" },
+					]}
+					activeValue="imperial"
+					dataAttribute="wrist-unit"
+				/>
+			</InputGroup>
+
+			<div class="wrist-inputs imperial-wrist" data-unit-group="imperial">
+				<InputGroup
+					label="Wrist"
+					helpText="Measure around the smallest part, just below the wrist bone"
+					class="full-width"
+				>
+					<RangeSlider
+						id="wrist-inches"
+						label=""
+						min={5.5}
+						max={9}
+						step={0.1}
+						value={7}
+						unit="inches"
+					/>
+				</InputGroup>
+			</div>
+
+			<div class="wrist-inputs metric-wrist" data-unit-group="metric" style="display: none;">
+				<InputGroup
+					label="Wrist"
+					helpText="Measure around the smallest part, just below the wrist bone"
+					class="full-width"
+				>
+					<RangeSlider id="wrist-cm" label="" min={14} max={23} step={0.1} value={17.8} unit="cm" />
+				</InputGroup>
+			</div>
+
+			<InputGroup label="Ankle Circumference" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "inches" },
+						{ value: "metric", label: "cm" },
+					]}
+					activeValue="imperial"
+					dataAttribute="ankle-unit"
+				/>
+			</InputGroup>
+
+			<div class="ankle-inputs imperial-ankle" data-unit-group="imperial">
+				<InputGroup
+					label="Ankle"
+					helpText="Measure around the smallest part, just above the ankle bone"
+					class="full-width"
+				>
+					<RangeSlider
+						id="ankle-inches"
+						label=""
+						min={7}
+						max={11}
+						step={0.1}
+						value={8.5}
+						unit="inches"
+					/>
+				</InputGroup>
+			</div>
+
+			<div class="ankle-inputs metric-ankle" data-unit-group="metric" style="display: none;">
+				<InputGroup
+					label="Ankle"
+					helpText="Measure around the smallest part, just above the ankle bone"
+					class="full-width"
+				>
+					<RangeSlider id="ankle-cm" label="" min={18} max={28} step={0.1} value={21.6} unit="cm" />
+				</InputGroup>
+			</div>
+
+			<InputGroup
+				label="Target Body Fat %"
+				helpText="Your target body fat percentage for maximum muscle potential calculations"
+			>
+				<RangeSlider id="body-fat" label="" min={5} max={20} step={0.5} value={10} unit="%" />
+			</InputGroup>
+
+			<ValidationDisplay />
+		</div>
+
+		<div slot="results">
+			<div class="main-results">
+				<ResultCard title="Maximum Lean Body Mass" variant="primary">
+					<ResultValue id="max-lean-number" value={167} unit="lbs" size="xl" color="primary" />
+					<p slot="description" class="result-description">
+						Muscle + organs + bones (fat-free mass)
+					</p>
+				</ResultCard>
+
+				<ResultCard title="Maximum Body Weight" variant="success">
+					<ResultValue id="max-weight-number" value={185} unit="lbs" size="xl" color="success" />
+					<p slot="description" class="result-description">
+						At <span id="target-bf-text">10</span>% body fat
+					</p>
+				</ResultCard>
+			</div>
+
+			<div class="body-parts-results">
+				<h3>Maximum Measurements</h3>
+				<div class="measurements-grid">
+					<div class="measurement-item">
+						<strong>Arms</strong>
+						<span id="max-arms">16.2 inches</span>
+					</div>
+					<div class="measurement-item">
+						<strong>Forearms</strong>
+						<span id="max-forearms">13.1 inches</span>
+					</div>
+					<div class="measurement-item">
+						<strong>Neck</strong>
+						<span id="max-neck">15.7 inches</span>
+					</div>
+					<div class="measurement-item">
+						<strong>Chest</strong>
+						<span id="max-chest">44.2 inches</span>
+					</div>
+					<div class="measurement-item">
+						<strong>Thighs</strong>
+						<span id="max-thighs">24.1 inches</span>
+					</div>
+					<div class="measurement-item">
+						<strong>Calves</strong>
+						<span id="max-calves">15.2 inches</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="formula-info">
+				<h4>Casey Butt's Formula</h4>
+				<p id="formula-text">LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)</p>
+				<p class="formula-note">
+					Casey Butt's scientifically-derived formula calculates maximum natural lean body mass
+					based on bone structure (wrist/ankle) and height. The formula was developed from
+					measurements of elite natural bodybuilders at their competitive peak. LBM = Lean Body
+					Mass, which excludes body fat. Total weight is calculated by dividing LBM by (1 - body fat
+					%).
 				</p>
 			</div>
-
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="height">Height</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">ft/in</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
-
-						<div class="height-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="height-feet" min="4" max="7" value="5" />
-								<div class="input-display">
-									<span id="height-feet-display">5</span> ft
-								</div>
-							</div>
-							<div class="input-container">
-								<input type="range" id="height-inches" min="0" max="11.5" step="0.5" value="8" />
-								<div class="input-display">
-									<span id="height-inches-display">8</span> in
-								</div>
-							</div>
-						</div>
-
-						<div class="height-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="height-cm" min="120" max="220" value="173" />
-								<div class="input-display">
-									<span id="height-cm-display">173</span> cm
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="wrist">Wrist Circumference</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">inches</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
-
-						<div class="wrist-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="wrist-inches" min="5.5" max="9" step="0.1" value="7" />
-								<div class="input-display">
-									<span id="wrist-inches-display">7.0</span> inches
-								</div>
-							</div>
-						</div>
-
-						<div class="wrist-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="wrist-cm" min="14" max="23" step="0.1" value="17.8" />
-								<div class="input-display">
-									<span id="wrist-cm-display">17.8</span> cm
-								</div>
-							</div>
-						</div>
-						<div class="measurement-guide">
-							<p>
-								<strong>How to measure:</strong> Measure around the smallest part of your wrist, just
-								below the wrist bone.
-							</p>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="ankle">Ankle Circumference</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">inches</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
-
-						<div class="ankle-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="ankle-inches" min="7" max="11" step="0.1" value="8.5" />
-								<div class="input-display">
-									<span id="ankle-inches-display">8.5</span> inches
-								</div>
-							</div>
-						</div>
-
-						<div class="ankle-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="ankle-cm" min="18" max="28" step="0.1" value="21.6" />
-								<div class="input-display">
-									<span id="ankle-cm-display">21.6</span> cm
-								</div>
-							</div>
-						</div>
-						<div class="measurement-guide">
-							<p>
-								<strong>How to measure:</strong> Measure around the smallest part of your ankle, just
-								above the ankle bone.
-							</p>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="body-fat">Target Body Fat %</label>
-						<div class="input-container">
-							<input type="range" id="body-fat" min="5" max="20" value="10" step="0.5" />
-							<div class="input-display">
-								<span id="body-fat-display">10</span>%
-							</div>
-						</div>
-						<div class="measurement-guide">
-							<p>
-								<strong>Note:</strong> This is your target body fat percentage for maximum muscle potential
-								calculations.
-							</p>
-						</div>
-					</div>
-				</div>
-				<div class="calculator-results">
-					<div class="result-card">
-						<h3>Maximum Lean Body Mass</h3>
-						<div class="result-value">
-							<span id="max-lean-number">167</span>
-							<span class="result-unit" id="lean-unit">lbs (76 kg)</span>
-						</div>
-						<p class="result-description">Muscle + organs + bones (fat-free mass)</p>
-					</div>
-
-					<div class="result-card">
-						<h3>Maximum Body Weight</h3>
-						<div class="result-value">
-							<span id="max-weight-number">185</span>
-							<span class="result-unit" id="weight-unit">lbs (84 kg)</span>
-						</div>
-						<p class="result-description">
-							At <span id="target-bf-text">10</span>% body fat
-						</p>
-					</div>
-
-					<div class="body-parts-results">
-						<h3>Maximum Measurements</h3>
-						<div class="measurements-grid">
-							<div class="measurement-item">
-								<strong>Arms</strong>
-								<span id="max-arms">16.2 inches</span>
-							</div>
-							<div class="measurement-item">
-								<strong>Forearms</strong>
-								<span id="max-forearms">13.1 inches</span>
-							</div>
-							<div class="measurement-item">
-								<strong>Neck</strong>
-								<span id="max-neck">15.7 inches</span>
-							</div>
-							<div class="measurement-item">
-								<strong>Chest</strong>
-								<span id="max-chest">44.2 inches</span>
-							</div>
-							<div class="measurement-item">
-								<strong>Thighs</strong>
-								<span id="max-thighs">24.1 inches</span>
-							</div>
-							<div class="measurement-item">
-								<strong>Calves</strong>
-								<span id="max-calves">15.2 inches</span>
-							</div>
-						</div>
-					</div>
-					<div class="formula-info">
-						<h4>Casey Butt's Formula</h4>
-						<p id="formula-text">LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)</p>
-						<p class="formula-note">
-							Casey Butt's scientifically-derived formula calculates maximum natural lean body mass
-							based on bone structure (wrist/ankle) and height. The formula was developed from
-							measurements of elite natural bodybuilders at their competitive peak. LBM = Lean Body
-							Mass, which excludes body fat. Total weight is calculated by dividing LBM by (1 - body
-							fat %).
-						</p>
-					</div>
-				</div>
-			</div>
 		</div>
-	</section>
+	</CalculatorLayout>
 </Layout>
 
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem;
-		min-height: 100vh;
-	}
-
-	.calculator-header {
-		text-align: center;
-		margin-bottom: 3rem;
-	}
-
-	.calculator-header h1 {
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
-	.calculator-header p {
-		color: var(--color-text-muted);
-		font-size: 1.125rem;
-	}
-
-	.calculator-layout {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 3rem;
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	.calculator-inputs {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		height: fit-content;
-	}
-
-	.input-group {
+	.main-results {
+		display: flex;
+		gap: 1.5rem;
 		margin-bottom: 2rem;
 	}
 
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--color-text);
-	}
-
-	/* Unit Toggle */
-	.unit-toggle {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.unit-btn {
-		flex: 1;
-		padding: 0.5rem;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		background: var(--color-background);
-		color: var(--color-text);
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 500;
-		font-size: 0.875rem;
-	}
-
-	.unit-btn:hover {
-		border-color: var(--color-primary);
-	}
-
-	.unit-btn.active {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	/* Input Controls */
-	.input-container {
-		margin-bottom: 1rem;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
-	}
-
-	.height-inputs {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.height-inputs.metric {
-		display: block;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.125rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
-	}
-
-	/* Measurement Guide */
-	.measurement-guide {
-		background: var(--color-background);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		margin-top: 1rem;
-		font-size: 0.875rem;
-	}
-
-	.measurement-guide p {
-		margin: 0;
-		color: var(--color-text-muted);
-	}
-
-	.measurement-guide strong {
-		color: var(--color-text);
-	}
-
-	/* Results */
-	.calculator-results {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.result-card {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		text-align: center;
-	}
-
-	.result-card h3 {
-		margin: 0 0 1rem 0;
-		color: var(--color-text);
-		font-size: 1.25rem;
-		font-weight: 600;
-	}
-
-	.result-value {
-		margin-bottom: 1rem;
-	}
-
-	.result-value span:first-child {
-		font-size: 2.5rem;
-		font-weight: 700;
-		color: var(--color-primary);
-		display: block;
-		line-height: 1;
-	}
-
-	.result-unit {
-		color: var(--color-text-muted);
-		font-size: 1rem;
-		font-weight: 500;
-	}
-
-	.result-description {
-		color: var(--color-text-muted);
-		margin: 0;
-		font-size: 0.875rem;
-	}
-
-	/* Body Parts Results */
 	.body-parts-results {
 		background: var(--color-surface);
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius-lg);
 		padding: 2rem;
+		margin-bottom: 2rem;
 	}
 
 	.body-parts-results h3 {
@@ -475,42 +281,23 @@ import Layout from "../layouts/Layout.astro";
 
 	/* Mobile Responsiveness */
 	@media (max-width: 768px) {
-		.calculator-layout {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
-
-		.calculator-header h1 {
-			font-size: 2rem;
-		}
-
-		.height-inputs {
+		.main-results {
 			flex-direction: column;
-			gap: 1rem;
 		}
 
 		.measurements-grid {
 			grid-template-columns: 1fr;
 		}
-
-		.result-value span:first-child {
-			font-size: 2rem;
-		}
 	}
 </style>
 
-<script src="/sharedValues.js" is:inline></script>
 <script>
 	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Load shared values on page load
-	const values = new window.SharedValues().load();
-	const sharedValues = new window.SharedValues();
-	let currentHeightUnit = values.heightUnit;
+	let currentHeightUnit = "imperial";
 	let currentMeasurementUnit = "imperial"; // for wrist/ankle measurements
 
-	// Get DOM elements
-	const heightFeet = document.getElementById("height-feet");
-	const heightInches = document.getElementById("height-inches");
+	// Get DOM elements using the new component selectors
+	const heightTotalInches = document.getElementById("height-total-inches");
 	const heightCm = document.getElementById("height-cm");
 	const wristInches = document.getElementById("wrist-inches");
 	const wristCm = document.getElementById("wrist-cm");
@@ -518,56 +305,12 @@ import Layout from "../layouts/Layout.astro";
 	const ankleCm = document.getElementById("ankle-cm");
 	const bodyFat = document.getElementById("body-fat");
 
-	const heightFeetDisplay = document.getElementById("height-feet-display");
-	const heightInchesDisplay = document.getElementById("height-inches-display");
-	const heightCmDisplay = document.getElementById("height-cm-display");
-	const wristInchesDisplay = document.getElementById("wrist-inches-display");
-	const wristCmDisplay = document.getElementById("wrist-cm-display");
-	const ankleInchesDisplay = document.getElementById("ankle-inches-display");
-	const ankleCmDisplay = document.getElementById("ankle-cm-display");
-	const bodyFatDisplay = document.getElementById("body-fat-display");
-
 	// Results elements
-	const maxWeightNumber = document.getElementById("max-weight-number");
-	const maxLeanNumber = document.getElementById("max-lean-number");
+	const maxWeightNumber = document.querySelector("#max-weight-number .result-value__number");
+	const maxLeanNumber = document.querySelector("#max-lean-number .result-value__number");
+	const maxWeightUnit = document.querySelector("#max-weight-number .result-value__unit");
+	const maxLeanUnit = document.querySelector("#max-lean-number .result-value__unit");
 	const formulaText = document.getElementById("formula-text");
-
-	// Initialize inputs with shared values
-	function initializeInputs() {
-		if (heightFeet) heightFeet.value = values.heightFeet.toString();
-		if (heightInches) heightInches.value = values.heightInches.toString();
-		if (heightCm) heightCm.value = values.heightCm.toString();
-
-		// Set unit toggles to match saved preferences for height
-		const heightToggle = document.querySelector(
-			".input-group:has(#height-feet, #height-cm) .unit-toggle"
-		);
-		if (heightToggle) {
-			heightToggle.querySelectorAll(".unit-btn").forEach((btn) => {
-				btn.classList.remove("active");
-				if (btn.dataset.unit === currentHeightUnit) {
-					btn.classList.add("active");
-				}
-			});
-
-			// Show/hide height inputs
-			const heightInputGroup = heightToggle.closest(".input-group");
-			heightInputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-				input.style.display = input.classList.contains(currentHeightUnit) ? "flex" : "none";
-			});
-		}
-	}
-
-	// Save current values to shared storage
-	function saveCurrentValues() {
-		const currentValues = {
-			heightFeet: parseInt(heightFeet?.value || "5"),
-			heightInches: parseFloat(heightInches?.value || "8"),
-			heightCm: parseInt(heightCm?.value || "173"),
-			heightUnit: currentHeightUnit,
-		};
-		sharedValues.update(currentValues);
-	}
 
 	// Calculate muscle potential using Casey Butt's formulas
 	function calculateMusclePotential() {
@@ -575,9 +318,7 @@ import Layout from "../layouts/Layout.astro";
 
 		// Convert height to inches
 		if (currentHeightUnit === "imperial") {
-			const feet = parseInt(heightFeet?.value || "5");
-			const inches = parseFloat(heightInches?.value || "8");
-			heightInInches = feet * 12 + inches;
+			heightInInches = parseFloat(heightTotalInches?.value || "68");
 		} else {
 			heightInInches = parseInt(heightCm?.value || "173") / 2.54;
 		}
@@ -595,8 +336,10 @@ import Layout from "../layouts/Layout.astro";
 		} else {
 			ankleInInches = parseFloat(ankleCm?.value || "21.6") / 2.54;
 		}
+
 		// Get body fat percentage
 		bodyFatPercent = parseFloat(bodyFat?.value || "10") / 100;
+
 		// Casey Butt's formula for maximum lean body mass (Imperial Units)
 		// LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)
 		// Where H = height in inches, W = wrist in inches, A = ankle in inches, F = body fat %
@@ -637,15 +380,20 @@ import Layout from "../layouts/Layout.astro";
 		const results = calculateMusclePotential();
 		const maxWeightKg = results.maxWeightLbs * 0.453592;
 		const maxLeanKg = results.maxLeanMassLbs * 0.453592;
-		// Update displays (lean mass first, then total weight)
-		if (maxLeanNumber) maxLeanNumber.textContent = Math.round(results.maxLeanMassLbs).toString();
-		if (maxWeightNumber) maxWeightNumber.textContent = Math.round(results.maxWeightLbs).toString();
 
-		// Update weight units
-		const weightUnit = document.getElementById("weight-unit");
-		const leanUnit = document.getElementById("lean-unit");
-		if (weightUnit) weightUnit.textContent = `lbs (${Math.round(maxWeightKg)} kg)`;
-		if (leanUnit) leanUnit.textContent = `lbs (${Math.round(maxLeanKg)} kg)`;
+		// Update main results using new component selectors
+		if (currentHeightUnit === "imperial") {
+			if (maxLeanNumber) maxLeanNumber.textContent = Math.round(results.maxLeanMassLbs).toString();
+			if (maxWeightNumber)
+				maxWeightNumber.textContent = Math.round(results.maxWeightLbs).toString();
+			if (maxWeightUnit) maxWeightUnit.textContent = "lbs";
+			if (maxLeanUnit) maxLeanUnit.textContent = "lbs";
+		} else {
+			if (maxLeanNumber) maxLeanNumber.textContent = Math.round(maxLeanKg).toString();
+			if (maxWeightNumber) maxWeightNumber.textContent = Math.round(maxWeightKg).toString();
+			if (maxWeightUnit) maxWeightUnit.textContent = "kg";
+			if (maxLeanUnit) maxLeanUnit.textContent = "kg";
+		}
 
 		// Update body fat text
 		const targetBfText = document.getElementById("target-bf-text");
@@ -655,134 +403,113 @@ import Layout from "../layouts/Layout.astro";
 		const displayUnit = currentMeasurementUnit === "imperial" ? "inches" : "cm";
 		const convert = currentMeasurementUnit === "imperial" ? 1 : 2.54;
 
-		document.getElementById("max-arms").textContent =
-			`${(results.maxArmsInches * convert).toFixed(1)} ${displayUnit}`;
-		document.getElementById("max-forearms").textContent =
-			`${(results.maxForearmsInches * convert).toFixed(1)} ${displayUnit}`;
-		document.getElementById("max-neck").textContent =
-			`${(results.maxNeckInches * convert).toFixed(1)} ${displayUnit}`;
-		document.getElementById("max-chest").textContent =
-			`${(results.maxChestInches * convert).toFixed(1)} ${displayUnit}`;
-		document.getElementById("max-thighs").textContent =
-			`${(results.maxThighsInches * convert).toFixed(1)} ${displayUnit}`;
-		document.getElementById("max-calves").textContent =
-			`${(results.maxCalvesInches * convert).toFixed(1)} ${displayUnit}`; // Update formula display
+		const maxArms = document.getElementById("max-arms");
+		const maxForearms = document.getElementById("max-forearms");
+		const maxNeck = document.getElementById("max-neck");
+		const maxChest = document.getElementById("max-chest");
+		const maxThighs = document.getElementById("max-thighs");
+		const maxCalves = document.getElementById("max-calves");
+
+		if (maxArms)
+			maxArms.textContent = `${(results.maxArmsInches * convert).toFixed(1)} ${displayUnit}`;
+		if (maxForearms)
+			maxForearms.textContent = `${(results.maxForearmsInches * convert).toFixed(1)} ${displayUnit}`;
+		if (maxNeck)
+			maxNeck.textContent = `${(results.maxNeckInches * convert).toFixed(1)} ${displayUnit}`;
+		if (maxChest)
+			maxChest.textContent = `${(results.maxChestInches * convert).toFixed(1)} ${displayUnit}`;
+		if (maxThighs)
+			maxThighs.textContent = `${(results.maxThighsInches * convert).toFixed(1)} ${displayUnit}`;
+		if (maxCalves)
+			maxCalves.textContent = `${(results.maxCalvesInches * convert).toFixed(1)} ${displayUnit}`;
+
+		// Update formula display
 		if (formulaText) {
 			formulaText.textContent = `LBM = ${results.heightInInches.toFixed(1)}^1.5 × (√${results.wristInInches.toFixed(1)}/22.667 + √${results.ankleInInches.toFixed(1)}/17.01) × (${(results.bodyFatPercent * 100).toFixed(1)}/224 + 1) = ${Math.round(results.maxLeanMassLbs)} lbs`;
 		}
-
-		// Save values after calculation
-		saveCurrentValues();
 	}
 
-	function updateDisplays() {
-		if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
-		if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
-		if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
-		if (wristInchesDisplay && wristInches)
-			wristInchesDisplay.textContent = parseFloat(wristInches.value).toFixed(1);
-		if (wristCmDisplay && wristCm)
-			wristCmDisplay.textContent = parseFloat(wristCm.value).toFixed(1);
-		if (ankleInchesDisplay && ankleInches)
-			ankleInchesDisplay.textContent = parseFloat(ankleInches.value).toFixed(1);
-		if (ankleCmDisplay && ankleCm)
-			ankleCmDisplay.textContent = parseFloat(ankleCm.value).toFixed(1);
-		if (bodyFatDisplay && bodyFat) bodyFatDisplay.textContent = bodyFat.value;
-	}
-
-	// Debounced calculation
-	let calculationTimeout;
-	function debouncedCalculation() {
-		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(updateDisplay, 100);
-	}
-
-	// Event listeners for sliders
-	[heightFeet, heightInches, heightCm, wristInches, wristCm, ankleInches, ankleCm, bodyFat].forEach(
+	// Event listeners for range sliders
+	[heightTotalInches, heightCm, wristInches, wristCm, ankleInches, ankleCm, bodyFat].forEach(
 		(slider) => {
 			if (slider) {
 				slider.addEventListener("input", () => {
-					updateDisplays();
-					debouncedCalculation();
+					updateDisplay();
 				});
 			}
 		}
 	);
 
 	// Unit toggle functionality
-	document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-		toggle.addEventListener("click", (e) => {
-			const target = e.target;
-			if (!target?.classList.contains("unit-btn")) return;
+	document.addEventListener("unit-toggle-change", (event) => {
+		const customEvent = event as CustomEvent;
+		const unit = customEvent.detail.value;
+		const attribute = customEvent.detail.attribute;
 
-			const inputGroup = target.closest(".input-group");
-			const isHeightToggle = inputGroup?.querySelector("#height-feet, #height-cm");
-			const unit = target.dataset.unit;
+		if (attribute === "height-unit") {
+			currentHeightUnit = unit;
 
-			// Update active state
-			toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
-			target.classList.add("active");
+			const imperialHeight = document.querySelector(".imperial-height");
+			const metricHeight = document.querySelector(".metric-height");
 
-			if (isHeightToggle) {
-				// Handle height unit toggle
-				currentHeightUnit = unit || "imperial";
-				sharedValues.syncHeightUnits(currentHeightUnit);
-
-				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(unit || "imperial") ? "flex" : "none";
-				});
-
-				// Update sliders with converted values
-				const updatedValues = sharedValues.load();
-				if (heightFeet) heightFeet.value = updatedValues.heightFeet.toString();
-				if (heightInches) heightInches.value = updatedValues.heightInches.toString();
-				if (heightCm) heightCm.value = updatedValues.heightCm.toString();
+			if (unit === "metric") {
+				imperialHeight.style.display = "none";
+				metricHeight.style.display = "block";
+				// Convert total inches to cm
+				const totalInches = parseFloat(heightTotalInches?.value || "68");
+				if (heightCm) heightCm.value = Math.round(totalInches * 2.54).toString();
 			} else {
-				// Handle measurement unit toggle (wrist/ankle)
-				currentMeasurementUnit = unit || "imperial";
-
-				// Show/hide appropriate inputs
-				const isWristGroup = inputGroup?.querySelector("#wrist-inches, #wrist-cm");
-				const isAnkleGroup = inputGroup?.querySelector("#ankle-inches, #ankle-cm");
-
-				if (isWristGroup) {
-					inputGroup?.querySelectorAll(".wrist-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
-					});
-
-					// Convert between units for wrist
-					if (unit === "metric") {
-						const inches = parseFloat(wristInches?.value || "7");
-						if (wristCm) wristCm.value = (inches * 2.54).toFixed(1);
-					} else {
-						const cm = parseFloat(wristCm?.value || "17.8");
-						if (wristInches) wristInches.value = (cm / 2.54).toFixed(1);
-					}
-				} else if (isAnkleGroup) {
-					inputGroup?.querySelectorAll(".ankle-inputs").forEach((input) => {
-						input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
-					});
-
-					// Convert between units for ankle
-					if (unit === "metric") {
-						const inches = parseFloat(ankleInches?.value || "8.5");
-						if (ankleCm) ankleCm.value = (inches * 2.54).toFixed(1);
-					} else {
-						const cm = parseFloat(ankleCm?.value || "21.6");
-						if (ankleInches) ankleInches.value = (cm / 2.54).toFixed(1);
-					}
-				}
+				imperialHeight.style.display = "block";
+				metricHeight.style.display = "none";
+				// Convert cm to total inches
+				const cm = parseInt(heightCm?.value || "173");
+				if (heightTotalInches) heightTotalInches.value = Math.round((cm / 2.54) * 2) / 2; // Round to nearest 0.5
 			}
+		} else if (attribute === "wrist-unit") {
+			currentMeasurementUnit = unit;
 
-			updateDisplays();
-			debouncedCalculation();
-		});
+			const imperialWrist = document.querySelector(".imperial-wrist");
+			const metricWrist = document.querySelector(".metric-wrist");
+
+			if (unit === "metric") {
+				imperialWrist.style.display = "none";
+				metricWrist.style.display = "block";
+				// Convert inches to cm
+				const inches = parseFloat(wristInches?.value || "7");
+				if (wristCm) wristCm.value = (inches * 2.54).toFixed(1);
+			} else {
+				imperialWrist.style.display = "block";
+				metricWrist.style.display = "none";
+				// Convert cm to inches
+				const cm = parseFloat(wristCm?.value || "17.8");
+				if (wristInches) wristInches.value = (cm / 2.54).toFixed(1);
+			}
+		} else if (attribute === "ankle-unit") {
+			currentMeasurementUnit = unit;
+
+			const imperialAnkle = document.querySelector(".imperial-ankle");
+			const metricAnkle = document.querySelector(".metric-ankle");
+
+			if (unit === "metric") {
+				imperialAnkle.style.display = "none";
+				metricAnkle.style.display = "block";
+				// Convert inches to cm
+				const inches = parseFloat(ankleInches?.value || "8.5");
+				if (ankleCm) ankleCm.value = (inches * 2.54).toFixed(1);
+			} else {
+				imperialAnkle.style.display = "block";
+				metricAnkle.style.display = "none";
+				// Convert cm to inches
+				const cm = parseFloat(ankleCm?.value || "21.6");
+				if (ankleInches) ankleInches.value = (cm / 2.54).toFixed(1);
+			}
+		}
+
+		updateDisplay();
 	});
 
 	// Initialize the calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
-		initializeInputs();
-		updateDisplays();
 		updateDisplay();
 	});
 </script>

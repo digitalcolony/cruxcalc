@@ -8,6 +8,7 @@ class SharedValues {
 			age: 30,
 			heightFeet: 5,
 			heightInches: 8,
+			heightTotalInches: 68, // 5'8" = 68 inches
 			heightCm: 173,
 			weightLbs: 160,
 			weightKg: 73,
@@ -75,9 +76,26 @@ class SharedValues {
 		return Math.round((feet * 12 + inches) * 2.54);
 	}
 
+	// Convert total inches to cm
+	totalInchesToCm(totalInches) {
+		return Math.round(totalInches * 2.54);
+	}
+
 	// Convert height from cm to feet/inches
 	heightToImperial(cm) {
 		const totalInches = cm / 2.54;
+		const feet = Math.floor(totalInches / 12);
+		const inches = Math.round((totalInches % 12) * 2) / 2; // Round to nearest 0.5
+		return { feet, inches };
+	}
+
+	// Convert cm to total inches
+	cmToTotalInches(cm) {
+		return Math.round((cm / 2.54) * 2) / 2; // Round to nearest 0.5 inch
+	}
+
+	// Convert total inches to feet and inches display
+	totalInchesToFeetInches(totalInches) {
 		const feet = Math.floor(totalInches / 12);
 		const inches = Math.round((totalInches % 12) * 2) / 2; // Round to nearest 0.5
 		return { feet, inches };
@@ -99,15 +117,19 @@ class SharedValues {
 		if (values.heightUnit !== newUnit) {
 			if (newUnit === "metric") {
 				// Convert imperial to metric
-				const cm = this.heightToCm(values.heightFeet, values.heightInches);
-				this.update({ heightUnit: newUnit, heightCm: cm });
+				const totalInches =
+					values.heightTotalInches || values.heightFeet * 12 + values.heightInches;
+				const cm = this.totalInchesToCm(totalInches);
+				this.update({ heightUnit: newUnit, heightCm: cm, heightTotalInches: totalInches });
 			} else {
 				// Convert metric to imperial
-				const { feet, inches } = this.heightToImperial(values.heightCm);
+				const totalInches = this.cmToTotalInches(values.heightCm);
+				const { feet, inches } = this.totalInchesToFeetInches(totalInches);
 				this.update({
 					heightUnit: newUnit,
 					heightFeet: feet,
 					heightInches: inches,
+					heightTotalInches: totalInches,
 				});
 			}
 		}

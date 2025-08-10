@@ -1,169 +1,186 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
+
+// Initialize SharedValues on the server side
+const sharedValues = {
+	weightUnit: "imperial",
+};
 ---
 
 <Layout
 	title="One Rep Max Calculator - Potato Hack Fitness Calculators"
 	description="Calculate your one-repetition maximum using Epley, Brzycki, and Lombardi formulas. Estimate your max lift from submaximal weights and reps."
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>One Rep Max Calculator</h1>
-				<p>
-					Estimate your maximum lift using three proven formulas from submaximal weights and
-					repetitions
-				</p>
+	<CalculatorLayout
+		title="One Rep Max Calculator"
+		description="Estimate your maximum lift using three proven formulas from submaximal weights and repetitions"
+	>
+		<div slot="inputs">
+			<InputGroup label="Weight Lifted" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "lbs" },
+						{ value: "metric", label: "kg" },
+					]}
+					activeValue={sharedValues.weightUnit}
+					dataAttribute="unit"
+				/>
+			</InputGroup>
+
+			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
+				<InputGroup label="Weight" helpText="" class="full-width">
+					<RangeSlider
+						id="weight"
+						label=""
+						min={50}
+						max={500}
+						value={135}
+						unit="lbs"
+						sharedKey="weightLbs"
+					/>
+				</InputGroup>
 			</div>
 
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="weight">Weight Lifted</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="lbs">lbs</button>
-							<button class="unit-btn" data-unit="kg">kg</button>
-						</div>
+			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Weight" helpText="" class="full-width">
+					<RangeSlider
+						id="weight-kg"
+						label=""
+						min={23}
+						max={227}
+						value={61}
+						unit="kg"
+						sharedKey="weightKg"
+					/>
+				</InputGroup>
+			</div>
 
-						<div class="weight-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="weight" min="50" max="500" value="135" />
-								<div class="input-display">
-									<span id="weight-display">135</span> lbs
-								</div>
-							</div>
-						</div>
+			<InputGroup
+				label="Repetitions Performed"
+				helpText="Enter the number of reps completed with good form"
+			>
+				<RangeSlider
+					id="reps"
+					label=""
+					min={1}
+					max={10}
+					value={5}
+					unit="reps"
+					sharedKey="repetitions"
+				/>
+			</InputGroup>
 
-						<div class="weight-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="weight-kg" min="23" max="227" value="61" />
-								<div class="input-display">
-									<span id="weight-kg-display">61</span> kg
-								</div>
-							</div>
-						</div>
+			<ValidationDisplay />
+		</div>
+
+		<div slot="results">
+			<div class="results-grid">
+				<ResultCard title="Epley Formula" variant="primary">
+					<ResultValue id="epley-result" value={169} unit="lbs" size="xl" color="primary" />
+					<p slot="description" class="result-description">Most commonly used formula</p>
+				</ResultCard>
+
+				<ResultCard title="Brzycki Formula" variant="success">
+					<ResultValue id="brzycki-result" value={169} unit="lbs" size="xl" color="success" />
+					<p slot="description" class="result-description">Conservative research-backed estimate</p>
+				</ResultCard>
+
+				<ResultCard title="Lombardi Formula" variant="warning">
+					<ResultValue id="lombardi-result" value={169} unit="lbs" size="xl" color="warning" />
+					<p slot="description" class="result-description">Logarithmic approach</p>
+				</ResultCard>
+			</div>
+
+			<div class="formula-details">
+				<h3>Formula Information</h3>
+				<div class="formula-grid">
+					<div class="formula-item">
+						<h4>Epley</h4>
+						<code>1RM = w × (1 + r/30)</code>
+						<p>
+							Developed by Boyd Epley (1985). Tends to slightly overestimate for low rep ranges but
+							is widely used in strength training.
+						</p>
 					</div>
-
-					<div class="input-group">
-						<label for="reps">Repetitions Performed</label>
-						<div class="input-container">
-							<input type="range" id="reps" min="1" max="10" value="5" />
-							<div class="input-display">
-								<span id="reps-display">5</span> reps
-							</div>
-						</div>
+					<div class="formula-item">
+						<h4>Brzycki</h4>
+						<code>1RM = w × 36/(37 - r)</code>
+						<p>
+							Created by Matt Brzycki (1998). More conservative estimate, extensively validated in
+							research studies.
+						</p>
 					</div>
-
-					<div class="info-sections">
-						<div class="info-section mobile-hide">
-							<h3>How to Use This Calculator</h3>
-							<p>
-								Enter the weight you lifted and how many repetitions you completed. The calculator
-								will estimate your one-rep maximum using three scientifically-backed formulas.
-							</p>
-						</div>
-
-						<div class="info-section mobile-hide">
-							<h3>Best Practices</h3>
-							<ul>
-								<li><strong>Rep Range:</strong> Use 3-6 reps for most accurate estimates</li>
-								<li>
-									<strong>Form:</strong> Only count reps with proper form and full range of motion
-								</li>
-								<li><strong>Rest:</strong> Use weights from when you're fresh, not fatigued</li>
-								<li>
-									<strong>Safety:</strong> Always use spotters when attempting actual max lifts
-								</li>
-							</ul>
-						</div>
-
-						<div class="info-section mobile-hide">
-							<h3>Formula Accuracy</h3>
-							<p>
-								These formulas typically estimate within ±10% of actual 1RM. Results may vary based
-								on training experience, muscle fiber composition, and exercise type.
-							</p>
-						</div>
+					<div class="formula-item">
+						<h4>Lombardi</h4>
+						<code>1RM = w × r^0.10</code>
+						<p>
+							Uses logarithmic progression. Works well for moderate rep ranges (3-8 reps) and
+							different muscle groups.
+						</p>
 					</div>
 				</div>
-
-				<div class="calculator-results">
-					<div class="results-grid">
-						<div class="result-card epley-card">
-							<h3>Epley Formula</h3>
-							<div class="result-value">
-								<span id="epley-result">169</span>
-								<span class="result-unit" id="epley-unit">lbs</span>
-							</div>
-							<p class="result-description">Most commonly used formula</p>
-						</div>
-
-						<div class="result-card brzycki-card">
-							<h3>Brzycki Formula</h3>
-							<div class="result-value">
-								<span id="brzycki-result">169</span>
-								<span class="result-unit" id="brzycki-unit">lbs</span>
-							</div>
-							<p class="result-description">Conservative research-backed estimate</p>
-						</div>
-
-						<div class="result-card lombardi-card">
-							<h3>Lombardi Formula</h3>
-							<div class="result-value">
-								<span id="lombardi-result">169</span>
-								<span class="result-unit" id="lombardi-unit">lbs</span>
-							</div>
-							<p class="result-description">Logarithmic approach</p>
-						</div>
-					</div>
-
-					<div class="formula-details">
-						<h3>Formula Information</h3>
-						<div class="formula-grid">
-							<div class="formula-item">
-								<h4>Epley</h4>
-								<code>1RM = w × (1 + r/30)</code>
-								<p>
-									Developed by Boyd Epley (1985). Tends to slightly overestimate for low rep ranges
-									but is widely used in strength training.
-								</p>
-							</div>
-							<div class="formula-item">
-								<h4>Brzycki</h4>
-								<code>1RM = w × 36/(37 - r)</code>
-								<p>
-									Created by Matt Brzycki (1998). More conservative estimate, extensively validated
-									in research studies.
-								</p>
-							</div>
-							<div class="formula-item">
-								<h4>Lombardi</h4>
-								<code>1RM = w × r^0.10</code>
-								<p>
-									Uses logarithmic progression. Works well for moderate rep ranges (3-8 reps) and
-									different muscle groups.
-								</p>
-							</div>
-						</div>
-						<div class="formula-note">
-							<p>
-								<strong>Note:</strong> All formulas converge around 10 reps but diverge significantly
-								below 5 reps. For best accuracy, use weights you can lift for 3-6 repetitions.
-							</p>
-						</div>
-					</div>
+				<div class="formula-note">
+					<p>
+						<strong>Note:</strong> All formulas converge around 10 reps but diverge significantly below
+						5 reps. For best accuracy, use weights you can lift for 3-6 repetitions.
+					</p>
 				</div>
 			</div>
 		</div>
-	</section>
+
+		<div slot="footer">
+			<div class="info-sections">
+				<div class="info-section">
+					<h3>How to Use This Calculator</h3>
+					<p>
+						Enter the weight you lifted and how many repetitions you completed. The calculator will
+						estimate your one-rep maximum using three scientifically-backed formulas.
+					</p>
+				</div>
+
+				<div class="info-section">
+					<h3>Best Practices</h3>
+					<ul>
+						<li><strong>Rep Range:</strong> Use 3-6 reps for most accurate estimates</li>
+						<li>
+							<strong>Form:</strong> Only count reps with proper form and full range of motion
+						</li>
+						<li><strong>Rest:</strong> Use weights from when you're fresh, not fatigued</li>
+						<li>
+							<strong>Safety:</strong> Always use spotters when attempting actual max lifts
+						</li>
+					</ul>
+				</div>
+
+				<div class="info-section">
+					<h3>Formula Accuracy</h3>
+					<p>
+						These formulas typically estimate within ±10% of actual 1RM. Results may vary based on
+						training experience, muscle fiber composition, and exercise type.
+					</p>
+				</div>
+			</div>
+		</div>
+	</CalculatorLayout>
 </Layout>
 
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem;
-		min-height: 100vh;
+	/* Component-specific styles */
+	.weight-inputs {
+		display: block;
+		margin-bottom: 1rem;
+	}
+
+	/* Full width styling */
+	.full-width {
 		width: 100%;
-		overflow-x: hidden;
 	}
 
 	.calculator-header {
@@ -560,29 +577,9 @@ import Layout from "../layouts/Layout.astro";
 	const KG_TO_LBS = 2.20462;
 
 	// State variables
-	let currentUnit = "lbs"; // "lbs" or "kg"
+	let currentUnit = "imperial"; // "imperial" or "metric"
 	let currentWeightLbs = 135; // Always store weight in pounds internally
 	let currentReps = 5;
-
-	// Get DOM elements
-	const weightSlider = document.getElementById("weight");
-	const weightKgSlider = document.getElementById("weight-kg");
-	const repsSlider = document.getElementById("reps");
-	const weightDisplay = document.getElementById("weight-display");
-	const weightKgDisplay = document.getElementById("weight-kg-display");
-	const repsDisplay = document.getElementById("reps-display");
-
-	// Container elements
-	const imperialWeightInputs = document.querySelector(".weight-inputs.imperial");
-	const metricWeightInputs = document.querySelector(".weight-inputs.metric");
-
-	// Result elements
-	const epleyResult = document.getElementById("epley-result");
-	const brzyckiResult = document.getElementById("brzycki-result");
-	const lombardiResult = document.getElementById("lombardi-result");
-	const epleyUnit = document.getElementById("epley-unit");
-	const brzyckiUnit = document.getElementById("brzycki-unit");
-	const lombardiUnit = document.getElementById("lombardi-unit");
 
 	// Unit conversion functions
 	function lbsToKg(lbs) {
@@ -611,12 +608,16 @@ import Layout from "../layouts/Layout.astro";
 
 	// Update weight slider range based on unit
 	function updateWeightSliderRange() {
-		if (currentUnit === "kg") {
+		const imperialWeightInputs = document.querySelector(".imperial-weight");
+		const metricWeightInputs = document.querySelector(".metric-weight");
+
+		if (currentUnit === "metric") {
 			// Show metric inputs, hide imperial
 			if (imperialWeightInputs) imperialWeightInputs.style.display = "none";
 			if (metricWeightInputs) metricWeightInputs.style.display = "block";
 
 			// Update kg slider value
+			const weightKgSlider = document.getElementById("weight-kg");
 			if (weightKgSlider) {
 				weightKgSlider.value = Math.round(lbsToKg(currentWeightLbs));
 			}
@@ -626,6 +627,7 @@ import Layout from "../layouts/Layout.astro";
 			if (metricWeightInputs) metricWeightInputs.style.display = "none";
 
 			// Update lbs slider value
+			const weightSlider = document.getElementById("weight");
 			if (weightSlider) {
 				weightSlider.value = currentWeightLbs;
 			}
@@ -635,15 +637,19 @@ import Layout from "../layouts/Layout.astro";
 	// Update all displays
 	function updateDisplays() {
 		// Update weight displays
+		const weightDisplay = document.getElementById("weight-display");
+		const weightKgDisplay = document.getElementById("weight-kg-display");
+
 		if (weightDisplay) {
 			weightDisplay.textContent = currentWeightLbs.toString();
 		}
 		if (weightKgDisplay) {
 			const weightKg = lbsToKg(currentWeightLbs);
-			weightKgDisplay.textContent = weightKg.toFixed(1);
+			weightKgDisplay.textContent = Math.round(weightKg).toString();
 		}
 
 		// Update reps display
+		const repsDisplay = document.getElementById("reps-display");
 		if (repsDisplay) {
 			repsDisplay.textContent = currentReps.toString();
 		}
@@ -656,8 +662,16 @@ import Layout from "../layouts/Layout.astro";
 		const brzyckiValue = calculateBrzycki(currentWeightLbs, currentReps);
 		const lombardiValue = calculateLombardi(currentWeightLbs, currentReps);
 
+		// Get result elements using the new component structure
+		const epleyResult = document.querySelector("#epley-result .result-value__number");
+		const brzyckiResult = document.querySelector("#brzycki-result .result-value__number");
+		const lombardiResult = document.querySelector("#lombardi-result .result-value__number");
+		const epleyUnit = document.querySelector("#epley-result .result-value__unit");
+		const brzyckiUnit = document.querySelector("#brzycki-result .result-value__unit");
+		const lombardiUnit = document.querySelector("#lombardi-result .result-value__unit");
+
 		// Display results in user's preferred unit
-		if (currentUnit === "kg") {
+		if (currentUnit === "metric") {
 			if (epleyResult) epleyResult.textContent = Math.round(lbsToKg(epleyValue)).toString();
 			if (brzyckiResult) brzyckiResult.textContent = Math.round(lbsToKg(brzyckiValue)).toString();
 			if (lombardiResult)
@@ -703,7 +717,10 @@ import Layout from "../layouts/Layout.astro";
 		}
 
 		// Update slider values
-		repsSlider.value = currentReps;
+		const repsSlider = document.getElementById("reps");
+		if (repsSlider) {
+			repsSlider.value = currentReps;
+		}
 		updateWeightSliderRange();
 	}
 
@@ -711,7 +728,7 @@ import Layout from "../layouts/Layout.astro";
 	function updateUnitButtons() {
 		document.querySelectorAll(".unit-btn").forEach((btn) => {
 			btn.classList.remove("active");
-			if (btn.dataset.unit === currentUnit) {
+			if (btn.getAttribute("data-unit") === currentUnit) {
 				btn.classList.add("active");
 			}
 		});
@@ -724,47 +741,58 @@ import Layout from "../layouts/Layout.astro";
 		calculationTimeout = setTimeout(calculateAndDisplayResults, 100);
 	}
 
-	// Event listeners
-	if (weightSlider) {
-		weightSlider.addEventListener("input", () => {
-			currentWeightLbs = parseInt(weightSlider.value);
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}
-
-	if (weightKgSlider) {
-		weightKgSlider.addEventListener("input", () => {
-			// Convert kg input back to lbs for storage
-			currentWeightLbs = Math.round(kgToLbs(parseInt(weightKgSlider.value)));
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}
-
-	if (repsSlider) {
-		repsSlider.addEventListener("input", () => {
-			currentReps = parseInt(repsSlider.value);
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}
-
-	// Unit toggle functionality
-	document.querySelectorAll(".unit-btn").forEach((btn) => {
-		btn.addEventListener("click", () => {
-			currentUnit = btn.dataset.unit || "lbs";
-			updateUnitButtons();
-			updateWeightSliderRange();
-			updateDisplays();
-			calculateAndDisplayResults();
-		});
-	});
-
 	// Initialize the calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
-		loadSavedValues();
-		updateDisplays();
-		calculateAndDisplayResults();
+		// Wait a bit for components to initialize
+		setTimeout(() => {
+			// Event listeners for sliders
+			const weightSlider = document.getElementById("weight");
+			const weightKgSlider = document.getElementById("weight-kg");
+			const repsSlider = document.getElementById("reps");
+
+			if (weightSlider) {
+				weightSlider.addEventListener("input", () => {
+					currentWeightLbs = parseInt(weightSlider.value);
+					updateDisplays();
+					debouncedCalculation();
+				});
+			}
+
+			if (weightKgSlider) {
+				weightKgSlider.addEventListener("input", () => {
+					// Convert kg input back to lbs for storage
+					currentWeightLbs = Math.round(kgToLbs(parseInt(weightKgSlider.value)));
+					updateDisplays();
+					debouncedCalculation();
+				});
+			}
+
+			if (repsSlider) {
+				repsSlider.addEventListener("input", () => {
+					currentReps = parseInt(repsSlider.value);
+					updateDisplays();
+					debouncedCalculation();
+				});
+			}
+
+			// Unit toggle functionality - targeting the new component structure
+			document.querySelectorAll(".unit-btn").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const newUnit = btn.getAttribute("data-unit");
+					if (newUnit) {
+						currentUnit = newUnit;
+						updateUnitButtons();
+						updateWeightSliderRange();
+						updateDisplays();
+						calculateAndDisplayResults();
+					}
+				});
+			});
+
+			// Initialize everything
+			loadSavedValues();
+			updateDisplays();
+			calculateAndDisplayResults();
+		}, 300);
 	});
 </script>

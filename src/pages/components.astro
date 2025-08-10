@@ -25,97 +25,122 @@ import GenderToggle from "../components/GenderToggle.astro";
 
 			<div class="component-section">
 				<h2>RangeSlider Component</h2>
+				<p class="component-description">
+					RangeSlider components can be used standalone or within InputGroup components. The modern
+					pattern (used in calculators) wraps sliders in InputGroup for consistent styling.
+				</p>
+
+				<h3>Modern Pattern - RangeSlider with InputGroup</h3>
 				<div class="component-examples">
 					<div class="example">
-						<h3>Height (Imperial)</h3>
-						<RangeSlider
-							id="height-feet"
-							label="Feet"
-							min={4}
-							max={7}
-							value={5}
-							unit="ft"
-							sharedKey="heightFeet"
-						/>
-						<RangeSlider
-							id="height-inches"
-							label="Inches"
-							min={0}
-							max={11.5}
-							step={0.5}
-							value={8}
-							unit="in"
-							sharedKey="heightInches"
-						/>
-					</div>
-
-					<div class="example">
-						<h3>Height (Metric)</h3>
-						<RangeSlider
-							id="height-cm"
+						<h4>Height (Imperial) - formatAsHeight</h4>
+						<InputGroup
 							label="Height"
-							min={120}
-							max={220}
-							value={175}
-							unit="cm"
-							helpText="Enter your height in centimeters"
-							sharedKey="heightCm"
-						/>
+							helpText="Single slider displaying total inches as feet'inches"
+						>
+							<RangeSlider
+								id="height-total-inches-demo"
+								label=""
+								min={48}
+								max={84}
+								step={0.5}
+								value={68}
+								unit=""
+								sharedKey="heightTotalInches"
+								formatAsHeight={true}
+							/>
+						</InputGroup>
 					</div>
 
 					<div class="example">
-						<h3>Weight (Metric)</h3>
-						<RangeSlider
-							id="weight-kg"
-							label="Weight"
-							min={35}
-							max={180}
-							value={73}
-							unit="kg"
-							helpText="Enter your current weight in kilograms"
-							sharedKey="weightKg"
-						/>
+						<h4>Height (Metric)</h4>
+						<InputGroup label="Height" helpText="Enter your height in centimeters">
+							<RangeSlider
+								id="height-cm-demo"
+								label=""
+								min={120}
+								max={220}
+								value={175}
+								unit="cm"
+								sharedKey="heightCm"
+							/>
+						</InputGroup>
 					</div>
 
 					<div class="example">
-						<h3>Weight (Imperial)</h3>
-						<RangeSlider
-							id="weight-lbs"
-							label="Weight"
-							min={80}
-							max={400}
-							value={160}
-							unit="lbs"
-							helpText="Enter your current weight in pounds"
-							sharedKey="weightLbs"
-						/>
+						<h4>Weight (Imperial)</h4>
+						<InputGroup label="Weight" helpText="Enter your current weight in pounds">
+							<RangeSlider
+								id="weight-lbs-demo"
+								label=""
+								min={80}
+								max={400}
+								value={160}
+								unit="lbs"
+								sharedKey="weightLbs"
+							/>
+						</InputGroup>
 					</div>
 
 					<div class="example">
-						<h3>Age</h3>
+						<h4>Weight (Metric)</h4>
+						<InputGroup label="Weight" helpText="Enter your current weight in kilograms">
+							<RangeSlider
+								id="weight-kg-demo"
+								label=""
+								min={35}
+								max={180}
+								value={73}
+								unit="kg"
+								sharedKey="weightKg"
+							/>
+						</InputGroup>
+					</div>
+
+					<div class="example">
+						<h4>Body Fat Percentage</h4>
+						<InputGroup label="Body Fat %" helpText="Enter your body fat percentage if known">
+							<RangeSlider
+								id="body-fat-demo"
+								label=""
+								min={3}
+								max={50}
+								step={0.1}
+								value={15.5}
+								unit="%"
+							/>
+						</InputGroup>
+					</div>
+
+					<div class="example">
+						<h4>Age</h4>
+						<InputGroup label="Age" helpText="Your age in years">
+							<RangeSlider
+								id="age-demo"
+								label=""
+								min={15}
+								max={100}
+								value={30}
+								unit="years"
+								sharedKey="age"
+							/>
+						</InputGroup>
+					</div>
+				</div>
+
+				<h3>Legacy Pattern - Standalone RangeSlider</h3>
+				<div class="component-examples legacy-examples">
+					<div class="example">
+						<h4>Standalone with Label</h4>
 						<RangeSlider
-							id="age"
-							label="Age"
-							min={15}
+							id="standalone-demo"
+							label="Standalone Slider"
+							min={0}
 							max={100}
-							value={30}
-							unit="years"
-							helpText="Your age in years"
-							sharedKey="age"
-						/>
-					</div>
-
-					<div class="example">
-						<h3>Body Fat Percentage</h3>
-						<RangeSlider
-							id="body-fat"
-							label="Body Fat"
-							min={3}
-							max={50}
-							step={0.1}
-							value={15.5}
-							unit="%"
-							helpText="Enter your body fat percentage if known"
+							step={1}
+							value={50}
+							unit="units"
+							helpText="This pattern is less commonly used in modern calculators"
 						/>
 					</div>
 				</div>
@@ -737,6 +762,37 @@ import GenderToggle from "../components/GenderToggle.astro";
 		font-weight: 700;
 		margin-bottom: 1.5rem;
 		color: var(--color-primary);
+		border-bottom: 2px solid var(--color-accent);
+		padding-bottom: 0.5rem;
+	}
+
+	.component-section h3 {
+		color: var(--color-text);
+		font-size: 1.25rem;
+		margin: 2rem 0 1rem 0;
+		font-weight: 600;
+	}
+
+	.component-description {
+		color: var(--color-text-muted);
+		font-style: italic;
+		margin-bottom: 2rem;
+		padding: 1rem;
+		background: var(--color-bg);
+		border-left: 4px solid var(--color-accent);
+		border-radius: var(--border-radius);
+	}
+
+	.legacy-examples {
+		opacity: 0.8;
+		border-left: 3px solid var(--color-text-muted);
+		padding-left: 1rem;
+		margin-left: 1rem;
+	}
+
+	.legacy-examples .example {
+		background: var(--color-bg);
+		border: 1px dashed var(--color-border);
 	}
 
 	.component-examples {

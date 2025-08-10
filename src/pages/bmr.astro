@@ -1,461 +1,568 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import UnitToggle from "../components/UnitToggle.astro";
+import GenderToggle from "../components/GenderToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+import ComparisonTable from "../components/ComparisonTable.astro";
+import ValidationDisplay from "../components/ValidationDisplay.astro";
 ---
 
 <Layout
 	title="BMR Calculator - Potato Hack Fitness Calculators"
 	description="Calculate your Basal Metabolic Rate using all three major formulas: Mifflin-St Jeor, Harris-Benedict, and Katch-McArdle. Compare results instantly."
 >
-	<section class="calculator-page">
-		<div class="container">
-			<div class="calculator-header">
-				<h1>Complete BMR Calculator</h1>
-				<p>
-					Calculate your Basal Metabolic Rate using all three major formulas and compare results
-				</p>
+	<CalculatorLayout
+		title="Complete BMR Calculator"
+		description="Calculate your Basal Metabolic Rate using all three major formulas and compare results"
+	>
+		<div slot="inputs">
+			<InputGroup label="Gender" helpText="Biological sex affects metabolic rate calculations">
+				<GenderToggle activeGender="male" />
+			</InputGroup>
+
+			<InputGroup label="Age" helpText="Age significantly impacts metabolic rate">
+				<RangeSlider id="age" label="" min={15} max={80} value={30} unit="years" sharedKey="age" />
+			</InputGroup>
+
+			<InputGroup label="Height" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "ft/in" },
+						{ value: "metric", label: "cm" },
+					]}
+					activeValue="imperial"
+					dataAttribute="height-unit"
+				/>
+			</InputGroup>
+
+			<div class="height-inputs imperial-height" data-unit-group="imperial">
+				<InputGroup label="Height" helpText="" class="full-width">
+					<RangeSlider
+						id="height-total-inches"
+						label=""
+						min={48}
+						max={84}
+						step={0.5}
+						value={68}
+						unit=""
+						sharedKey="heightTotalInches"
+						formatAsHeight={true}
+					/>
+				</InputGroup>
 			</div>
 
-			<div class="calculator-layout">
-				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="gender">Gender</label>
-						<div class="gender-toggle">
-							<button class="gender-btn active" data-gender="male">Male</button>
-							<button class="gender-btn" data-gender="female">Female</button>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="age">Age</label>
-						<div class="input-container">
-							<input type="range" id="age" min="15" max="80" value="30" />
-							<div class="input-display">
-								<span id="age-display">30</span> years
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="height">Height</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">ft/in</button>
-							<button class="unit-btn" data-unit="metric">cm</button>
-						</div>
-
-						<div class="height-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="height-feet" min="4" max="7" value="5" />
-								<div class="input-display">
-									<span id="height-feet-display">5</span> ft
-								</div>
-							</div>
-							<div class="input-container">
-								<input type="range" id="height-inches" min="0" max="11.5" step="0.5" value="8" />
-								<div class="input-display">
-									<span id="height-inches-display">8</span> in
-								</div>
-							</div>
-						</div>
-
-						<div class="height-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="height-cm" min="120" max="220" value="173" />
-								<div class="input-display">
-									<span id="height-cm-display">173</span> cm
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="weight">Weight</label>
-						<div class="unit-toggle">
-							<button class="unit-btn active" data-unit="imperial">lbs</button>
-							<button class="unit-btn" data-unit="metric">kg</button>
-						</div>
-
-						<div class="weight-inputs imperial">
-							<div class="input-container">
-								<input type="range" id="weight-lbs" min="80" max="400" value="160" />
-								<div class="input-display">
-									<span id="weight-lbs-display">160</span> lbs
-								</div>
-							</div>
-						</div>
-
-						<div class="weight-inputs metric" style="display: none;">
-							<div class="input-container">
-								<input type="range" id="weight-kg" min="35" max="180" value="73" />
-								<div class="input-display">
-									<span id="weight-kg-display">73</span> kg
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="input-group">
-						<label for="body-fat"
-							>Body Fat Percentage <span class="optional">(for Katch-McArdle)</span></label
-						>
-						<div class="input-container">
-							<input type="range" id="body-fat" min="5" max="50" value="15" step="0.5" />
-							<div class="input-display">
-								<span id="body-fat-display">15</span>%
-							</div>
-						</div>
-						<p class="input-help">Optional: Required only for Katch-McArdle formula</p>
-					</div>
-
-					<div class="input-group">
-						<label for="activity">Activity Level</label>
-						<div class="activity-selector">
-							<button class="activity-btn active" data-multiplier="1.2">
-								<strong>Sedentary</strong>
-								<span>Little to no exercise</span>
-							</button>
-							<button class="activity-btn" data-multiplier="1.375">
-								<strong>Lightly Active</strong>
-								<span>Light exercise 1-3 days/week</span>
-							</button>
-							<button class="activity-btn" data-multiplier="1.55">
-								<strong>Moderately Active</strong>
-								<span>Moderate exercise 3-5 days/week</span>
-							</button>
-							<button class="activity-btn" data-multiplier="1.725">
-								<strong>Very Active</strong>
-								<span>Heavy exercise 6-7 days/week</span>
-							</button>
-							<button class="activity-btn" data-multiplier="1.9">
-								<strong>Extremely Active</strong>
-								<span>Physical job + exercise</span>
-							</button>
-						</div>
-					</div>
-				</div>
-
-				<div class="calculator-results">
-					<div class="results-grid">
-						<div class="result-card mifflin">
-							<h3>Mifflin-St Jeor</h3>
-							<div class="dual-results">
-								<div class="result-section bmr-section">
-									<div class="result-label">BMR (Resting)</div>
-									<div class="result-value">
-										<span id="mifflin-bmr">1,685</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-								<div class="result-section tdee-section">
-									<div class="result-label">TDEE (Total Daily)</div>
-									<div class="result-value">
-										<span id="mifflin-tdee">2,022</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-							</div>
-							<p class="result-description">Most accurate for general population</p>
-						</div>
-
-						<div class="result-card harris">
-							<h3>Harris-Benedict</h3>
-							<div class="dual-results">
-								<div class="result-section bmr-section">
-									<div class="result-label">BMR (Resting)</div>
-									<div class="result-value">
-										<span id="harris-bmr">1,712</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-								<div class="result-section tdee-section">
-									<div class="result-label">TDEE (Total Daily)</div>
-									<div class="result-value">
-										<span id="harris-tdee">2,054</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-							</div>
-							<p class="result-description">Classic formula, slightly higher estimates</p>
-						</div>
-
-						<div class="result-card katch">
-							<h3>Katch-McArdle</h3>
-							<div class="dual-results">
-								<div class="result-section bmr-section">
-									<div class="result-label">BMR (Resting)</div>
-									<div class="result-value">
-										<span id="katch-bmr">1,798</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-								<div class="result-section tdee-section">
-									<div class="result-label">TDEE (Total Daily)</div>
-									<div class="result-value">
-										<span id="katch-tdee">2,158</span>
-										<span class="result-unit">cal/day</span>
-									</div>
-								</div>
-							</div>
-							<p class="result-description">Most accurate for lean/athletic individuals</p>
-						</div>
-					</div>
-
-					<div class="comparison-card">
-						<h3>Formula Comparison</h3>
-						<div class="comparison-stats">
-							<div class="stat">
-								<span class="stat-label">Average BMR:</span>
-								<span class="stat-value" id="average-bmr">1,732</span> cal/day
-							</div>
-							<div class="stat">
-								<span class="stat-label">Range:</span>
-								<span class="stat-value" id="bmr-range">113</span> cal/day
-							</div>
-							<div class="stat">
-								<span class="stat-label">Recommended:</span>
-								<span class="stat-value">Mifflin-St Jeor</span>
-							</div>
-						</div>
-					</div>
-
-					<div class="formula-details">
-						<div class="formula-card">
-							<h4>Mifflin-St Jeor (Recommended)</h4>
-							<p class="formula-text" id="mifflin-formula">
-								BMR = (10 × 73kg) + (6.25 × 173cm) - (5 × 30y) + 5 = 1,685 cal/day
-							</p>
-							<p class="formula-note">Most accurate for modern populations, published in 1990</p>
-						</div>
-
-						<div class="formula-card">
-							<h4>Harris-Benedict (Revised)</h4>
-							<p class="formula-text" id="harris-formula">
-								BMR = (13.397 × 73kg) + (4.799 × 173cm) - (5.677 × 30y) + 88.362 = 1,712 cal/day
-							</p>
-							<p class="formula-note">Classic formula revised in 1984, tends to overestimate</p>
-						</div>
-
-						<div class="formula-card">
-							<h4>Katch-McArdle</h4>
-							<p class="formula-text" id="katch-formula">
-								BMR = 370 + (21.6 × 62kg lean mass) = 1,798 cal/day
-							</p>
-							<p class="formula-note">
-								Based on lean body mass, most accurate for athletic individuals
-							</p>
-						</div>
-					</div>
-				</div>
+			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Height" helpText="" class="full-width">
+					<RangeSlider
+						id="height-cm"
+						label=""
+						min={120}
+						max={220}
+						value={173}
+						unit="cm"
+						sharedKey="heightCm"
+					/>
+				</InputGroup>
 			</div>
+
+			<InputGroup label="Weight" helpText="Choose your preferred measurement system">
+				<UnitToggle
+					options={[
+						{ value: "imperial", label: "lbs" },
+						{ value: "metric", label: "kg" },
+					]}
+					activeValue="imperial"
+					dataAttribute="weight-unit"
+				/>
+			</InputGroup>
+
+			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
+				<InputGroup label="Weight (Imperial)" helpText="">
+					<RangeSlider
+						id="weight-lbs"
+						label=""
+						min={80}
+						max={400}
+						value={160}
+						unit="lbs"
+						sharedKey="weightLbs"
+					/>
+				</InputGroup>
+			</div>
+
+			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Weight (Metric)" helpText="">
+					<RangeSlider
+						id="weight-kg"
+						label=""
+						min={35}
+						max={180}
+						value={73}
+						unit="kg"
+						sharedKey="weightKg"
+					/>
+				</InputGroup>
+			</div>
+
+			<InputGroup
+				label="Body Fat Percentage"
+				helpText="Optional: Required only for Katch-McArdle formula"
+			>
+				<RangeSlider
+					id="body-fat"
+					label=""
+					min={5}
+					max={50}
+					step={0.5}
+					value={15}
+					unit="%"
+					sharedKey="bodyFat"
+				/>
+			</InputGroup>
+
+			<InputGroup label="Activity Level" helpText="Your typical weekly exercise routine">
+				<div class="activity-selector">
+					<button class="activity-btn active" data-multiplier="1.2">
+						<strong>Sedentary</strong>
+						<span>Little to no exercise</span>
+					</button>
+					<button class="activity-btn" data-multiplier="1.375">
+						<strong>Lightly Active</strong>
+						<span>Light exercise 1-3 days/week</span>
+					</button>
+					<button class="activity-btn" data-multiplier="1.55">
+						<strong>Moderately Active</strong>
+						<span>Moderate exercise 3-5 days/week</span>
+					</button>
+					<button class="activity-btn" data-multiplier="1.725">
+						<strong>Very Active</strong>
+						<span>Heavy exercise 6-7 days/week</span>
+					</button>
+					<button class="activity-btn" data-multiplier="1.9">
+						<strong>Extremely Active</strong>
+						<span>Physical job + exercise</span>
+					</button>
+				</div>
+			</InputGroup>
+
+			<ValidationDisplay />
 		</div>
-	</section>
+
+		<div slot="results">
+			<ResultCard title="Mifflin-St Jeor Formula" variant="primary">
+				<div class="dual-results">
+					<div class="result-section">
+						<div class="result-label">BMR (Resting)</div>
+						<ResultValue id="mifflin-bmr" value={1685} unit="cal/day" size="lg" color="primary" />
+					</div>
+					<div class="result-section">
+						<div class="result-label">TDEE (Total Daily)</div>
+						<ResultValue id="mifflin-tdee" value={2022} unit="cal/day" size="lg" color="success" />
+					</div>
+				</div>
+				<p class="result-description">Most accurate for general population</p>
+			</ResultCard>
+
+			<ResultCard title="Harris-Benedict Formula">
+				<div class="dual-results">
+					<div class="result-section">
+						<div class="result-label">BMR (Resting)</div>
+						<ResultValue id="harris-bmr" value={1712} unit="cal/day" size="lg" color="primary" />
+					</div>
+					<div class="result-section">
+						<div class="result-label">TDEE (Total Daily)</div>
+						<ResultValue id="harris-tdee" value={2054} unit="cal/day" size="lg" color="success" />
+					</div>
+				</div>
+				<p class="result-description">Classic formula, slightly higher estimates</p>
+			</ResultCard>
+
+			<ResultCard title="Katch-McArdle Formula">
+				<div class="dual-results">
+					<div class="result-section">
+						<div class="result-label">BMR (Resting)</div>
+						<ResultValue id="katch-bmr" value={1798} unit="cal/day" size="lg" color="primary" />
+					</div>
+					<div class="result-section">
+						<div class="result-label">TDEE (Total Daily)</div>
+						<ResultValue id="katch-tdee" value={2158} unit="cal/day" size="lg" color="success" />
+					</div>
+				</div>
+				<p class="result-description">Most accurate for lean/athletic individuals</p>
+			</ResultCard>
+
+			<ResultCard title="Formula Comparison">
+				<ComparisonTable
+					headers={["Formula", "BMR", "TDEE", "Best For"]}
+					rows={[
+						{
+							cells: [
+								"Mifflin-St Jeor",
+								"<span id='comparison-mifflin-bmr'>1,685</span>",
+								"<span id='comparison-mifflin-tdee'>2,022</span>",
+								"General population",
+							],
+							highlight: true,
+						},
+						{
+							cells: [
+								"Harris-Benedict",
+								"<span id='comparison-harris-bmr'>1,712</span>",
+								"<span id='comparison-harris-tdee'>2,054</span>",
+								"Traditional method",
+							],
+						},
+						{
+							cells: [
+								"Katch-McArdle",
+								"<span id='comparison-katch-bmr'>1,798</span>",
+								"<span id='comparison-katch-tdee'>2,158</span>",
+								"Athletic/lean body",
+							],
+						},
+					]}
+				/>
+			</ResultCard>
+
+			<ResultCard title="Understanding Your Results">
+				<div class="info-sections">
+					<div class="info-section">
+						<h4>BMR vs TDEE</h4>
+						<ul>
+							<li><strong>BMR (Basal Metabolic Rate):</strong> Calories burned at complete rest</li>
+							<li><strong>TDEE (Total Daily Energy Expenditure):</strong> BMR × activity factor</li>
+							<li><strong>For weight loss:</strong> Eat below TDEE but above BMR</li>
+							<li><strong>For weight gain:</strong> Eat above TDEE</li>
+						</ul>
+					</div>
+					<div class="info-section">
+						<h4>Which Formula to Use?</h4>
+						<ul>
+							<li><strong>Mifflin-St Jeor:</strong> Most accurate for average body composition</li>
+							<li><strong>Harris-Benedict:</strong> Older formula, tends to overestimate</li>
+							<li><strong>Katch-McArdle:</strong> Best if you know your body fat percentage</li>
+						</ul>
+					</div>
+				</div>
+			</ResultCard>
+		</div>
+	</CalculatorLayout>
 </Layout>
 
+<script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
+<script>
+	// BMR Calculator - Refactored with Components
+	class BMRCalculator {
+		private sharedValues: any;
+		private reactiveSharedValues: any;
+		private activityMultiplier: number = 1.2;
+
+		constructor() {
+			// Initialize SharedValues systems
+			this.sharedValues = new (window as any).SharedValues();
+
+			if ((window as any).ReactiveSharedValues) {
+				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
+			}
+
+			this.init();
+		}
+
+		private init(): void {
+			// Set up event listeners
+			this.setupEventListeners();
+
+			// Set default values
+			this.sharedValues.set("gender", "male");
+			this.sharedValues.set("heightUnit", "imperial");
+			this.sharedValues.set("weightUnit", "imperial");
+
+			// Initialize UI state
+			this.convertAndToggleHeightUnits("imperial");
+			this.convertAndToggleWeightUnits("imperial");
+
+			// Initial calculation
+			this.calculate();
+		}
+
+		private setupEventListeners(): void {
+			// Listen for input changes
+			document.addEventListener("range-slider-change", () => {
+				this.calculate();
+			});
+
+			document.addEventListener("gender-toggle-change", () => {
+				this.calculate();
+			});
+
+			document.addEventListener("unit-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				if (customEvent.detail.attribute === "height-unit") {
+					this.convertAndToggleHeightUnits(customEvent.detail.value);
+					this.sharedValues.set("heightUnit", customEvent.detail.value);
+				} else if (customEvent.detail.attribute === "weight-unit") {
+					this.convertAndToggleWeightUnits(customEvent.detail.value);
+					this.sharedValues.set("weightUnit", customEvent.detail.value);
+				}
+				this.calculate();
+			});
+
+			// Activity level buttons
+			document.querySelectorAll(".activity-btn").forEach((btn) => {
+				btn.addEventListener("click", (e) => {
+					e.preventDefault();
+					this.handleActivityChange(btn as HTMLElement);
+				});
+			});
+		}
+
+		private convertAndToggleHeightUnits(unit: string): void {
+			const imperialGroup = document.querySelector(".imperial-height") as HTMLElement;
+			const metricGroup = document.querySelector(".metric-height") as HTMLElement;
+
+			if (imperialGroup && metricGroup) {
+				if (unit === "imperial") {
+					// Converting from metric to imperial
+					const currentCm = this.sharedValues.get("heightCm") || 173;
+					const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("heightTotalInches", totalInches);
+
+					// Update the UI slider
+					this.updateSliderValue("height-total-inches", totalInches);
+
+					imperialGroup.style.display = "block";
+					metricGroup.style.display = "none";
+				} else {
+					// Converting from imperial to metric
+					const totalInches = this.sharedValues.get("heightTotalInches") || 68;
+					const cm = Math.round(totalInches * 2.54);
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("heightCm", cm);
+
+					// Update the UI slider
+					this.updateSliderValue("height-cm", cm);
+
+					imperialGroup.style.display = "none";
+					metricGroup.style.display = "block";
+				}
+			}
+		}
+
+		private convertAndToggleWeightUnits(unit: string): void {
+			const imperialGroup = document.querySelector(".imperial-weight") as HTMLElement;
+			const metricGroup = document.querySelector(".metric-weight") as HTMLElement;
+
+			if (imperialGroup && metricGroup) {
+				if (unit === "imperial") {
+					// Converting from metric to imperial
+					const currentKg = this.sharedValues.get("weightKg") || 73;
+					const lbs = Math.round(currentKg / 0.453592);
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("weightLbs", lbs);
+
+					// Update the UI slider
+					this.updateSliderValue("weight-lbs", lbs);
+
+					imperialGroup.style.display = "block";
+					metricGroup.style.display = "none";
+				} else {
+					// Converting from imperial to metric
+					const lbs = this.sharedValues.get("weightLbs") || 160;
+					const kg = Math.round(lbs * 0.453592);
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("weightKg", kg);
+
+					// Update the UI slider
+					this.updateSliderValue("weight-kg", kg);
+
+					imperialGroup.style.display = "none";
+					metricGroup.style.display = "block";
+				}
+			}
+		}
+
+		private updateSliderValue(sliderId: string, value: number): void {
+			const slider = document.getElementById(sliderId) as HTMLInputElement;
+			if (slider) {
+				slider.value = value.toString();
+
+				// Trigger the display update
+				const event = new Event("input", { bubbles: true });
+				slider.dispatchEvent(event);
+			}
+		}
+
+		private handleActivityChange(clickedBtn: HTMLElement): void {
+			// Remove active class from all buttons
+			document.querySelectorAll(".activity-btn").forEach((btn) => {
+				btn.classList.remove("active");
+			});
+
+			// Add active class to clicked button
+			clickedBtn.classList.add("active");
+
+			// Get multiplier
+			this.activityMultiplier = parseFloat(clickedBtn.getAttribute("data-multiplier") || "1.2");
+
+			// Recalculate
+			this.calculate();
+		}
+
+		private calculate(): void {
+			try {
+				const gender = this.sharedValues.get("gender") || "male";
+				const age = this.sharedValues.get("age") || 30;
+				const bodyFat = this.sharedValues.get("bodyFat") || 15;
+
+				// Get height in cm
+				let heightCm: number;
+				const heightUnit = this.sharedValues.get("heightUnit") || "imperial";
+				if (heightUnit === "imperial") {
+					const totalInches = this.sharedValues.get("heightTotalInches") || 68;
+					heightCm = totalInches * 2.54;
+				} else {
+					heightCm = this.sharedValues.get("heightCm") || 173;
+				}
+
+				// Get weight in kg
+				let weightKg: number;
+				const weightUnit = this.sharedValues.get("weightUnit") || "imperial";
+				if (weightUnit === "imperial") {
+					const weightLbs = this.sharedValues.get("weightLbs") || 160;
+					weightKg = weightLbs * 0.453592;
+				} else {
+					weightKg = this.sharedValues.get("weightKg") || 73;
+				}
+
+				// Calculate BMR using all three formulas
+				const mifflinBMR = this.calculateMifflinStJeor(gender, age, weightKg, heightCm);
+				const harrisBMR = this.calculateHarrisBenedict(gender, age, weightKg, heightCm);
+				const katchBMR = this.calculateKatchMcArdle(weightKg, bodyFat);
+
+				// Calculate TDEE
+				const mifflinTDEE = Math.round(mifflinBMR * this.activityMultiplier);
+				const harrisTDEE = Math.round(harrisBMR * this.activityMultiplier);
+				const katchTDEE = Math.round(katchBMR * this.activityMultiplier);
+
+				// Update displays
+				this.updateResults(
+					Math.round(mifflinBMR),
+					mifflinTDEE,
+					Math.round(harrisBMR),
+					harrisTDEE,
+					Math.round(katchBMR),
+					katchTDEE
+				);
+			} catch (error) {
+				console.error("BMR calculation error:", error);
+			}
+		}
+
+		private calculateMifflinStJeor(
+			gender: string,
+			age: number,
+			weightKg: number,
+			heightCm: number
+		): number {
+			if (gender === "male") {
+				return 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+			} else {
+				return 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+			}
+		}
+
+		private calculateHarrisBenedict(
+			gender: string,
+			age: number,
+			weightKg: number,
+			heightCm: number
+		): number {
+			if (gender === "male") {
+				return 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age;
+			} else {
+				return 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.33 * age;
+			}
+		}
+
+		private calculateKatchMcArdle(weightKg: number, bodyFatPercentage: number): number {
+			const leanBodyMass = weightKg * (1 - bodyFatPercentage / 100);
+			return 370 + 21.6 * leanBodyMass;
+		}
+
+		private updateResults(
+			mifflinBMR: number,
+			mifflinTDEE: number,
+			harrisBMR: number,
+			harrisTDEE: number,
+			katchBMR: number,
+			katchTDEE: number
+		): void {
+			// Update individual result cards
+			this.updateElement("mifflin-bmr", mifflinBMR.toLocaleString());
+			this.updateElement("mifflin-tdee", mifflinTDEE.toLocaleString());
+			this.updateElement("harris-bmr", harrisBMR.toLocaleString());
+			this.updateElement("harris-tdee", harrisTDEE.toLocaleString());
+			this.updateElement("katch-bmr", katchBMR.toLocaleString());
+			this.updateElement("katch-tdee", katchTDEE.toLocaleString());
+
+			// Update comparison table
+			this.updateElement("comparison-mifflin-bmr", mifflinBMR.toLocaleString());
+			this.updateElement("comparison-mifflin-tdee", mifflinTDEE.toLocaleString());
+			this.updateElement("comparison-harris-bmr", harrisBMR.toLocaleString());
+			this.updateElement("comparison-harris-tdee", harrisTDEE.toLocaleString());
+			this.updateElement("comparison-katch-bmr", katchBMR.toLocaleString());
+			this.updateElement("comparison-katch-tdee", katchTDEE.toLocaleString());
+		}
+
+		private updateElement(id: string, value: string): void {
+			const element = document.getElementById(id);
+			if (element) {
+				element.textContent = value;
+			}
+		}
+	}
+
+	// Initialize calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		new BMRCalculator();
+	});
+</script>
+
 <style>
-	.calculator-page {
-		padding: 2rem 0 4rem;
-		min-height: 100vh;
-	}
-
-	.calculator-header {
-		text-align: center;
-		margin-bottom: 3rem;
-	}
-
-	.calculator-header h1 {
-		color: var(--color-primary);
-		margin-bottom: 0.5rem;
-		font-size: 2.5rem;
-		font-weight: 700;
-	}
-
-	.calculator-header p {
-		color: var(--color-text-muted);
-		font-size: 1.125rem;
-	}
-	.calculator-layout {
-		display: grid;
-		grid-template-columns: 1fr 1.5fr;
-		gap: 3rem;
-		max-width: 1400px;
-		margin: 0 auto;
-	}
-
-	.calculator-inputs {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		height: fit-content;
-		box-shadow: var(--shadow-md);
-	}
-
-	.input-group {
-		margin-bottom: 2rem;
-	}
-
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--color-text);
-	}
-
-	.optional {
-		font-weight: 400;
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-	}
-
-	.input-help {
-		margin-top: 0.5rem;
-		margin-bottom: 0;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		font-style: italic;
-	}
-
-	/* Gender Toggle */
-	.gender-toggle {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.gender-btn {
-		flex: 1;
-		padding: 0.75rem;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		background: var(--color-background);
-		color: var(--color-text);
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 500;
-	}
-
-	.gender-btn:hover {
-		border-color: var(--color-primary);
-	}
-
-	.gender-btn.active {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	/* Unit Toggle */
-	.unit-toggle {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.unit-btn {
-		flex: 1;
-		padding: 0.5rem;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		background: var(--color-background);
-		color: var(--color-text);
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 500;
-		font-size: 0.875rem;
-	}
-
-	.unit-btn:hover {
-		border-color: var(--color-primary);
-	}
-
-	.unit-btn.active {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	/* Input Controls */
-	.input-container {
-		margin-bottom: 1rem;
-	}
-
-	.input-container:last-child {
-		margin-bottom: 0;
-	}
-
-	.height-inputs {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.height-inputs.metric {
-		display: block;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.125rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
-	}
-
-	/* Activity Selector */
+	/* Activity selector styles */
 	.activity-selector {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.5rem;
 	}
 
 	.activity-btn {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		align-items: flex-start;
 		padding: 1rem;
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--border-radius);
+		background: var(--color-surface);
+		color: var(--color-text);
 		cursor: pointer;
 		transition: all 0.2s ease;
-		background: var(--color-background);
 		text-align: left;
-		width: 100%;
 	}
 
 	.activity-btn:hover {
+		background: var(--color-bg);
 		border-color: var(--color-primary);
-		background: var(--color-surface);
 	}
 
 	.activity-btn.active {
@@ -465,587 +572,112 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	.activity-btn strong {
-		color: var(--color-text);
-		font-weight: 600;
-	}
-
-	.activity-btn.active strong {
-		color: white;
+		font-size: 1rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.activity-btn span {
-		color: var(--color-text-muted);
 		font-size: 0.875rem;
+		opacity: 0.8;
 	}
 
-	.activity-btn.active span {
-		color: rgba(255, 255, 255, 0.8);
-	}
-
-	/* Results */
-	.calculator-results {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.results-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-	}
-	.result-card {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		text-align: center;
-		position: relative;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.result-card h3 {
-		margin: 0 0 1.25rem 0;
-		color: var(--color-text);
-		font-size: 1.125rem;
-		font-weight: 600;
-	}
-
-	/* New dual results layout */
+	/* Dual results styling */
 	.dual-results {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
 		margin-bottom: 1rem;
 	}
 
 	.result-section {
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		background: var(--color-background);
-		border: 1px solid var(--color-border);
-	}
-
-	.bmr-section {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	.tdee-section {
-		background: var(--color-accent);
-		color: white;
-		border-color: var(--color-accent);
+		text-align: center;
 	}
 
 	.result-label {
-		font-size: 0.75rem;
+		font-size: 0.875rem;
 		font-weight: 600;
+		color: var(--color-text-muted);
+		margin-bottom: 0.5rem;
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		margin-bottom: 0.25rem;
-		opacity: 0.9;
-	}
-
-	.result-value {
-		display: flex;
-		align-items: baseline;
-		justify-content: center;
-		gap: 0.25rem;
-	}
-
-	.result-value span:first-child {
-		font-size: 1.5rem;
-		font-weight: 700;
-		line-height: 1;
-	}
-
-	.result-unit {
-		font-size: 0.75rem;
-		font-weight: 500;
-		opacity: 0.8;
+		letter-spacing: 0.05em;
 	}
 
 	.result-description {
 		color: var(--color-text-muted);
-		margin: 0;
-		font-size: 0.75rem;
-	}
-
-	/* Legacy TDEE styling - hide since we're using new layout */
-	.result-tdee {
-		display: none;
-	}
-
-	.comparison-card {
-		background: var(--color-background);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-	}
-
-	.comparison-card h3 {
-		margin: 0 0 1rem 0;
-		color: var(--color-text);
-		font-size: 1.125rem;
-		font-weight: 600;
-		text-align: center;
-	}
-
-	.comparison-stats {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-		text-align: center;
-	}
-
-	.stat {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.stat-label {
-		color: var(--color-text-muted);
 		font-size: 0.875rem;
+		text-align: center;
+		margin: 0;
 	}
 
-	.stat-value {
-		color: var(--color-text);
-		font-weight: 600;
-		font-size: 1.125rem;
+	/* Unit group toggling */
+	[data-unit-group] {
+		transition: all 0.3s ease;
 	}
 
-	.formula-details {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
+	/* Full width height inputs */
+	.full-width {
+		width: 100%;
 	}
 
-	.formula-card {
-		background: var(--color-surface);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 1rem;
+	.height-inputs .full-width {
+		flex: 1;
 	}
 
-	.formula-card h4 {
-		margin: 0 0 0.75rem 0;
+	/* Info sections */
+	.info-sections {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.info-section h4 {
 		color: var(--color-text);
 		font-size: 1rem;
 		font-weight: 600;
+		margin-bottom: 0.75rem;
 	}
 
-	.formula-text {
-		margin: 0 0 0.5rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-		font-family: "Courier New", monospace;
-		word-break: break-all;
-	}
-
-	.formula-note {
+	.info-section ul {
+		list-style: none;
+		padding: 0;
 		margin: 0;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		font-style: italic;
 	}
 
-	/* Mobile Responsiveness */
-	@media (max-width: 1024px) {
-		.calculator-layout {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-		}
-
-		.results-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.comparison-stats {
-			grid-template-columns: 1fr;
-		}
+	.info-section li {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--color-border);
+		font-size: 0.875rem;
+		line-height: 1.4;
 	}
+
+	.info-section li:last-child {
+		border-bottom: none;
+	}
+
+	/* Height inputs alignment */
+	.height-inputs.imperial-height {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+
+	/* Responsive design */
 	@media (max-width: 768px) {
-		.calculator-header h1 {
-			font-size: 2rem;
-		}
-
-		.height-inputs {
-			flex-direction: column;
+		.dual-results {
+			grid-template-columns: 1fr;
 			gap: 1rem;
 		}
 
-		.result-value span:first-child {
-			font-size: 1.25rem;
+		.height-inputs.imperial-height {
+			grid-template-columns: 1fr;
 		}
 
-		.result-label {
-			font-size: 0.7rem;
+		.activity-btn {
+			padding: 0.75rem;
 		}
 
-		.formula-text {
-			font-size: 0.75rem;
-		}
-
-		.dual-results {
-			gap: 0.5rem;
-		}
-
-		.result-section {
-			padding: 0.5rem;
+		.info-sections {
+			gap: 1rem;
 		}
 	}
 </style>
-
-<script src="/sharedValues.js" is:inline></script>
-<script>
-	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Load shared values on page load
-	const values = new window.SharedValues().load();
-	const sharedValues = new window.SharedValues();
-	let currentGender = values.gender;
-	let currentHeightUnit = values.heightUnit;
-	let currentWeightUnit = values.weightUnit;
-	let currentActivityMultiplier = 1.2;
-
-	// Get DOM elements
-	const age = document.getElementById("age");
-	const heightFeet = document.getElementById("height-feet");
-	const heightInches = document.getElementById("height-inches");
-	const heightCm = document.getElementById("height-cm");
-	const weightLbs = document.getElementById("weight-lbs");
-	const weightKg = document.getElementById("weight-kg");
-	const bodyFat = document.getElementById("body-fat");
-
-	const ageDisplay = document.getElementById("age-display");
-	const heightFeetDisplay = document.getElementById("height-feet-display");
-	const heightInchesDisplay = document.getElementById("height-inches-display");
-	const heightCmDisplay = document.getElementById("height-cm-display");
-	const weightLbsDisplay = document.getElementById("weight-lbs-display");
-	const weightKgDisplay = document.getElementById("weight-kg-display");
-	const bodyFatDisplay = document.getElementById("body-fat-display");
-
-	// Result elements
-	const mifflinBmr = document.getElementById("mifflin-bmr");
-	const mifflinTdee = document.getElementById("mifflin-tdee");
-	const harrisBmr = document.getElementById("harris-bmr");
-	const harrisTdee = document.getElementById("harris-tdee");
-	const katchBmr = document.getElementById("katch-bmr");
-	const katchTdee = document.getElementById("katch-tdee");
-	const averageBmr = document.getElementById("average-bmr");
-	const bmrRange = document.getElementById("bmr-range");
-
-	// Formula elements
-	const mifflinFormula = document.getElementById("mifflin-formula");
-	const harrisFormula = document.getElementById("harris-formula");
-	const katchFormula = document.getElementById("katch-formula");
-
-	// Initialize inputs with shared values
-	function initializeInputs() {
-		if (age) age.value = values.age.toString();
-		if (heightFeet) heightFeet.value = values.heightFeet.toString();
-		if (heightInches) heightInches.value = values.heightInches.toString();
-		if (heightCm) heightCm.value = values.heightCm.toString();
-		if (weightLbs) weightLbs.value = values.weightLbs.toString();
-		if (weightKg) weightKg.value = values.weightKg.toString();
-		if (bodyFat) bodyFat.value = "15";
-
-		// Set gender toggle to match saved preference
-		document.querySelectorAll(".gender-btn").forEach((btn) => {
-			btn.classList.remove("active");
-			if (btn.dataset.gender === currentGender) {
-				btn.classList.add("active");
-			}
-		});
-
-		// Set unit toggles to match saved preferences
-		document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-			const isHeightToggle = toggle
-				.closest(".input-group")
-				?.querySelector("label")
-				?.textContent?.toLowerCase()
-				.includes("height");
-			const targetUnit = isHeightToggle ? currentHeightUnit : currentWeightUnit;
-
-			toggle.querySelectorAll(".unit-btn").forEach((btn) => {
-				btn.classList.remove("active");
-				if (btn.dataset.unit === targetUnit) {
-					btn.classList.add("active");
-				}
-			});
-
-			// Show/hide appropriate inputs
-			const inputGroup = toggle.closest(".input-group");
-			if (isHeightToggle) {
-				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(targetUnit) ? "flex" : "none";
-				});
-			} else {
-				inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(targetUnit) ? "block" : "none";
-				});
-			}
-		});
-	}
-
-	// Save current values to shared storage
-	function saveCurrentValues() {
-		const currentValues = {
-			age: parseInt(age?.value || "30"),
-			heightFeet: parseInt(heightFeet?.value || "5"),
-			heightInches: parseFloat(heightInches?.value || "8"),
-			heightCm: parseInt(heightCm?.value || "173"),
-			weightLbs: parseInt(weightLbs?.value || "160"),
-			weightKg: parseInt(weightKg?.value || "73"),
-			heightUnit: currentHeightUnit,
-			weightUnit: currentWeightUnit,
-			gender: currentGender,
-		};
-		sharedValues.update(currentValues);
-	}
-
-	// Get standardized values (height in cm, weight in kg)
-	function getStandardizedValues() {
-		let heightInCm, weightInKg, ageValue;
-
-		ageValue = parseInt(age?.value || "30");
-
-		// Convert height to cm
-		if (currentHeightUnit === "imperial") {
-			const feet = parseInt(heightFeet?.value || "5");
-			const inches = parseFloat(heightInches?.value || "8");
-			const totalInches = feet * 12 + inches;
-			heightInCm = totalInches * 2.54;
-		} else {
-			heightInCm = parseInt(heightCm?.value || "173");
-		}
-
-		// Convert weight to kg
-		if (currentWeightUnit === "imperial") {
-			weightInKg = parseInt(weightLbs?.value || "160") * 0.453592;
-		} else {
-			weightInKg = parseInt(weightKg?.value || "73");
-		}
-
-		return { heightInCm, weightInKg, ageValue };
-	}
-
-	// Calculate Mifflin-St Jeor BMR
-	function calculateMifflinBMR() {
-		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
-
-		let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * ageValue;
-		bmr += currentGender === "male" ? 5 : -161;
-
-		return bmr;
-	}
-
-	// Calculate Harris-Benedict BMR
-	function calculateHarrisBMR() {
-		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
-
-		let bmr;
-		if (currentGender === "male") {
-			bmr = 88.362 + 13.397 * weightInKg + 4.799 * heightInCm - 5.677 * ageValue;
-		} else {
-			bmr = 447.593 + 9.247 * weightInKg + 3.098 * heightInCm - 4.33 * ageValue;
-		}
-
-		return bmr;
-	}
-
-	// Calculate Katch-McArdle BMR
-	function calculateKatchBMR() {
-		const { weightInKg } = getStandardizedValues();
-		const bodyFatPercentage = parseFloat(bodyFat?.value || "15");
-
-		const leanBodyMass = weightInKg * (1 - bodyFatPercentage / 100);
-		const bmr = 370 + 21.6 * leanBodyMass;
-
-		return bmr;
-	}
-	function updateDisplay() {
-		console.log("updateDisplay called, currentActivityMultiplier:", currentActivityMultiplier);
-
-		const mifflinBmrValue = calculateMifflinBMR();
-		const harrisBmrValue = calculateHarrisBMR();
-		const katchBmrValue = calculateKatchBMR();
-
-		const mifflinTdeeValue = mifflinBmrValue * currentActivityMultiplier;
-		const harrisTdeeValue = harrisBmrValue * currentActivityMultiplier;
-		const katchTdeeValue = katchBmrValue * currentActivityMultiplier;
-
-		console.log("Calculated TDEE values:", {
-			mifflin: mifflinTdeeValue,
-			harris: harrisTdeeValue,
-			katch: katchTdeeValue,
-		});
-
-		// Update BMR displays
-		if (mifflinBmr) mifflinBmr.textContent = Math.round(mifflinBmrValue).toLocaleString();
-		if (harrisBmr) harrisBmr.textContent = Math.round(harrisBmrValue).toLocaleString();
-		if (katchBmr) katchBmr.textContent = Math.round(katchBmrValue).toLocaleString();
-
-		// Update TDEE displays
-		if (mifflinTdee) mifflinTdee.textContent = Math.round(mifflinTdeeValue).toLocaleString();
-		if (harrisTdee) harrisTdee.textContent = Math.round(harrisTdeeValue).toLocaleString();
-		if (katchTdee) katchTdee.textContent = Math.round(katchTdeeValue).toLocaleString();
-
-		// Calculate comparison stats
-		const bmrValues = [mifflinBmrValue, harrisBmrValue, katchBmrValue];
-		const avgBmr = bmrValues.reduce((a, b) => a + b, 0) / bmrValues.length;
-		const minBmr = Math.min(...bmrValues);
-		const maxBmr = Math.max(...bmrValues);
-		const rangeBmr = maxBmr - minBmr;
-
-		if (averageBmr) averageBmr.textContent = Math.round(avgBmr).toLocaleString();
-		if (bmrRange) bmrRange.textContent = Math.round(rangeBmr).toLocaleString();
-
-		// Update formula displays
-		const { heightInCm, weightInKg, ageValue } = getStandardizedValues();
-		const bodyFatPercentage = parseFloat(bodyFat?.value || "15");
-		const leanBodyMass = weightInKg * (1 - bodyFatPercentage / 100);
-
-		const genderSign = currentGender === "male" ? "+ 5" : "- 161";
-		if (mifflinFormula) {
-			mifflinFormula.textContent = `BMR = (10 × ${Math.round(weightInKg)}kg) + (6.25 × ${Math.round(heightInCm)}cm) - (5 × ${ageValue}y) ${genderSign} = ${Math.round(mifflinBmrValue).toLocaleString()} cal/day`;
-		}
-
-		if (currentGender === "male") {
-			if (harrisFormula) {
-				harrisFormula.textContent = `BMR = 88.362 + (13.397 × ${Math.round(weightInKg)}kg) + (4.799 × ${Math.round(heightInCm)}cm) - (5.677 × ${ageValue}y) = ${Math.round(harrisBmrValue).toLocaleString()} cal/day`;
-			}
-		} else {
-			if (harrisFormula) {
-				harrisFormula.textContent = `BMR = 447.593 + (9.247 × ${Math.round(weightInKg)}kg) + (3.098 × ${Math.round(heightInCm)}cm) - (4.330 × ${ageValue}y) = ${Math.round(harrisBmrValue).toLocaleString()} cal/day`;
-			}
-		}
-
-		if (katchFormula) {
-			katchFormula.textContent = `BMR = 370 + (21.6 × ${Math.round(leanBodyMass)}kg lean mass) = ${Math.round(katchBmrValue).toLocaleString()} cal/day`;
-		} // Save values after calculation
-		saveCurrentValues();
-
-		// Save Mifflin BMR for other calculators to use
-		localStorage.setItem("cruxcalc-bmr-mifflin", Math.round(mifflinBmrValue).toString());
-
-		// Save Mifflin TDEE for other calculators to use
-		localStorage.setItem("cruxcalc-tdee-mifflin", Math.round(mifflinTdeeValue).toString());
-	}
-
-	function updateDisplays() {
-		if (ageDisplay && age) ageDisplay.textContent = age.value;
-		if (heightFeetDisplay && heightFeet) heightFeetDisplay.textContent = heightFeet.value;
-		if (heightInchesDisplay && heightInches) heightInchesDisplay.textContent = heightInches.value;
-		if (heightCmDisplay && heightCm) heightCmDisplay.textContent = heightCm.value;
-		if (weightLbsDisplay && weightLbs) weightLbsDisplay.textContent = weightLbs.value;
-		if (weightKgDisplay && weightKg) weightKgDisplay.textContent = weightKg.value;
-		if (bodyFatDisplay && bodyFat) bodyFatDisplay.textContent = bodyFat.value;
-	}
-
-	// Debounced calculation
-	let calculationTimeout;
-	function debouncedCalculation() {
-		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(updateDisplay, 100);
-	}
-
-	// Event listeners for sliders
-	[age, heightFeet, heightInches, heightCm, weightLbs, weightKg, bodyFat].forEach((slider) => {
-		if (slider) {
-			slider.addEventListener("input", () => {
-				updateDisplays();
-				debouncedCalculation();
-			});
-		}
-	});
-
-	// Gender toggle functionality
-	document.querySelectorAll(".gender-btn").forEach((btn) => {
-		btn.addEventListener("click", () => {
-			document.querySelectorAll(".gender-btn").forEach((b) => b.classList.remove("active"));
-			btn.classList.add("active");
-			currentGender = btn.dataset.gender || "male";
-			debouncedCalculation();
-		});
-	});
-
-	// Unit toggle functionality
-	document.querySelectorAll(".unit-toggle").forEach((toggle) => {
-		toggle.addEventListener("click", (e) => {
-			const target = e.target;
-			if (!target?.classList.contains("unit-btn")) return;
-
-			const unitType = target
-				.closest(".input-group")
-				?.querySelector("label")
-				?.textContent?.toLowerCase();
-			const unit = target.dataset.unit;
-
-			// Update active state
-			toggle.querySelectorAll(".unit-btn").forEach((btn) => btn.classList.remove("active"));
-			target.classList.add("active");
-
-			// Show/hide appropriate inputs
-			const inputGroup = target.closest(".input-group");
-			if (unitType?.includes("height")) {
-				currentHeightUnit = unit || "imperial";
-				sharedValues.syncHeightUnits(currentHeightUnit);
-				inputGroup?.querySelectorAll(".height-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(unit || "imperial") ? "flex" : "none";
-				});
-			} else {
-				currentWeightUnit = unit || "imperial";
-				sharedValues.syncWeightUnits(currentWeightUnit);
-				inputGroup?.querySelectorAll(".weight-inputs").forEach((input) => {
-					input.style.display = input.classList.contains(unit || "imperial") ? "block" : "none";
-				});
-			}
-
-			// Update sliders with converted values after unit change
-			const updatedValues = sharedValues.load();
-			if (heightFeet) heightFeet.value = updatedValues.heightFeet.toString();
-			if (heightInches) heightInches.value = updatedValues.heightInches.toString();
-			if (heightCm) heightCm.value = updatedValues.heightCm.toString();
-			if (weightLbs) weightLbs.value = updatedValues.weightLbs.toString();
-			if (weightKg) weightKg.value = updatedValues.weightKg.toString();
-
-			updateDisplays();
-			debouncedCalculation();
-		});
-	}); // Activity level functionality
-	console.log(
-		"Setting up activity button listeners, found buttons:",
-		document.querySelectorAll(".activity-btn").length
-	);
-	document.querySelectorAll(".activity-btn").forEach((btn) => {
-		btn.addEventListener("click", (e) => {
-			e.preventDefault(); // Prevent any default button behavior
-			const target = e.currentTarget;
-			const multiplier = target.dataset.multiplier;
-
-			console.log("Activity button clicked, multiplier:", multiplier);
-
-			if (multiplier) {
-				currentActivityMultiplier = parseFloat(multiplier);
-				console.log("Updated currentActivityMultiplier to:", currentActivityMultiplier);
-
-				// Update active state
-				document.querySelectorAll(".activity-btn").forEach((b) => b.classList.remove("active"));
-				target.classList.add("active");
-
-				// Force immediate update for activity changes
-				console.log("Calling updateDisplay...");
-				updateDisplay();
-			}
-		});
-	});
-
-	// Initialize the calculator when DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		initializeInputs();
-		updateDisplays();
-		updateDisplay();
-	});
-</script>

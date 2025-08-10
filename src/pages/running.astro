@@ -1,5 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import RangeSlider from "../components/RangeSlider.astro";
+import InputGroup from "../components/InputGroup.astro";
 ---
 
 <Layout
@@ -17,19 +19,23 @@ import Layout from "../layouts/Layout.astro";
 			</div>
 			<div class="calculator-layout">
 				<div class="calculator-inputs">
-					<div class="input-group">
-						<label for="pace">Pace per Mile</label>
-						<div class="input-container">
-							<input type="range" id="pace-slider" min="240" max="1440" value="510" step="5" />
-							<div class="input-display">
-								<span id="pace-display">8:30</span>
-							</div>
-						</div>
+					<InputGroup label="Pace Control">
+						<RangeSlider
+							id="pace-slider"
+							label="Pace per Mile"
+							sharedKey="runningPace"
+							min={240}
+							max={1440}
+							step={5}
+							value={490}
+							unit=""
+							formatAsPace={true}
+						/>
 						<div class="pace-range">
 							<span class="range-label">4:00 (Fast)</span>
 							<span class="range-label">24:00 (Slow)</span>
 						</div>
-					</div>
+					</InputGroup>
 
 					<div class="pace-category-section">
 						<div class="pace-value">
@@ -70,6 +76,7 @@ import Layout from "../layouts/Layout.astro";
 			</div>
 		</div>
 	</section>
+	<script src="/reactiveSharedValues.js" is:inline></script>
 	<script>
 		// Race distances in miles
 		const DISTANCES = {
@@ -145,14 +152,14 @@ import Layout from "../layouts/Layout.astro";
 			return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 		}
 		function calculateRaceTimes(paceSeconds: number) {
-			const times = {
+			const times: Record<string, number> = {
 				"5k": 0,
 				"10k": 0,
 				half: 0,
 				full: 0,
 			};
 			for (const [race, distance] of Object.entries(DISTANCES)) {
-				times[race as "5k" | "10k" | "half" | "full"] = distance * paceSeconds;
+				times[race] = distance * paceSeconds;
 			}
 			return times;
 		}
@@ -165,13 +172,13 @@ import Layout from "../layouts/Layout.astro";
 			}
 			return PACE_CATEGORIES[PACE_CATEGORIES.length - 1];
 		}
-		function savePaceValue() {
-			const paceSlider = document.getElementById("pace-slider");
-			if (!paceSlider) return;
-
-			const paceSeconds = parseInt((paceSlider as HTMLInputElement).value);
+		function savePaceValue(paceSeconds: number) {
 			try {
 				localStorage.setItem("cruxcalc-running-pace", paceSeconds.toString());
+				// Also sync with ReactiveSharedValues for cross-calculator integration if available
+				if (typeof ReactiveSharedValues !== "undefined") {
+					(ReactiveSharedValues as any).set("runningPace", paceSeconds);
+				}
 			} catch (error) {
 				console.warn("Error saving pace value to localStorage:", error);
 			}
@@ -186,68 +193,107 @@ import Layout from "../layouts/Layout.astro";
 			} catch (error) {
 				console.warn("Error loading pace value from localStorage:", error);
 			}
-			// Default to 8:30 (510 seconds) if no saved value
-			return 510;
+			// Default to 8:10 (490 seconds) if no saved value
+			return 490;
 		}
 
 		function updateCalculations() {
-			const paceSlider = document.getElementById("pace-slider");
-			if (!paceSlider) return;
+			console.log("updateCalculations called");
 
-			const paceSeconds = parseInt((paceSlider as HTMLInputElement).value);
-
-			// Update pace display
-			const paceDisplay = document.getElementById("pace-display");
-			if (paceDisplay) {
-				paceDisplay.textContent = formatPace(paceSeconds);
+			// Read pace from the slider
+			const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
+			if (!paceSlider) {
+				console.log("Could not find pace slider");
+				return;
 			}
+
+			const paceSeconds = parseInt(paceSlider.value);
+			console.log("Current pace value:", paceSeconds);
 
 			// Calculate and display race times
 			const raceTimes = calculateRaceTimes(paceSeconds);
+			console.log("Calculated race times:", raceTimes);
 
 			const time5k = document.getElementById("time-5k");
+			console.log("5K element found:", !!time5k);
 			if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
 
 			const time10k = document.getElementById("time-10k");
+			console.log("10K element found:", !!time10k);
 			if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
 
 			const timeHalf = document.getElementById("time-half");
+			console.log("Half element found:", !!timeHalf);
 			if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
 
 			const timeFull = document.getElementById("time-full");
+			console.log("Full element found:", !!timeFull);
 			if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
 
 			// Update pace category
 			const category = getPaceCategory(paceSeconds);
+			console.log("Pace category:", category);
 			const categoryElement = document.getElementById("pace-category");
 			const descriptionElement = document.getElementById("pace-description");
+
+			console.log("Category element found:", !!categoryElement);
+			console.log("Description element found:", !!descriptionElement);
 
 			if (categoryElement) {
 				categoryElement.textContent = category.name;
 				categoryElement.style.backgroundColor = category.color;
+				console.log("Updated category to:", category.name, "with color:", category.color);
 			}
 
 			if (descriptionElement) {
 				descriptionElement.textContent = category.description;
+				console.log("Updated description to:", category.description);
 			}
 
 			// Save the pace value to localStorage
-			savePaceValue();
+			savePaceValue(paceSeconds);
+			console.log("Updated calculations complete");
 		}
 		// Initialize calculator
 		document.addEventListener("DOMContentLoaded", function () {
-			const paceSlider = document.getElementById("pace-slider");
-			if (paceSlider) {
-				// Load saved pace value or use default (8:30 = 510 seconds)
-				const savedPaceSeconds = loadPaceValue();
-				(paceSlider as HTMLInputElement).value = savedPaceSeconds.toString();
+			console.log("Running calculator initializing...");
 
-				// Add input event listener
-				paceSlider.addEventListener("input", updateCalculations);
+			// Load saved pace value or use default (8:10 = 490 seconds)
+			const savedPaceSeconds = loadPaceValue();
+			console.log("Loaded pace:", savedPaceSeconds);
 
-				// Initial calculation with loaded value
+			// Function to handle any pace change
+			function handlePaceChange() {
+				console.log("Handle pace change called");
 				updateCalculations();
 			}
+
+			// Wait for components to load, then set up everything
+			setTimeout(() => {
+				console.log("Setting up slider...");
+
+				const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
+				if (paceSlider) {
+					// Set initial value
+					paceSlider.value = savedPaceSeconds.toString();
+					console.log("Set slider value to:", savedPaceSeconds);
+
+					// Add multiple event listeners to catch any change
+					paceSlider.addEventListener("input", handlePaceChange);
+					paceSlider.addEventListener("change", handlePaceChange);
+
+					console.log("Added event listeners to slider");
+				} else {
+					console.log("ERROR: Pace slider not found!");
+				}
+
+				// Also listen for the custom events
+				document.addEventListener("range-slider-change", handlePaceChange);
+
+				// Trigger initial calculation
+				console.log("Triggering initial calculation...");
+				updateCalculations();
+			}, 200);
 		});
 	</script>
 </Layout>
@@ -304,62 +350,6 @@ import Layout from "../layouts/Layout.astro";
 		border-radius: var(--border-radius-lg);
 		padding: 2rem;
 		height: fit-content;
-	}
-
-	.input-group {
-		margin-bottom: 2rem;
-	}
-
-	.input-group:last-child {
-		margin-bottom: 0;
-	}
-
-	.input-group label {
-		display: block;
-		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--color-text);
-	}
-
-	.input-container {
-		margin-bottom: 1rem;
-	}
-
-	.input-display {
-		text-align: center;
-		font-weight: 600;
-		color: var(--color-primary);
-		margin-top: 0.5rem;
-		font-size: 1.5rem;
-	}
-
-	input[type="range"] {
-		width: 100%;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-		-webkit-appearance: none;
-	}
-
-	input[type="range"]::-webkit-slider-thumb {
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		box-shadow: var(--shadow-sm);
-	}
-
-	input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-		box-shadow: var(--shadow-sm);
 	}
 
 	.pace-range {

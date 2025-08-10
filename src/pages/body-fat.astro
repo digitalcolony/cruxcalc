@@ -36,35 +36,24 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 				/>
 			</InputGroup>
 
-			<div class="height-inputs" data-unit-group="imperial">
-				<InputGroup label="Feet" class="inline">
+			<div class="height-inputs imperial-height" data-unit-group="imperial">
+				<InputGroup label="Height" class="full-width">
 					<RangeSlider
-						id="height-feet"
+						id="height-total-inches"
 						label=""
-						min={4}
-						max={7}
-						value={5}
-						unit="ft"
-						sharedKey="heightFeet"
-					/>
-				</InputGroup>
-
-				<InputGroup label="Inches" class="inline">
-					<RangeSlider
-						id="height-inches"
-						label=""
-						min={0}
-						max={11.5}
+						min={48}
+						max={84}
 						step={0.5}
-						value={10}
-						unit="in"
-						sharedKey="heightInches"
+						value={70}
+						unit=""
+						sharedKey="heightTotalInches"
+						formatAsHeight={true}
 					/>
 				</InputGroup>
 			</div>
 
-			<div class="height-inputs" data-unit-group="metric" style="display: none;">
-				<InputGroup label="Height">
+			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Height" class="full-width">
 					<RangeSlider
 						id="height-cm"
 						label=""
@@ -233,17 +222,48 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 		}
 
 		private toggleHeightUnits(unit: string): void {
-			const imperialInputs = document.querySelector('[data-unit-group="imperial"]') as HTMLElement;
-			const metricInputs = document.querySelector('[data-unit-group="metric"]') as HTMLElement;
+			const imperialInputs = document.querySelector(".imperial-height") as HTMLElement;
+			const metricInputs = document.querySelector(".metric-height") as HTMLElement;
 
 			if (imperialInputs && metricInputs) {
 				if (unit === "imperial") {
+					// Converting from metric to imperial
+					const currentCm = this.sharedValues.get("heightCm") || 178;
+					const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("heightTotalInches", totalInches);
+
+					// Update the UI slider
+					this.updateSliderValue("height-total-inches", totalInches);
+
 					imperialInputs.style.display = "block";
 					metricInputs.style.display = "none";
 				} else {
+					// Converting from imperial to metric
+					const totalInches = this.sharedValues.get("heightTotalInches") || 70;
+					const cm = Math.round(totalInches * 2.54);
+
+					// Update the SharedValues with converted value
+					this.sharedValues.set("heightCm", cm);
+
+					// Update the UI slider
+					this.updateSliderValue("height-cm", cm);
+
 					imperialInputs.style.display = "none";
 					metricInputs.style.display = "block";
 				}
+			}
+		}
+
+		private updateSliderValue(sliderId: string, value: number): void {
+			const slider = document.getElementById(sliderId) as HTMLInputElement;
+			if (slider) {
+				slider.value = value.toString();
+
+				// Trigger the display update
+				const event = new Event("input", { bubbles: true });
+				slider.dispatchEvent(event);
 			}
 		}
 
@@ -251,9 +271,7 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 			const heightUnit = this.sharedValues.get("heightUnit") || "imperial";
 
 			if (heightUnit === "imperial") {
-				const feet = this.sharedValues.get("heightFeet") || 5;
-				const inches = this.sharedValues.get("heightInches") || 10;
-				return feet * 12 + inches;
+				return this.sharedValues.get("heightTotalInches") || 70;
 			} else {
 				const cm = this.sharedValues.get("heightCm") || 178;
 				return cm / 2.54; // Convert cm to inches
@@ -354,9 +372,7 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 <style>
 	/* Component-specific styles */
 	.height-inputs {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
+		display: block;
 		margin-bottom: 1rem;
 	}
 
@@ -419,6 +435,15 @@ import ValidationDisplay from "../components/ValidationDisplay.astro";
 		background: color-mix(in srgb, var(--color-danger) 20%, transparent);
 		color: var(--color-danger);
 		border-color: var(--color-danger);
+	}
+
+	/* Full width height inputs */
+	.full-width {
+		width: 100%;
+	}
+
+	.height-inputs .full-width {
+		flex: 1;
 	}
 
 	/* Responsive design */

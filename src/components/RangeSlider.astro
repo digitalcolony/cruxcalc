@@ -10,6 +10,8 @@ export interface Props {
 	helpText?: string;
 	class?: string;
 	sharedKey?: string; // For SharedValues integration
+	formatAsHeight?: boolean; // For total inches display as feet'inches"
+	formatAsPace?: boolean; // For seconds display as mm:ss pace format
 }
 
 const {
@@ -23,6 +25,8 @@ const {
 	helpText,
 	class: className = "",
 	sharedKey,
+	formatAsHeight = false,
+	formatAsPace = false,
 } = Astro.props;
 ---
 
@@ -37,9 +41,19 @@ const {
 			step={step}
 			value={value}
 			data-shared-key={sharedKey}
+			data-format-as-height={formatAsHeight}
+			data-format-as-pace={formatAsPace}
 		/>
 		<div class="input-display">
-			<span id={`${id}-display`}>{value}</span>
+			<span id={`${id}-display`}>
+				{
+					formatAsPace
+						? `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, "0")}`
+						: formatAsHeight
+							? `${Math.floor(value / 12)}'${Math.round((value % 12) * 2) / 2}"`
+							: value
+				}
+			</span>
 			<span class="unit">{unit}</span>
 		</div>
 	</div>
@@ -90,7 +104,7 @@ const {
 	input[type="range"] {
 		width: 100%;
 		height: 8px;
-		border-radius: 0;
+		border-radius: 4px;
 		background: var(--color-bg);
 		outline: none;
 		border: var(--border-width) solid var(--color-border);
@@ -113,7 +127,7 @@ const {
 		appearance: none;
 		height: 24px;
 		width: 24px;
-		border-radius: 0;
+		border-radius: 50%;
 		background: var(--color-primary);
 		border: var(--border-width) solid var(--color-border);
 		box-shadow: var(--shadow-sm);
@@ -129,7 +143,7 @@ const {
 	input[type="range"]::-moz-range-thumb {
 		height: 20px;
 		width: 20px;
-		border-radius: 0;
+		border-radius: 50%;
 		background: var(--color-primary);
 		border: var(--border-width) solid var(--color-border);
 		box-shadow: var(--shadow-sm);
@@ -200,27 +214,28 @@ const {
 			this.input.addEventListener("input", () => {
 				this.updateDisplay();
 
-				// Debounced SharedValues update
-				if (this.sharedValues && this.sharedKey && this.input) {
-					clearTimeout(debounceTimer);
-					debounceTimer = setTimeout(() => {
-						if (this.input) {
-							this.sharedValues.set(this.sharedKey, parseFloat(this.input.value));
+				// Always dispatch custom event for other components
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => {
+					if (this.input) {
+						// Dispatch custom event for other components
+						this.container.dispatchEvent(
+							new CustomEvent("range-slider-change", {
+								detail: {
+									id: this.input.id,
+									value: parseFloat(this.input.value),
+									sharedKey: this.sharedKey,
+								},
+								bubbles: true,
+							})
+						);
 
-							// Dispatch custom event for other components
-							this.container.dispatchEvent(
-								new CustomEvent("range-slider-change", {
-									detail: {
-										id: this.input.id,
-										value: parseFloat(this.input.value),
-										sharedKey: this.sharedKey,
-									},
-									bubbles: true,
-								})
-							);
+						// Update SharedValues if available
+						if (this.sharedValues && this.sharedKey) {
+							this.sharedValues.set(this.sharedKey, parseFloat(this.input.value));
 						}
-					}, 150);
-				}
+					}
+				}, 150);
 			});
 
 			// Listen for refresh requests from unit changes
@@ -236,16 +251,30 @@ const {
 
 		private updateDisplay(): void {
 			if (this.display && this.input) {
-				// Handle decimal precision
 				const value = parseFloat(this.input.value);
-				const step = parseFloat(this.input.step);
+				const formatAsHeight = this.input.getAttribute("data-format-as-height") === "true";
+				const formatAsPace = this.input.getAttribute("data-format-as-pace") === "true";
 
-				if (step < 1) {
-					// For decimal steps, show appropriate precision
-					const decimalPlaces = step.toString().split(".")[1]?.length || 1;
-					this.display.textContent = value.toFixed(decimalPlaces);
+				if (formatAsHeight) {
+					// Format total inches as feet'inches"
+					const feet = Math.floor(value / 12);
+					const inches = Math.round((value % 12) * 2) / 2; // Round to nearest 0.5
+					this.display.textContent = `${feet}'${inches}"`;
+				} else if (formatAsPace) {
+					// Format seconds as mm:ss pace format
+					const minutes = Math.floor(value / 60);
+					const seconds = Math.round(value % 60);
+					this.display.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 				} else {
-					this.display.textContent = Math.round(value).toString();
+					// Handle decimal precision for normal values
+					const step = parseFloat(this.input.step);
+					if (step < 1) {
+						// For decimal steps, show appropriate precision
+						const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+						this.display.textContent = value.toFixed(decimalPlaces);
+					} else {
+						this.display.textContent = Math.round(value).toString();
+					}
 				}
 			}
 		}
