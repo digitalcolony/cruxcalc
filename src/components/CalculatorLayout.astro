@@ -10,7 +10,7 @@ const { title, description, class: className = "" } = Astro.props;
 
 <div class={`calculator-layout ${className}`}>
 	<div class="calculator-layout__header">
-		<h1 class="calculator-layout__title">{title}</h1>
+		<h2 class="calculator-layout__title">{title}</h2>
 		{description && <p class="calculator-layout__description">{description}</p>}
 	</div>
 

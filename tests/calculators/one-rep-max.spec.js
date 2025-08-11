@@ -8,7 +8,7 @@ test.describe("One Rep Max Calculator", () => {
 
 	test("should load with correct default values", async ({ page }) => {
 		// Check page loads correctly
-		await expect(page.locator("h1")).toContainText("One Rep Max");
+		await expect(page.locator(".calculator-layout__title")).toContainText("One Rep Max");
 
 		// Check default weight (135 lbs)
 		await expect(page.locator("#weight")).toHaveValue("135");
@@ -151,7 +151,7 @@ test.describe("One Rep Max Calculator", () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Should still be functional
-		await expect(page.locator("h1")).toContainText("One Rep Max");
+		await expect(page.locator(".calculator-layout__title")).toContainText("One Rep Max");
 
 		// Test interactions
 		await page.locator("#weight").fill("180");

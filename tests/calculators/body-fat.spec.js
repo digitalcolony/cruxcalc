@@ -8,7 +8,7 @@ test.describe("Body Fat Calculator", () => {
 
 	test("should load with correct default values for male", async ({ page }) => {
 		// Check page loads correctly
-		await expect(page.locator("h1")).toContainText("Body Fat");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Body Fat");
 
 		// Should default to male
 		await expect(page.locator('[data-gender="male"]')).toHaveClass(/active/);
@@ -200,7 +200,7 @@ test.describe("Body Fat Calculator", () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Should still function on mobile
-		await expect(page.locator("h1")).toContainText("Body Fat");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Body Fat");
 
 		// Test gender toggle
 		await page.click('[data-gender="female"]');

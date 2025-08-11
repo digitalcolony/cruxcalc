@@ -8,7 +8,7 @@ test.describe("Heart Rate Zones Calculator", () => {
 
 	test("should load with correct default values", async ({ page }) => {
 		// Check page loads correctly
-		await expect(page.locator("h1")).toContainText("Heart Rate Zones");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Heart Rate Zones");
 
 		// Check default age (35)
 		await expect(page.locator("#age")).toHaveValue("35");
@@ -118,7 +118,7 @@ test.describe("Heart Rate Zones Calculator", () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Should still be functional
-		await expect(page.locator("h1")).toContainText("Heart Rate Zones");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Heart Rate Zones");
 
 		// Test interactions
 		await page.locator("#age").fill("28");

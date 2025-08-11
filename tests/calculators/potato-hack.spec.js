@@ -8,7 +8,7 @@ test.describe("Potato Hack Calculator", () => {
 
 	test("should load with correct default values", async ({ page }) => {
 		// Check page loads correctly
-		await expect(page.locator("h1")).toContainText("Potato Hack");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Potato Hack");
 
 		// Check default potato weight (4 lbs)
 		await expect(page.locator("#potato-pounds")).toHaveValue("4");
@@ -243,7 +243,7 @@ test.describe("Potato Hack Calculator", () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Should still be functional
-		await expect(page.locator("h1")).toContainText("Potato Hack");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Potato Hack");
 
 		// Test interactions
 		await page.locator("#potato-pounds").fill("3.5");

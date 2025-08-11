@@ -8,7 +8,7 @@ test.describe("Running Pace Calculator", () => {
 
 	test("should load with correct default values", async ({ page }) => {
 		// Check page loads correctly
-		await expect(page.locator("h1")).toContainText("Running Pace");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Running Pace");
 
 		// Check default pace (8:00 min/mile)
 		await expect(page.locator("#pace")).toHaveValue("480"); // 8:00 = 480 seconds
@@ -108,7 +108,7 @@ test.describe("Running Pace Calculator", () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Should still function on mobile
-		await expect(page.locator("h1")).toContainText("Running Pace");
+		await expect(page.locator(".calculator-layout__title")).toContainText("Running Pace");
 
 		// Test pace slider
 		await page.locator("#pace").fill("450");

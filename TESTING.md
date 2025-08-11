@@ -8,8 +8,12 @@ This project uses Playwright for comprehensive end-to-end testing of all calcula
 tests/
 ├── calculators/           # Individual calculator tests
 │   ├── bmi.spec.js       # BMI Calculator tests
+│   ├── bmr.spec.js       # BMR Calculator tests
 │   ├── body-fat.spec.js  # Body Fat Calculator tests
+│   ├── heart-rate-zones.spec.js # Heart Rate Zones Calculator tests
+│   ├── muscle-potential.spec.js # Muscle Potential Calculator tests
 │   ├── one-rep-max.spec.js # 1RM Calculator tests
+│   ├── potato-hack.spec.js # Potato Hack Calculator tests
 │   └── running-pace.spec.js # Running Pace Calculator tests
 ├── integration/          # Cross-calculator integration tests
 │   └── shared-values.spec.js # SharedValues synchronization tests
@@ -46,6 +50,13 @@ npm run test:report
 
 # Run specific test file
 npx playwright test tests/calculators/bmi.spec.js
+npx playwright test tests/calculators/bmr.spec.js
+npx playwright test tests/calculators/body-fat.spec.js
+npx playwright test tests/calculators/heart-rate-zones.spec.js
+npx playwright test tests/calculators/muscle-potential.spec.js
+npx playwright test tests/calculators/one-rep-max.spec.js
+npx playwright test tests/calculators/potato-hack.spec.js
+npx playwright test tests/calculators/running-pace.spec.js
 
 # Run tests on specific browser
 npx playwright test --project=chromium
@@ -62,8 +73,12 @@ npx playwright test --project="Mobile Safari"
 ### Individual Calculator Tests
 
 - ✅ **BMI Calculator**: Unit conversions, BMI categories, height formatting
+- ✅ **BMR Calculator**: Basal Metabolic Rate calculations, gender-specific formulas, age/activity factors
 - ✅ **Body Fat Calculator**: Navy method formulas, gender-specific inputs, unit conversions
+- ✅ **Heart Rate Zones Calculator**: Age-based calculations, zone distributions, intensity levels
+- ✅ **Muscle Potential Calculator**: Genetic potential estimates, body composition analysis
 - ✅ **1RM Calculator**: Multiple formulas (Epley, Brzycki, Lombardi), weight/rep inputs
+- ✅ **Potato Hack Calculator**: Calorie calculations, resistant starch options, weight loss projections
 - ✅ **Running Pace Calculator**: Pace formatting, race time calculations, pace categories
 
 ### Integration Tests
@@ -196,8 +211,12 @@ npm run test:debug -- tests/calculators/bmi.spec.js
 All calculator formulas are validated against expected outputs:
 
 - **BMI**: Standard BMI formula verification
+- **BMR**: Mifflin-St Jeor and Harris-Benedict formula accuracy
 - **Body Fat**: Navy method formula accuracy
+- **Heart Rate Zones**: Age-based zone calculation verification
+- **Muscle Potential**: Casey Butt formula and genetic potential algorithms
 - **1RM**: Epley, Brzycki, and Lombardi formula validation
+- **Potato Hack**: Calorie deficit and resistant starch calculation verification
 - **Running Pace**: Race time calculation verification
 
 ## Maintenance
