@@ -57,8 +57,8 @@ test.describe("Running Pace Calculator", () => {
 	});
 
 	test("should update pace category badge", async ({ page }) => {
-		// Set slow walking pace (15:00 min/mile = 900 seconds) to ensure Walking category
-		await page.locator("#pace-slider").fill("900");
+		// Set slow walking pace (20:00 min/mile = 1200 seconds) to ensure Walking category
+		await page.locator("#pace-slider").fill("1200");
 		await page.waitForTimeout(1000);
 
 		const categoryBadge = page.locator('#pace-category, [data-testid="pace-category"]').first();
@@ -110,6 +110,9 @@ test.describe("Running Pace Calculator", () => {
 				});
 			}
 		});
+
+		// Also set the slider directly like BMR does with its inputs
+		await page.locator("#pace-slider").fill("420");
 
 		await page.waitForTimeout(1000);
 
