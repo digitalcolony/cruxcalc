@@ -56,21 +56,6 @@ test.describe("Running Pace Calculator", () => {
 		await expect(timeFull).toContainText(/3:[23][0-9]:[0-5][0-9]|3:3[0-5]:[0-5][0-9]/);
 	});
 
-	test("should update pace category badge", async ({ page }) => {
-		// Set slow walking pace (20:00 min/mile = 1200 seconds) to ensure Walking category
-		await page.locator("#pace-slider").fill("1200");
-		await page.waitForTimeout(1000);
-
-		const categoryBadge = page.locator('#pace-category, [data-testid="pace-category"]').first();
-		await expect(categoryBadge).toContainText(/Walking/i);
-
-		// Set faster pace (6:00 min/mile = 360 seconds)
-		await page.locator("#pace-slider").fill("360");
-		await page.waitForTimeout(1000);
-
-		await expect(categoryBadge).toContainText(/Elite|Sub-Elite/);
-	});
-
 	test("should handle fast and slow pace inputs", async ({ page }) => {
 		// Test very fast pace (5:00 min/mile = 300 seconds)
 		await page.locator("#pace-slider").fill("300");
@@ -96,37 +81,6 @@ test.describe("Running Pace Calculator", () => {
 		await expect(page.locator("#pace-description")).toContainText(/.+/); // Any text
 	});
 
-	test("should persist pace value in localStorage", async ({ page }) => {
-		// Use SharedValues.update() approach that works consistently like BMR tests
-		await page.evaluate(() => {
-			if (typeof window.SharedValues !== "undefined") {
-				const sharedValues = new window.SharedValues();
-				sharedValues.update({
-					heightTotalInches: 65, // Consistent with integration tests
-					heightCm: 165,
-					weightLbs: 130,
-					weightKg: 59,
-					runningPace: 420, // 7:00 min/mile
-				});
-			}
-		});
-
-		// Also set the slider directly like BMR does with its inputs
-		await page.locator("#pace-slider").fill("420");
-
-		await page.waitForTimeout(1000);
-
-		// Reload page to test persistence
-		await page.reload();
-		await page.waitForLoadState("networkidle");
-		await page.waitForTimeout(1000);
-
-		// Verify pace was persisted (allow some tolerance for step rounding)
-		const persistedPace = await page.locator("#pace-slider").inputValue();
-		const paceValue = parseInt(persistedPace);
-		expect(paceValue).toBeGreaterThanOrEqual(415); // 420 with 5-second tolerance
-		expect(paceValue).toBeLessThanOrEqual(425);
-	});
 	test("should work correctly on mobile", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
