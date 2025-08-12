@@ -187,9 +187,24 @@ const {
 			this.display = container.querySelector(`#${this.input?.id}-display`);
 			this.sharedKey = this.input?.dataset.sharedKey;
 
+			// Prevent duplicate initialization
+			if ((this.container as any).__rangeSliderInitialized) {
+				console.log("Skipping duplicate initialization for", this.input?.id);
+				return;
+			}
+			(this.container as any).__rangeSliderInitialized = true;
+
+			// Debug logging
+			console.log("RangeSlider initializing:", {
+				id: this.input?.id,
+				sharedKey: this.sharedKey,
+				sharedValuesAvailable: typeof (window as any).SharedValues !== "undefined",
+			});
+
 			// Initialize SharedValues if available and sharedKey is provided
 			if (typeof window !== "undefined" && (window as any).SharedValues && this.sharedKey) {
 				this.sharedValues = new (window as any).SharedValues();
+				console.log("SharedValues instance created for", this.input?.id);
 				this.loadFromSharedValues();
 			}
 
@@ -199,9 +214,11 @@ const {
 		private loadFromSharedValues(): void {
 			if (this.sharedValues && this.sharedKey) {
 				const savedValue = this.sharedValues.get(this.sharedKey);
+				console.log("Loading from SharedValues:", this.sharedKey, savedValue);
 				if (savedValue !== undefined && savedValue !== null && this.input) {
 					this.input.value = savedValue;
 					this.updateDisplay();
+					console.log("Applied saved value:", this.sharedKey, savedValue);
 				}
 			}
 		}
@@ -232,7 +249,15 @@ const {
 
 						// Update SharedValues if available
 						if (this.sharedValues && this.sharedKey) {
-							this.sharedValues.set(this.sharedKey, parseFloat(this.input.value));
+							const newValue = parseFloat(this.input.value);
+							console.log("Saving to SharedValues:", this.sharedKey, newValue);
+							this.sharedValues.set(this.sharedKey, newValue);
+						} else {
+							console.warn("Cannot save to SharedValues:", {
+								hasSharedValues: !!this.sharedValues,
+								sharedKey: this.sharedKey,
+								inputId: this.input?.id,
+							});
 						}
 					}
 				}, 150);
@@ -297,10 +322,32 @@ const {
 	}
 
 	// Initialize all range sliders on the page
-	document.addEventListener("DOMContentLoaded", () => {
+	function initializeRangeSliders() {
 		const rangeSliders = document.querySelectorAll('.input-group:has(input[type="range"])');
 		rangeSliders.forEach((container) => {
 			new RangeSliderComponent(container as HTMLElement);
 		});
+	}
+
+	// Wait for both DOM and SharedValues to be available
+	document.addEventListener("DOMContentLoaded", () => {
+		// If SharedValues is already available, initialize immediately
+		if (typeof (window as any).SharedValues !== "undefined") {
+			initializeRangeSliders();
+		} else {
+			// Otherwise, wait for SharedValues to load
+			const checkForSharedValues = setInterval(() => {
+				if (typeof (window as any).SharedValues !== "undefined") {
+					clearInterval(checkForSharedValues);
+					initializeRangeSliders();
+				}
+			}, 50); // Check every 50ms
+
+			// Fallback: initialize after 2 seconds even if SharedValues isn't available
+			setTimeout(() => {
+				clearInterval(checkForSharedValues);
+				initializeRangeSliders();
+			}, 2000);
+		}
 	});
 </script>

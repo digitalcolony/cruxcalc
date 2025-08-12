@@ -134,6 +134,33 @@ test.describe("BMR Calculator", () => {
 		// Set custom values
 		await page.click('[data-gender="female"]');
 		await page.locator("#age").fill("28");
+
+		// Set consistent height and weight values to prevent unit conversion conflicts
+		await page.evaluate(() => {
+			const sharedValues = new window.SharedValues();
+
+			// Height: 65 inches = 5'5" = 165cm
+			const heightInInches = 65;
+			const heightInCm = Math.round(heightInInches * 2.54); // 165cm
+			const feet = Math.floor(heightInInches / 12); // 5 feet
+			const inches = heightInInches % 12; // 5 inches
+
+			// Weight: 130 lbs = 59kg
+			const weightInLbs = 130;
+			const preciseKg = weightInLbs * 0.453592; // 58.967
+			const weightInKg = Math.round(preciseKg * 10) / 10; // 59.0 kg
+
+			sharedValues.update({
+				heightTotalInches: heightInInches,
+				heightCm: heightInCm,
+				heightFeet: feet,
+				heightInches: inches,
+				weightLbs: weightInLbs,
+				weightKg: weightInKg,
+				age: 28,
+			});
+		});
+
 		await page.locator("#height-total-inches").fill("65");
 		await page.locator("#weight-lbs").fill("130");
 

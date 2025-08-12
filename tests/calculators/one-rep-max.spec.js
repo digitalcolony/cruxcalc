@@ -97,14 +97,14 @@ test.describe("One Rep Max Calculator", () => {
 
 	test("should display formula information", async ({ page }) => {
 		// Check that formula details are present
-		await expect(page.getByText("Epley")).toBeVisible();
-		await expect(page.getByText("Brzycki")).toBeVisible();
-		await expect(page.getByText("Lombardi")).toBeVisible();
+		await expect(page.getByText("Epley").first()).toBeVisible();
+		await expect(page.getByText("Brzycki").first()).toBeVisible();
+		await expect(page.getByText("Lombardi").first()).toBeVisible();
 
 		// Check for formula descriptions
-		await expect(page.getByText(/1RM = w.*30/)).toBeVisible(); // Epley formula
-		await expect(page.getByText(/1RM = w.*37.*r/)).toBeVisible(); // Brzycki formula
-		await expect(page.getByText(/1RM = w.*r.*0\.10/)).toBeVisible(); // Lombardi formula
+		await expect(page.getByText(/1RM = w.*30/).first()).toBeVisible(); // Epley formula
+		await expect(page.getByText(/1RM = w.*37.*r/).first()).toBeVisible(); // Brzycki formula
+		await expect(page.getByText(/1RM = w.*r.*0\.10/).first()).toBeVisible(); // Lombardi formula
 	});
 
 	test("should handle edge cases", async ({ page }) => {
