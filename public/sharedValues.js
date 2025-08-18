@@ -71,6 +71,17 @@ class SharedValues {
 		}
 	}
 
+	// Debug method to log current state
+	debug() {
+		const values = this.load();
+		console.log("SharedValues debug:", {
+			stored: values,
+			localStorage: localStorage.getItem(this.storageKey),
+			defaults: this.defaultValues,
+		});
+		return values;
+	}
+
 	// Convert height from feet/inches to cm
 	heightToCm(feet, inches) {
 		return Math.round((feet * 12 + inches) * 2.54);

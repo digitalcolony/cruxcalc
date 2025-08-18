@@ -407,20 +407,23 @@ const sharedValues = {
 
 		private loadSharedValues(): void {
 			const values = this.sharedValues.load();
-			console.log("Loaded SharedValues:", values);
+			console.log("BMI Calculator - Loaded SharedValues:", values);
 
 			// Load Asian scale preference
 			if (this.asianScale) {
 				this.asianScale.checked = values.useAsianBMI || false;
 			}
 
-			// Delay unit toggle initialization to ensure DOM is ready
-			setTimeout(() => {
-				this.initializeUnitToggles(values);
-			}, 100);
+			// Initialize unit toggles and update sliders immediately
+			this.initializeUnitToggles(values);
 
 			// Show appropriate input containers
 			this.showCurrentUnitInputs();
+
+			// Force refresh of all range sliders after a short delay to ensure they load saved values
+			setTimeout(() => {
+				this.updateRangeSliders(values);
+			}, 50);
 		}
 
 		private initializeUnitToggles(values: any): void {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SharedValues Debug</title>
+	</head>
+	<body>
+		<h1>SharedValues Debug</h1>
+		<p>Check browser console for SharedValues data</p>
+
+		<script src="/sharedValues.js"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				if (typeof SharedValues !== "undefined") {
+					const sharedValues = new SharedValues();
+					const values = sharedValues.load();
+					console.log("Current SharedValues:", values);
+
+					// Display on page
+					const pre = document.createElement("pre");
+					pre.textContent = JSON.stringify(values, null, 2);
+					document.body.appendChild(pre);
+				} else {
+					console.log("SharedValues not available");
+				}
+			});
+		</script>
+	</body>
+</html>

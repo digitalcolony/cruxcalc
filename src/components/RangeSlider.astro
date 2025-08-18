@@ -205,20 +205,60 @@ const {
 			if (typeof window !== "undefined" && (window as any).SharedValues && this.sharedKey) {
 				this.sharedValues = new (window as any).SharedValues();
 				console.log("SharedValues instance created for", this.input?.id);
+				// Load from SharedValues immediately and override any hardcoded value
 				this.loadFromSharedValues();
+			} else if (this.sharedKey) {
+				// Wait for SharedValues to become available
+				console.log("Waiting for SharedValues for", this.input?.id);
+				const waitForSharedValues = setInterval(() => {
+					if (typeof (window as any).SharedValues !== "undefined") {
+						clearInterval(waitForSharedValues);
+						this.sharedValues = new (window as any).SharedValues();
+						console.log("SharedValues now available for", this.input?.id);
+						this.loadFromSharedValues();
+					}
+				}, 10); // Check every 10ms for faster response
 			}
 
 			this.attachEventListeners();
 		}
 
 		private loadFromSharedValues(): void {
-			if (this.sharedValues && this.sharedKey) {
+			if (this.sharedValues && this.sharedKey && this.input) {
 				const savedValue = this.sharedValues.get(this.sharedKey);
-				console.log("Loading from SharedValues:", this.sharedKey, savedValue);
-				if (savedValue !== undefined && savedValue !== null && this.input) {
-					this.input.value = savedValue;
+				console.log(
+					"[RangeSlider] Loading from SharedValues:",
+					this.input.id,
+					"sharedKey:",
+					this.sharedKey,
+					"saved:",
+					savedValue,
+					"current:",
+					this.input.value
+				);
+
+				if (savedValue !== undefined && savedValue !== null) {
+					// Always apply the saved value, regardless of current value
+					this.input.value = savedValue.toString();
 					this.updateDisplay();
-					console.log("Applied saved value:", this.sharedKey, savedValue);
+					console.log(
+						"[RangeSlider] Applied saved value:",
+						this.input.id,
+						this.sharedKey,
+						"=",
+						savedValue
+					);
+				} else {
+					// No saved value exists, initialize SharedValues with current hardcoded value
+					const currentValue = parseFloat(this.input.value);
+					this.sharedValues.set(this.sharedKey, currentValue);
+					console.log(
+						"[RangeSlider] Initialized SharedValues with default:",
+						this.input.id,
+						this.sharedKey,
+						"=",
+						currentValue
+					);
 				}
 			}
 		}
@@ -226,41 +266,76 @@ const {
 		private attachEventListeners(): void {
 			if (!this.input) return;
 
-			// Debounced input handler
+			// Debounced input handler for external events
 			let debounceTimer: NodeJS.Timeout;
+
 			this.input.addEventListener("input", () => {
+				// Always update display immediately
 				this.updateDisplay();
 
-				// Always dispatch custom event for other components
+				// Debounced saving and event dispatch
 				clearTimeout(debounceTimer);
 				debounceTimer = setTimeout(() => {
 					if (this.input) {
-						// Dispatch custom event for other components
-						this.container.dispatchEvent(
-							new CustomEvent("range-slider-change", {
-								detail: {
-									id: this.input.id,
-									value: parseFloat(this.input.value),
-									sharedKey: this.sharedKey,
-								},
-								bubbles: true,
-							})
-						);
+						const newValue = parseFloat(this.input.value);
 
-						// Update SharedValues if available
+						// Update SharedValues immediately if available
 						if (this.sharedValues && this.sharedKey) {
 							const newValue = parseFloat(this.input.value);
-							console.log("Saving to SharedValues:", this.sharedKey, newValue);
+							console.log(
+								"[RangeSlider] Saving to SharedValues:",
+								this.input.id,
+								this.sharedKey,
+								"=",
+								newValue
+							);
+
+							// Force save with explicit update
 							this.sharedValues.set(this.sharedKey, newValue);
+
+							// Double-check it was actually saved
+							setTimeout(() => {
+								const verified = this.sharedValues.get(this.sharedKey);
+								if (verified !== newValue) {
+									console.error(
+										"[RangeSlider] Save verification failed! Expected:",
+										newValue,
+										"Got:",
+										verified
+									);
+									// Try saving again
+									this.sharedValues.set(this.sharedKey, newValue);
+								} else {
+									console.log(
+										"[RangeSlider] Save verified:",
+										this.input?.id || "unknown",
+										this.sharedKey,
+										"=",
+										verified
+									);
+								}
+							}, 10);
 						} else {
-							console.warn("Cannot save to SharedValues:", {
+							console.warn("[RangeSlider] Cannot save to SharedValues:", {
 								hasSharedValues: !!this.sharedValues,
 								sharedKey: this.sharedKey,
 								inputId: this.input?.id,
 							});
 						}
+
+						// Dispatch custom event for other components
+						this.container.dispatchEvent(
+							new CustomEvent("range-slider-change", {
+								detail: {
+									id: this.input.id,
+									value: newValue,
+									sharedKey: this.sharedKey,
+								},
+								bubbles: true,
+							})
+						);
 					}
-				}, 150);
+				}, 100); // Reduced from 150ms to 100ms
 			});
 
 			// Listen for refresh requests from unit changes

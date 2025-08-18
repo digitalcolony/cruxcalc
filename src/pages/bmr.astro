@@ -267,6 +267,10 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
 			}
 
+			console.log(
+				"[BMR Calculator] Initializing with existing SharedValues:",
+				this.sharedValues.load()
+			);
 			this.init();
 		}
 
@@ -274,14 +278,28 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			// Set up event listeners
 			this.setupEventListeners();
 
-			// Set default values
-			this.sharedValues.set("gender", "male");
-			this.sharedValues.set("heightUnit", "imperial");
-			this.sharedValues.set("weightUnit", "imperial");
+			// Only set default values if they don't already exist
+			const existingGender = this.sharedValues.get("gender");
+			const existingHeightUnit = this.sharedValues.get("heightUnit");
+			const existingWeightUnit = this.sharedValues.get("weightUnit");
 
-			// Initialize UI state
-			this.convertAndToggleHeightUnits("imperial");
-			this.convertAndToggleWeightUnits("imperial");
+			if (!existingGender) {
+				this.sharedValues.set("gender", "male");
+			}
+			if (!existingHeightUnit) {
+				this.sharedValues.set("heightUnit", "imperial");
+			}
+			if (!existingWeightUnit) {
+				this.sharedValues.set("weightUnit", "imperial");
+			}
+
+			// Use existing values or defaults for UI initialization
+			const heightUnit = existingHeightUnit || "imperial";
+			const weightUnit = existingWeightUnit || "imperial";
+
+			// Initialize UI state with existing preferences
+			this.convertAndToggleHeightUnits(heightUnit);
+			this.convertAndToggleWeightUnits(weightUnit);
 
 			// Initial calculation
 			this.calculate();
@@ -324,31 +342,35 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			if (imperialGroup && metricGroup) {
 				if (unit === "imperial") {
-					// Converting from metric to imperial
-					const currentCm = this.sharedValues.get("heightCm") || 173;
-					const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
-
-					// Update the SharedValues with converted value
-					this.sharedValues.set("heightTotalInches", totalInches);
-
-					// Update the UI slider
-					this.updateSliderValue("height-total-inches", totalInches);
-
+					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
+
+					// Only convert if we're actually switching from metric to imperial
+					const currentUnit = this.sharedValues.get("heightUnit");
+					if (currentUnit === "metric") {
+						// Converting from metric to imperial
+						const currentCm = this.sharedValues.get("heightCm") || 173;
+						const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
+						this.sharedValues.set("heightTotalInches", totalInches);
+						this.updateSliderValue("height-total-inches", totalInches);
+					}
+					// If we're not converting, let the existing heightTotalInches value be used
 				} else {
-					// Converting from imperial to metric
-					const totalInches = this.sharedValues.get("heightTotalInches") || 68;
-					const cm = Math.round(totalInches * 2.54);
-
-					// Update the SharedValues with converted value
-					this.sharedValues.set("heightCm", cm);
-
-					// Update the UI slider
-					this.updateSliderValue("height-cm", cm);
-
+					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
+
+					// Only convert if we're actually switching from imperial to metric
+					const currentUnit = this.sharedValues.get("heightUnit");
+					if (currentUnit === "imperial") {
+						// Converting from imperial to metric
+						const totalInches = this.sharedValues.get("heightTotalInches") || 68;
+						const cm = Math.round(totalInches * 2.54);
+						this.sharedValues.set("heightCm", cm);
+						this.updateSliderValue("height-cm", cm);
+					}
+					// If we're not converting, let the existing heightCm value be used
 				}
 			}
 		}
@@ -359,31 +381,35 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			if (imperialGroup && metricGroup) {
 				if (unit === "imperial") {
-					// Converting from metric to imperial
-					const currentKg = this.sharedValues.get("weightKg") || 73;
-					const lbs = Math.round(currentKg / 0.453592);
-
-					// Update the SharedValues with converted value
-					this.sharedValues.set("weightLbs", lbs);
-
-					// Update the UI slider
-					this.updateSliderValue("weight-lbs", lbs);
-
+					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
+
+					// Only convert if we're actually switching from metric to imperial
+					const currentUnit = this.sharedValues.get("weightUnit");
+					if (currentUnit === "metric") {
+						// Converting from metric to imperial
+						const currentKg = this.sharedValues.get("weightKg") || 73;
+						const lbs = Math.round(currentKg / 0.453592);
+						this.sharedValues.set("weightLbs", lbs);
+						this.updateSliderValue("weight-lbs", lbs);
+					}
+					// If we're not converting, let the existing weightLbs value be used
 				} else {
-					// Converting from imperial to metric
-					const lbs = this.sharedValues.get("weightLbs") || 160;
-					const kg = Math.round(lbs * 0.453592);
-
-					// Update the SharedValues with converted value
-					this.sharedValues.set("weightKg", kg);
-
-					// Update the UI slider
-					this.updateSliderValue("weight-kg", kg);
-
+					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
+
+					// Only convert if we're actually switching from imperial to metric
+					const currentUnit = this.sharedValues.get("weightUnit");
+					if (currentUnit === "imperial") {
+						// Converting from imperial to metric
+						const lbs = this.sharedValues.get("weightLbs") || 160;
+						const kg = Math.round(lbs * 0.453592);
+						this.sharedValues.set("weightKg", kg);
+						this.updateSliderValue("weight-kg", kg);
+					}
+					// If we're not converting, let the existing weightKg value be used
 				}
 			}
 		}

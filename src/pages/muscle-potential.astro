@@ -41,6 +41,7 @@ import ResultValue from "../components/ResultValue.astro";
 						step={0.5}
 						value={68}
 						unit=""
+						sharedKey="heightTotalInches"
 						formatAsHeight={true}
 					/>
 				</InputGroup>
@@ -48,7 +49,15 @@ import ResultValue from "../components/ResultValue.astro";
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider id="height-cm" label="" min={120} max={220} value={173} unit="cm" />
+					<RangeSlider
+						id="height-cm"
+						label=""
+						min={120}
+						max={220}
+						value={173}
+						unit="cm"
+						sharedKey="heightCm"
+					/>
 				</InputGroup>
 			</div>
 
@@ -289,6 +298,10 @@ import ResultValue from "../components/ResultValue.astro";
 </style>
 
 <script>
+	// Ensure SharedValues is available
+</script>
+<script src="/sharedValues.js" is:inline></script>
+<script>
 	// @ts-nocheck - Disable TypeScript checking for this Astro component
 	let currentHeightUnit = "imperial";
 	let currentMeasurementUnit = "imperial"; // for wrist/ankle measurements
@@ -437,6 +450,15 @@ import ResultValue from "../components/ResultValue.astro";
 		}
 	);
 
+	function setSliderValue(id, value) {
+		const slider = document.getElementById(id);
+		if (slider) {
+			slider.value = value.toString();
+			// trigger display update
+			slider.dispatchEvent(new Event("input", { bubbles: true }));
+		}
+	}
+
 	// Unit toggle functionality
 	document.addEventListener("unit-toggle-change", (event) => {
 		const customEvent = event as CustomEvent;
@@ -449,18 +471,34 @@ import ResultValue from "../components/ResultValue.astro";
 			const imperialHeight = document.querySelector(".imperial-height");
 			const metricHeight = document.querySelector(".metric-height");
 
+			// Read existing shared values to avoid overwrites on simple page load
+			const shared = new (window as any).SharedValues();
+			const existingUnit = shared.get("heightUnit") || "imperial";
+			if (unit !== existingUnit) {
+				shared.set("heightUnit", unit);
+			}
+
 			if (unit === "metric") {
 				imperialHeight.style.display = "none";
 				metricHeight.style.display = "block";
-				// Convert total inches to cm
-				const totalInches = parseFloat(heightTotalInches?.value || "68");
-				if (heightCm) heightCm.value = Math.round(totalInches * 2.54).toString();
+				// Convert only if switching units now; otherwise honor existing heightCm
+				if (existingUnit === "imperial") {
+					const totalInches =
+						shared.get("heightTotalInches") ?? parseFloat(heightTotalInches?.value || "68");
+					const cm = Math.round(totalInches * 2.54);
+					shared.set("heightCm", cm);
+					setSliderValue("height-cm", cm);
+				}
 			} else {
 				imperialHeight.style.display = "block";
 				metricHeight.style.display = "none";
-				// Convert cm to total inches
-				const cm = parseInt(heightCm?.value || "173");
-				if (heightTotalInches) heightTotalInches.value = Math.round((cm / 2.54) * 2) / 2; // Round to nearest 0.5
+				// Convert only if switching units now; otherwise honor existing heightTotalInches
+				if (existingUnit === "metric") {
+					const cm = shared.get("heightCm") ?? parseInt(heightCm?.value || "173");
+					const inches = Math.round((cm / 2.54) * 2) / 2; // nearest 0.5
+					shared.set("heightTotalInches", inches);
+					setSliderValue("height-total-inches", inches);
+				}
 			}
 		} else if (attribute === "wrist-unit") {
 			currentMeasurementUnit = unit;
@@ -508,5 +546,38 @@ import ResultValue from "../components/ResultValue.astro";
 	// Initialize the calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
 		updateDisplay();
+		// Initialize from SharedValues for height without forcing conversions
+		try {
+			const shared = new (window as any).SharedValues();
+			const savedHeightUnit = shared.get("heightUnit") || "imperial";
+			currentHeightUnit = savedHeightUnit;
+			const imperialHeight = document.querySelector(".imperial-height") as HTMLElement;
+			const metricHeight = document.querySelector(".metric-height") as HTMLElement;
+			if (savedHeightUnit === "imperial") {
+				if (imperialHeight) imperialHeight.style.display = "block";
+				if (metricHeight) metricHeight.style.display = "none";
+				const inches = shared.get("heightTotalInches");
+				if (inches != null) setSliderValue("height-total-inches", inches);
+			} else {
+				if (imperialHeight) imperialHeight.style.display = "none";
+				if (metricHeight) metricHeight.style.display = "block";
+				const cm = shared.get("heightCm");
+				if (cm != null) setSliderValue("height-cm", cm);
+			}
+
+			// Sync unit toggle UI state to saved unit
+			const heightToggle = document.querySelector(
+				'.unit-toggle .unit-btn[data-height-unit="' + savedHeightUnit + '"]'
+			) as HTMLElement | null;
+			if (heightToggle) {
+				// simulate click to update active state without re-triggering conversions
+				document
+					.querySelectorAll(".unit-toggle .unit-btn[data-height-unit]")
+					.forEach((btn) => btn.classList.remove("active"));
+				heightToggle.classList.add("active");
+			}
+		} catch (e) {
+			console.warn("SharedValues init failed on muscle-potential:", e);
+		}
 	});
 </script>

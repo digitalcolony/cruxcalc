@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Debug SharedValues</title>
+	</head>
+	<body>
+		<h1>Debug SharedValues System</h1>
+
+		<h2>1. Current localStorage content:</h2>
+		<pre id="localStorage-content">Loading...</pre>
+
+		<h2>2. SharedValues load() result:</h2>
+		<pre id="sharedValues-content">Loading...</pre>
+
+		<h2>3. Actions:</h2>
+		<button onclick="clearStorage()">Clear localStorage</button>
+		<button onclick="setHeight63()">Set Height to 6'3" (75 inches)</button>
+		<button onclick="refresh()">Refresh Data</button>
+
+		<script src="/sharedValues.js"></script>
+		<script>
+			function refresh() {
+				// Show raw localStorage
+				const raw = localStorage.getItem("cruxcalc-shared-values");
+				document.getElementById("localStorage-content").textContent = raw || "null";
+
+				// Show SharedValues load result
+				if (typeof SharedValues !== "undefined") {
+					const sv = new SharedValues();
+					const values = sv.load();
+					document.getElementById("sharedValues-content").textContent = JSON.stringify(
+						values,
+						null,
+						2
+					);
+				}
+			}
+
+			function clearStorage() {
+				localStorage.removeItem("cruxcalc-shared-values");
+				refresh();
+				alert("localStorage cleared");
+			}
+
+			function setHeight63() {
+				if (typeof SharedValues !== "undefined") {
+					const sv = new SharedValues();
+					sv.set("heightTotalInches", 75);
+					refresh();
+					alert("Height set to 6'3\" (75 inches)");
+				}
+			}
+
+			// Initial load
+			document.addEventListener("DOMContentLoaded", refresh);
+		</script>
+	</body>
+</html>
