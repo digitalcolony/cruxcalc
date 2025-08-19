@@ -172,14 +172,6 @@ Before making ANY changes to a calculator:
 - ✅ **Multiple Time Projections**: 3-day, 4-day, 5-day, and weekly fat loss estimates
 - ✅ **Unit-Aware Results**: Results display in correct units (lbs/kg) based on potato unit selection
 
-**Final Testing Checklist**:
-
-- [ ] **Comprehensive Unit Testing**: Verify all conversions work accurately
-- [ ] **Edge Case Testing**: Test min/max values and boundary conditions
-- [ ] **Cross-Calculator Integration**: Verify TDEE sync with BMR calculator if applicable
-- [ ] **Mobile Responsiveness**: Test on different screen sizes
-- [ ] **Calculation Accuracy**: Verify potato hack formulas match expected results
-
 ### 1RM Calculator (✅ COMPLETED)
 
 **Status**: Passed all testing - DO NOT MODIFY
@@ -287,37 +279,8 @@ Before making ANY changes to a calculator:
 
 ## Automated Testing Implementation
 
-### E2E Testing with Playwright ✅ IMPLEMENTED
+E2E testing has been removed to reduce maintenance overhead. Manual verification and targeted unit-style checks inside calculators are used during development. Future automated testing can be reintroduced if needed.
 
-**Comprehensive Test Suite Includes**:
-
-- ✅ **Individual Calculator Tests**: BMI, Body Fat, 1RM, Running Pace with full functionality coverage
-- ✅ **Cross-Calculator Integration**: SharedValues synchronization, localStorage persistence, unit conversion consistency
-- ✅ **Performance Testing**: Load time < 3s, input response < 500ms, rapid input handling
-- ✅ **Accessibility Testing**: ARIA attributes, keyboard navigation, screen reader support
-- ✅ **Mobile Responsiveness**: Touch interactions, multiple viewport testing (iPhone, Android)
-- ✅ **Cross-Browser Testing**: Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari
-
-**Test Commands**:
-
-```bash
-npm run test              # Run all tests headlessly
-npm run test:headed       # Run with visible browser
-npm run test:ui           # Interactive test runner
-npm run test:debug        # Debug mode with breakpoints
-npm run test:report       # View HTML test report
-```
-
-**CI/CD Integration**:
-
-- ✅ GitHub Actions workflow for automated testing
-- ✅ Tests run on push to main/refactor branches
-- ✅ Pull request validation with test results
-- ✅ Test artifacts and reports automatically generated
-
-**Test Coverage**:
-
-- ✅ **Calculator Functionality**: All inputs, outputs, calculations, unit conversions
 - ✅ **SharedValues System**: Cross-calculator synchronization and persistence
 - ✅ **Formula Accuracy**: Mathematical validation against known correct outputs
 - ✅ **Edge Case Handling**: Min/max values, boundary conditions, error scenarios

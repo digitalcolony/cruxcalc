@@ -3,7 +3,6 @@
 ## Project Overview
 
 **Project:** CruxCalc - Potato Hack Fitness Calculators
-**Date:** August 12, 2025
 **Status:** All Core Calculators Complete - Planning Next Features
 
 ## Current Calculator Status
@@ -27,36 +26,6 @@
 - ✅ Unit conversion system (Imperial/Metric)
 - ✅ Real-time calculations with debounced updates
 
-## Next Calculator Options
-
-### Option 1: TDEE Calculator (Total Daily Energy Expenditure)
-
-**Purpose:** Calculate total calories burned per day including activity multipliers
-**Rationale:** Natural progression from BMR, highly requested fitness metric
-**Complexity:** Medium
-**Dependencies:** BMR calculator integration
-
-### Option 2: Macronutrient Calculator
-
-**Purpose:** Calculate protein/carb/fat targets based on goals and activity level
-**Rationale:** Nutrition planning tool, complements TDEE/BMR calculators
-**Complexity:** Medium-High
-**Dependencies:** TDEE/BMR integration
-
-### Option 3: Hydration Calculator
-
-**Purpose:** Calculate daily water intake needs based on activity and environment
-**Rationale:** Simple but valuable wellness tool, fits health theme
-**Complexity:** Low-Medium
-**Dependencies:** Weight integration
-
-### Option 4: Sleep Optimization Calculator
-
-**Purpose:** Calculate optimal bedtime and wake time based on sleep cycles
-**Rationale:** Recovery/wellness focus, complements fitness calculators
-**Complexity:** Low-Medium
-**Dependencies:** None
-
 ## Current Implementation Status
 
 All 8 core calculators are now complete and functional:
@@ -76,7 +45,7 @@ The application features a mature SharedValues system for cross-calculator data 
 
 ### 1. Framework & Structure
 
-- **Platform:** Astro 5.12.0 static site generation
+- **Platform:** Astro 5.13.2 static site generation
 - **File Structure:** `/src/pages/[calculator-name].astro`
 - **Layout:** Import from `../layouts/Layout.astro`
 - **Styling:** Neo-brutalist design system with CSS custom properties
@@ -168,38 +137,6 @@ All 8 core calculators are complete and the application is in a mature state wit
 - ✅ SEO-optimized pages with proper meta tags
 - ✅ Accessibility features (ARIA labels, keyboard navigation)
 - ✅ Performance optimization (< 2s load times)
-
-## Future Calculator Options
-
-With all core calculators complete, potential additions could include:
-
-### Option 1: TDEE Calculator (Total Daily Energy Expenditure)
-
-**Purpose:** Calculate total daily caloric needs including activity level
-**Rationale:** Builds on BMR calculator, adds activity multipliers
-**Complexity:** Medium
-**Dependencies:** BMR integration
-
-### Option 2: Macronutrient Calculator
-
-**Purpose:** Calculate protein/carb/fat ratios for fitness goals
-**Rationale:** Nutrition focus complements existing fitness calculators
-**Complexity:** Medium
-**Dependencies:** Weight integration, possible TDEE integration
-
-### Option 3: Hydration Calculator
-
-**Purpose:** Calculate daily water intake needs based on activity
-**Rationale:** Simple wellness addition, universal health metric  
-**Complexity:** Low
-**Dependencies:** Possible weight integration
-
-### Option 4: Sleep Optimization Calculator
-
-**Purpose:** Calculate optimal bedtime and wake time based on sleep cycles
-**Rationale:** Recovery/wellness focus complements fitness calculators
-**Complexity:** Low-Medium
-**Dependencies:** None
 
 ## Success Metrics (Project Complete)
 

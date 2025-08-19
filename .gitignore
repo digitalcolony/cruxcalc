@@ -23,8 +23,4 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Playwright testing
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+# (Removed Playwright testing artifacts)

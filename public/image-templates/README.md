@@ -25,7 +25,7 @@ This folder contains HTML templates for generating social media images for CruxC
 3. Take full page screenshot
 4. Save as PNG with appropriate filename
 
-### Method 3: Puppeteer/Playwright (Node.js)
+### Method 3: Puppeteer (Node.js)
 
 ```bash
 npm install puppeteer

@@ -64,30 +64,38 @@ Each calculator has its own themed social media image for better engagement.
 /
 ├── public/
 │   ├── favicon.svg
-│   ├── site.webmanifest         # PWA configuration
-│   ├── og-*.png                 # Social media images
-│   ├── android-chrome-*.png     # PWA icons
-│   └── image-templates/         # Social media image generators
+│   ├── site.webmanifest           # PWA configuration
+│   ├── sharedValues.js            # Cross-calculator persistent storage
+│   ├── reactiveSharedValues.js    # Event-driven shared values helpers
+│   ├── og-*.png                   # Social media images
+│   ├── android-chrome-*.png       # PWA icons
+│   ├── debug.html                 # Dev-only shared values inspector
+│   ├── debug-simple.html          # Minimal inspector
+│   └── image-templates/           # Social media image generators
+│       ├── generate-images.js
+│       ├── generate-favicons.js
+│       └── README.md
 ├── src/
-│   ├── components/              # Reusable Astro components
-│   │   └── Header.astro         # Navigation with active states
+│   ├── components/                # Reusable Astro components
+│   │   ├── CalculatorLayout.astro
+│   │   ├── RangeSlider.astro, UnitToggle.astro, GenderToggle.astro
+│   │   ├── ResultCard.astro, ResultValue.astro, CategoryBadge.astro, ComparisonTable.astro
+│   │   ├── InputGroup.astro, ValidationDisplay.astro
+│   │   └── Header.astro, Footer.astro
 │   ├── layouts/
-│   │   └── Layout.astro         # Main layout with SEO & social meta
-│   ├── pages/                   # Calculator pages (auto-routed)
-│   │   ├── index.astro          # Homepage with calculator grid
-│   │   ├── bmi.astro            # BMI Calculator
-│   │   ├── bmr.astro            # BMR Calculator (unified)
-│   │   ├── body-fat.astro       # Body Fat Calculator (Navy Method)
-│   │   ├── heart-rate-zones.astro # Heart Rate Zones Calculator
-│   │   ├── one-rep-max.astro    # One Rep Max Calculator
-│   │   ├── muscle-potential.astro # Casey Butt formula
-│   │   ├── running.astro        # Running Pace Calculator
-│   │   └── potato-hack.astro    # Potato Hack Calculator
+│   │   └── Layout.astro           # Main layout with SEO & social meta
+│   ├── pages/                     # Calculator pages (auto-routed)
+│   │   ├── index.astro            # Homepage with calculator grid
+│   │   ├── bmi.astro, bmr.astro, body-fat.astro, heart-rate-zones.astro
+│   │   ├── one-rep-max.astro, muscle-potential.astro, running.astro, potato-hack.astro
+│   │   └── components.astro       # Component showcase
 │   └── styles/
-│       └── global.css           # Neo-brutalist styling
-├── astro.config.mjs             # Site config with calc.potatohack.com
+│       └── global.css             # Neo-brutalist styling
+├── astro.config.mjs               # Astro site configuration
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+├── CALCULATOR_CHECKLIST.md, CALCULATOR_REQUIREMENTS.md, REFACTOR_PLAN.md
+└── LICENSE
 ```
 
 ## 🧞 Commands
