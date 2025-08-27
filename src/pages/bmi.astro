@@ -139,8 +139,7 @@ const sharedValues = {
 					<div class="scale-segment obese">
 						<span>Obese</span>
 					</div>
-					<!-- Move the indicator inside the bar so left% maps to the bar width -->
-					<div class="scale-indicator" id="scale-indicator"></div>
+					<!-- scale indicator removed - controlled indicator caused layout issues -->
 				</div>
 			</div>
 
@@ -256,22 +255,9 @@ const sharedValues = {
 		background: var(--color-danger);
 	}
 
-	.scale-indicator {
-		position: absolute;
-		/* position the indicator relative to the scale-bar so left% maps to the bar width */
-		/* tip alignment: the triangular tip is placed at the left edge when left: 0 */
-		bottom: -17px; /* 5px spacing between the arrow and the bar (was -12px) */
-		width: 0;
-		height: 0;
-		/* create a triangle where the border-bottom is the visible tip */
-		border-left: 10px solid transparent;
-		border-right: 10px solid transparent;
-		border-bottom: 12px solid var(--color-text);
-		/* remove translateX centering so left:0 aligns the left-most tip to the bar's left */
-		/* when updating left in JS, the code should set left to percent across the bar */
-		transition: left 0.3s ease;
-		z-index: 10;
-	}
+	/* scale indicator removed - kept for historical context
+	.scale-indicator { ... }
+	*/
 
 	.bmi-info {
 		background: var(--color-background);
@@ -393,6 +379,7 @@ const sharedValues = {
 		private bmiNumber: HTMLElement | null = null;
 		private bmiCategory: HTMLElement | null = null;
 		private bmiExplanation: HTMLElement | null = null;
+		// scaleIndicator removed from DOM; keep property for compatibility
 		private scaleIndicator: HTMLElement | null = null;
 		private asianScale: HTMLInputElement | null = null;
 
@@ -409,7 +396,7 @@ const sharedValues = {
 			this.bmiNumber = document.getElementById("bmi-number");
 			this.bmiCategory = document.getElementById("bmi-category");
 			this.bmiExplanation = document.getElementById("bmi-explanation");
-			this.scaleIndicator = document.getElementById("scale-indicator");
+			// scaleIndicator intentionally not queried - removed from markup
 			this.asianScale = document.getElementById("asian-scale") as HTMLInputElement;
 		}
 
@@ -678,44 +665,8 @@ const sharedValues = {
 		}
 
 		private updateScaleIndicator(bmi: number, useAsianScale: boolean): void {
-			if (!this.scaleIndicator) return;
-
-			let position;
-			if (useAsianScale) {
-				// Asian scale thresholds
-				if (bmi < 18.5) position = (bmi / 18.5) * 25;
-				else if (bmi < 23) position = 25 + ((bmi - 18.5) / 4.5) * 25;
-				else if (bmi < 27.5) position = 50 + ((bmi - 23) / 4.5) * 25;
-				else position = 75 + Math.min(((bmi - 27.5) / 7.5) * 25, 25);
-			} else {
-				// Standard scale thresholds
-				if (bmi < 18.5) position = (bmi / 18.5) * 25;
-				else if (bmi < 25) position = 25 + ((bmi - 18.5) / 6.5) * 25;
-				else if (bmi < 30) position = 50 + ((bmi - 25) / 5) * 25;
-				else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
-			}
-
-			// Position the indicator tip precisely. The triangle is 20px wide (10px left + 10px right),
-			// and the visible tip is centered 10px from the element's left edge. Since we removed
-			// translateX(-50%) in CSS, convert the percent position to pixels and offset by half
-			// the triangle width so the tip aligns with the computed percentage point.
-			const bar = document.querySelector('.scale-bar') as HTMLElement | null;
-			if (!bar) {
-				this.scaleIndicator.style.left = `${Math.min(position, 100)}%`;
-				return;
-			}
-
-			const barWidth = bar.getBoundingClientRect().width;
-			const percent = Math.min(position, 100) / 100;
-			const triangleHalf = 10; // px (half of the 20px triangle base)
-			let leftPx = percent * barWidth - triangleHalf;
-
-			// Clamp leftPx so the tip remains inside the bar (tip at leftPx + triangleHalf)
-			const minLeft = -triangleHalf; // allows tip to be at 0
-			const maxLeft = barWidth - triangleHalf; // tip at barWidth
-			leftPx = Math.max(minLeft, Math.min(leftPx, maxLeft));
-
-			this.scaleIndicator.style.left = `${leftPx}px`;
+			// scale-indicator removed - no-op
+			return;
 		}
 	}
 
