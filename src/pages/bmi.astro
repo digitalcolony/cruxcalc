@@ -139,8 +139,9 @@ const sharedValues = {
 					<div class="scale-segment obese">
 						<span>Obese</span>
 					</div>
+					<!-- Move the indicator inside the bar so left% maps to the bar width -->
+					<div class="scale-indicator" id="scale-indicator"></div>
 				</div>
-				<div class="scale-indicator" id="scale-indicator"></div>
 			</div>
 
 			<ResultCard title="Understanding Your BMI">
@@ -226,6 +227,7 @@ const sharedValues = {
 		border-radius: var(--border-radius);
 		overflow: hidden;
 		margin-bottom: 1.5rem;
+		position: relative;
 	}
 
 	.scale-segment {
@@ -255,7 +257,8 @@ const sharedValues = {
 
 	.scale-indicator {
 		position: absolute;
-		bottom: 1rem;
+		/* position the indicator relative to the scale-bar so left% maps to the bar width */
+		bottom: -12px; /* sit just below the bar */
 		width: 0;
 		height: 0;
 		border-left: 10px solid transparent;
