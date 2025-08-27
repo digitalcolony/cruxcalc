@@ -695,7 +695,27 @@ const sharedValues = {
 				else position = 75 + Math.min(((bmi - 30) / 10) * 25, 25);
 			}
 
-			this.scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+			// Position the indicator tip precisely. The triangle is 20px wide (10px left + 10px right),
+			// and the visible tip is centered 10px from the element's left edge. Since we removed
+			// translateX(-50%) in CSS, convert the percent position to pixels and offset by half
+			// the triangle width so the tip aligns with the computed percentage point.
+			const bar = document.querySelector('.scale-bar') as HTMLElement | null;
+			if (!bar) {
+				this.scaleIndicator.style.left = `${Math.min(position, 100)}%`;
+				return;
+			}
+
+			const barWidth = bar.getBoundingClientRect().width;
+			const percent = Math.min(position, 100) / 100;
+			const triangleHalf = 10; // px (half of the 20px triangle base)
+			let leftPx = percent * barWidth - triangleHalf;
+
+			// Clamp leftPx so the tip remains inside the bar (tip at leftPx + triangleHalf)
+			const minLeft = -triangleHalf; // allows tip to be at 0
+			const maxLeft = barWidth - triangleHalf; // tip at barWidth
+			leftPx = Math.max(minLeft, Math.min(leftPx, maxLeft));
+
+			this.scaleIndicator.style.left = `${leftPx}px`;
 		}
 	}
 
