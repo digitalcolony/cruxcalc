@@ -259,13 +259,16 @@ const sharedValues = {
 	.scale-indicator {
 		position: absolute;
 		/* position the indicator relative to the scale-bar so left% maps to the bar width */
-		bottom: -12px; /* sit just below the bar */
+		/* tip alignment: the triangular tip is placed at the left edge when left: 0 */
+		bottom: -17px; /* 5px spacing between the arrow and the bar (was -12px) */
 		width: 0;
 		height: 0;
+		/* create a triangle where the border-bottom is the visible tip */
 		border-left: 10px solid transparent;
 		border-right: 10px solid transparent;
 		border-bottom: 12px solid var(--color-text);
-		transform: translateX(-50%);
+		/* remove translateX centering so left:0 aligns the left-most tip to the bar's left */
+		/* when updating left in JS, the code should set left to percent across the bar */
 		transition: left 0.3s ease;
 		z-index: 10;
 	}
