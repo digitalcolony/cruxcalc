@@ -611,8 +611,9 @@ const sharedValues = {
 				this.bmiCategory.textContent = categoryData.name;
 				// Update the CSS class for the category badge
 				this.bmiCategory.className = `category-badge category-badge--md category-badge--solid ${category}`;
+				// Set the badge color to match the chart legend colors exactly
+				this.bmiCategory.style.setProperty("--badge-color", categoryData.color);
 			}
-
 			if (this.bmiExplanation) {
 				this.bmiExplanation.textContent = categoryData.explanation;
 			}

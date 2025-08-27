@@ -105,4 +105,24 @@ test.describe("BMI Calculator", () => {
 		// Check that the scale indicator exists
 		await expect(page.locator("#scale-indicator")).toBeVisible();
 	});
+
+	test("should update badge color to match scale legend colors", async ({ page }) => {
+		const categoryBadge = page.locator("#bmi-category");
+
+		// Test normal weight - should have green color matching the legend
+		await page.locator("#height-total-inches").fill("68");
+		await page.locator("#weight-lbs").fill("150"); // BMI ≈ 22.8 (normal)
+		await page.waitForTimeout(500);
+
+		await expect(categoryBadge).toContainText(/Normal/i);
+
+		// Test overweight - should have warning color matching the legend
+		await page.locator("#weight-lbs").fill("185"); // BMI ≈ 28.1 (overweight)
+		await page.waitForTimeout(500);
+
+		await expect(categoryBadge).toContainText(/Overweight/i);
+
+		// Verify the badge element has the correct CSS class for styling
+		await expect(categoryBadge).toHaveClass(/overweight/);
+	});
 });
