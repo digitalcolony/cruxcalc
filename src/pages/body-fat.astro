@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import GenderToggle from "../components/GenderToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
@@ -37,9 +37,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
 				<InputGroup label="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-total-inches"
-						label=""
 						min={48}
 						max={84}
 						step={0.5}
@@ -53,9 +52,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-cm"
-						label=""
 						min={120}
 						max={220}
 						value={178}
@@ -69,13 +67,12 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				label="Neck Circumference"
 				helpText="Measure below the larynx, tape sloping downward to front"
 			>
-				<RangeSlider
+				<PrecisionRangeSlider
 					id="neck"
-					label=""
 					min={10}
 					max={25}
 					value={15}
-					step={0.1}
+					step={0.5}
 					unit="inches"
 					sharedKey="neckCircumference"
 				/>
@@ -85,13 +82,12 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				label="Waist Circumference"
 				helpText="Men: Measure at navel level | Women: Measure at smallest width"
 			>
-				<RangeSlider
+				<PrecisionRangeSlider
 					id="waist"
-					label=""
 					min={20}
 					max={60}
 					value={32}
-					step={0.1}
+					step={0.5}
 					unit="inches"
 					sharedKey="waistCircumference"
 				/>
@@ -102,13 +98,12 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					label="Hip Circumference (Female)"
 					helpText="Measure at largest horizontal circumference"
 				>
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="hips"
-						label=""
 						min={25}
 						max={65}
 						value={38}
-						step={0.1}
+						step={0.5}
 						unit="inches"
 						sharedKey="hipCircumference"
 					/>
@@ -162,21 +157,41 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 	</CalculatorLayout>
 </Layout>
 
-<script src="/sharedValues.js" is:inline></script>
 <script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// Body Fat Calculator - Refactored with Components
 	class BodyFatCalculator {
 		private sharedValues: any;
-		private reactiveSharedValues: any;
 
 		constructor() {
-			// Initialize SharedValues systems
-			this.sharedValues = new (window as any).SharedValues();
+			console.log("BodyFatCalculator: Initializing...");
 
-			if ((window as any).ReactiveSharedValues) {
-				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
-			}
+			// Initialize ReactiveSharedValues
+			this.sharedValues = new (window as any).ReactiveSharedValues();
+
+			// Log current values
+			const currentValues = this.sharedValues.getAll();
+			console.log("Body Fat Calculator - Loaded existing values:", currentValues);
+
+			// Set default values only if they don't exist
+			const defaults = {
+				gender: "male",
+				heightUnit: "imperial",
+				heightTotalInches: 70,
+				heightCm: 178,
+				neckCircumference: 15,
+				waistCircumference: 32,
+				hipCircumference: 38,
+			};
+
+			Object.entries(defaults).forEach(([key, defaultValue]) => {
+				if (currentValues[key] === undefined || currentValues[key] === null) {
+					console.log(`Setting default for ${key}: ${defaultValue}`);
+					this.sharedValues.set(key, defaultValue);
+				} else {
+					console.log(`Using existing value for ${key}: ${currentValues[key]}`);
+				}
+			});
 
 			this.init();
 		}
@@ -185,25 +200,67 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			// Set up event listeners
 			this.setupEventListeners();
 
+			// Use existing values or defaults for UI initialization
+			const heightUnit = this.sharedValues.get("heightUnit") || "imperial";
+			const gender = this.sharedValues.get("gender") || "male";
+
+			// Initialize UI state with existing preferences
+			this.convertAndToggleHeightUnits(heightUnit);
+			this.toggleGenderSpecificInputs();
+
 			// Initial calculation
 			this.calculate();
 		}
 
 		private setupEventListeners(): void {
-			// Listen for input changes
-			document.addEventListener("range-slider-change", (event) => {
+			// Listen for precision range slider changes
+			document.addEventListener("precision-range-change", (event) => {
+				const customEvent = event as CustomEvent;
+				const sharedKey = customEvent.detail.sharedKey;
+				const value = customEvent.detail.value;
+
+				console.log(`Body Fat Calculator: Range change for ${sharedKey}, value: ${value}`);
+
+				// Store the value in SharedValues
+				if (sharedKey) {
+					this.sharedValues.set(sharedKey, value);
+				}
+
+				// Bidirectional unit sync for height
+				if (sharedKey === "heightTotalInches") {
+					const cm = Math.round(value * 2.54);
+					console.log(`Syncing height: ${value} inches = ${cm} cm`);
+					this.sharedValues.set("heightCm", cm);
+				} else if (sharedKey === "heightCm") {
+					const totalInches = Math.round((value / 2.54) * 2) / 2;
+					console.log(`Syncing height: ${value} cm = ${totalInches} inches`);
+					this.sharedValues.set("heightTotalInches", totalInches);
+				}
+
+				// Recalculate results
 				this.calculate();
 			});
 
 			document.addEventListener("gender-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				console.log("Gender toggle change:", customEvent.detail);
+
+				// GenderToggle sends detail.gender (not detail.value)
+				if (customEvent.detail.gender) {
+					this.sharedValues.set("gender", customEvent.detail.gender);
+				}
+
 				this.toggleGenderSpecificInputs();
 				this.calculate();
 			});
-
 			document.addEventListener("unit-toggle-change", (event) => {
 				const customEvent = event as CustomEvent;
+				console.log("Unit change event received:", customEvent.detail);
+
 				if (customEvent.detail.attribute === "height-unit") {
-					this.toggleHeightUnits(customEvent.detail.value);
+					console.log("Updating height unit to:", customEvent.detail.value);
+					this.sharedValues.set("heightUnit", customEvent.detail.value);
+					this.convertAndToggleHeightUnits(customEvent.detail.value);
 				}
 				this.calculate();
 			});
@@ -218,49 +275,44 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			}
 		}
 
-		private toggleHeightUnits(unit: string): void {
-			const imperialInputs = document.querySelector(".imperial-height") as HTMLElement;
-			const metricInputs = document.querySelector(".metric-height") as HTMLElement;
+		private convertAndToggleHeightUnits(unit: string): void {
+			const imperialGroup = document.querySelector(".imperial-height") as HTMLElement;
+			const metricGroup = document.querySelector(".metric-height") as HTMLElement;
 
-			if (imperialInputs && metricInputs) {
+			console.log(`Converting height units to: ${unit}`);
+
+			if (imperialGroup && metricGroup) {
 				if (unit === "imperial") {
-					// Converting from metric to imperial
-					const currentCm = this.sharedValues.get("heightCm") || 178;
-					const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
+					// Show imperial, hide metric
+					imperialGroup.style.display = "block";
+					metricGroup.style.display = "none";
 
-					// Update the SharedValues with converted value
-					this.sharedValues.set("heightTotalInches", totalInches);
-
-					// Update the UI slider
-					this.updateSliderValue("height-total-inches", totalInches);
-
-					imperialInputs.style.display = "block";
-					metricInputs.style.display = "none";
+					// Force reload the imperial height slider from shared values
+					const imperialSlider = imperialGroup.querySelector(
+						'input[type="range"]'
+					) as HTMLInputElement;
+					if (imperialSlider) {
+						const heightTotalInches = this.sharedValues.get("heightTotalInches") || 70;
+						console.log(`Setting imperial height slider to: ${heightTotalInches} inches`);
+						imperialSlider.value = heightTotalInches.toString();
+						// Trigger an input event to update the display
+						imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				} else {
-					// Converting from imperial to metric
-					const totalInches = this.sharedValues.get("heightTotalInches") || 70;
-					const cm = Math.round(totalInches * 2.54);
+					// Show metric, hide imperial
+					imperialGroup.style.display = "none";
+					metricGroup.style.display = "block";
 
-					// Update the SharedValues with converted value
-					this.sharedValues.set("heightCm", cm);
-
-					// Update the UI slider
-					this.updateSliderValue("height-cm", cm);
-
-					imperialInputs.style.display = "none";
-					metricInputs.style.display = "block";
+					// Force reload the metric height slider from shared values
+					const metricSlider = metricGroup.querySelector('input[type="range"]') as HTMLInputElement;
+					if (metricSlider) {
+						const heightCm = this.sharedValues.get("heightCm") || 178;
+						console.log(`Setting metric height slider to: ${heightCm} cm`);
+						metricSlider.value = heightCm.toString();
+						// Trigger an input event to update the display
+						metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				}
-			}
-		}
-
-		private updateSliderValue(sliderId: string, value: number): void {
-			const slider = document.getElementById(sliderId) as HTMLInputElement;
-			if (slider) {
-				slider.value = value.toString();
-
-				// Trigger the display update
-				const event = new Event("input", { bubbles: true });
-				slider.dispatchEvent(event);
 			}
 		}
 
