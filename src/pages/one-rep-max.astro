@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
@@ -35,7 +35,7 @@ const sharedValues = {
 
 			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
 				<InputGroup label="Weight" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight"
 						label=""
 						min={50}
@@ -49,7 +49,7 @@ const sharedValues = {
 
 			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
 				<InputGroup label="Weight" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight-kg"
 						label=""
 						min={23}
@@ -65,7 +65,7 @@ const sharedValues = {
 				label="Repetitions Performed"
 				helpText="Enter the number of reps completed with good form"
 			>
-				<RangeSlider
+				<PrecisionRangeSlider
 					id="reps"
 					label=""
 					min={1}
@@ -533,229 +533,293 @@ const sharedValues = {
 	}
 </style>
 
+<script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// @ts-nocheck - Disable TypeScript checking for this Astro component
-	// Constants for unit conversion
-	const LBS_TO_KG = 0.453592;
-	const KG_TO_LBS = 2.20462;
+	// One Rep Max Calculator with ReactiveSharedValues integration
 
-	// State variables
-	let currentUnit = "imperial"; // "imperial" or "metric"
-	let currentWeightLbs = 135; // Always store weight in pounds internally
-	let currentReps = 5;
+	class OneRepMaxCalculator {
+		private reactiveSharedValues: any;
 
-	// Unit conversion functions
-	function lbsToKg(lbs) {
-		return lbs * LBS_TO_KG;
-	}
-
-	function kgToLbs(kg) {
-		return kg * KG_TO_LBS;
-	}
-
-	// 1RM calculation formulas
-	function calculateEpley(weight, reps) {
-		if (reps === 1) return weight;
-		return weight * (1 + reps / 30);
-	}
-
-	function calculateBrzycki(weight, reps) {
-		if (reps === 1) return weight;
-		return (weight * 36) / (37 - reps);
-	}
-
-	function calculateLombardi(weight, reps) {
-		if (reps === 1) return weight;
-		return weight * Math.pow(reps, 0.1);
-	}
-
-	// Update weight slider range based on unit
-	function updateWeightSliderRange() {
-		const imperialWeightInputs = document.querySelector(".imperial-weight");
-		const metricWeightInputs = document.querySelector(".metric-weight");
-
-		if (currentUnit === "metric") {
-			// Show metric inputs, hide imperial
-			if (imperialWeightInputs) imperialWeightInputs.style.display = "none";
-			if (metricWeightInputs) metricWeightInputs.style.display = "block";
-
-			// Update kg slider value
-			const weightKgSlider = document.getElementById("weight-kg");
-			if (weightKgSlider) {
-				weightKgSlider.value = Math.round(lbsToKg(currentWeightLbs));
-			}
-		} else {
-			// Show imperial inputs, hide metric
-			if (imperialWeightInputs) imperialWeightInputs.style.display = "block";
-			if (metricWeightInputs) metricWeightInputs.style.display = "none";
-
-			// Update lbs slider value
-			const weightSlider = document.getElementById("weight");
-			if (weightSlider) {
-				weightSlider.value = currentWeightLbs;
-			}
-		}
-	}
-
-	// Update all displays
-	function updateDisplays() {
-		// Update weight displays
-		const weightDisplay = document.getElementById("weight-display");
-		const weightKgDisplay = document.getElementById("weight-kg-display");
-
-		if (weightDisplay) {
-			weightDisplay.textContent = currentWeightLbs.toString();
-		}
-		if (weightKgDisplay) {
-			const weightKg = lbsToKg(currentWeightLbs);
-			weightKgDisplay.textContent = Math.round(weightKg).toString();
-		}
-
-		// Update reps display
-		const repsDisplay = document.getElementById("reps-display");
-		if (repsDisplay) {
-			repsDisplay.textContent = currentReps.toString();
-		}
-	}
-
-	// Calculate and display all 1RM results
-	function calculateAndDisplayResults() {
-		// Use current weight in pounds for calculations
-		const epleyValue = calculateEpley(currentWeightLbs, currentReps);
-		const brzyckiValue = calculateBrzycki(currentWeightLbs, currentReps);
-		const lombardiValue = calculateLombardi(currentWeightLbs, currentReps);
-
-		// Get result elements using the new component structure
-		const epleyResult = document.querySelector("#epley-result .result-value__number");
-		const brzyckiResult = document.querySelector("#brzycki-result .result-value__number");
-		const lombardiResult = document.querySelector("#lombardi-result .result-value__number");
-		const epleyUnit = document.querySelector("#epley-result .result-value__unit");
-		const brzyckiUnit = document.querySelector("#brzycki-result .result-value__unit");
-		const lombardiUnit = document.querySelector("#lombardi-result .result-value__unit");
-
-		// Display results in user's preferred unit
-		if (currentUnit === "metric") {
-			if (epleyResult) epleyResult.textContent = Math.round(lbsToKg(epleyValue)).toString();
-			if (brzyckiResult) brzyckiResult.textContent = Math.round(lbsToKg(brzyckiValue)).toString();
-			if (lombardiResult)
-				lombardiResult.textContent = Math.round(lbsToKg(lombardiValue)).toString();
-			if (epleyUnit) epleyUnit.textContent = "kg";
-			if (brzyckiUnit) brzyckiUnit.textContent = "kg";
-			if (lombardiUnit) lombardiUnit.textContent = "kg";
-		} else {
-			if (epleyResult) epleyResult.textContent = Math.round(epleyValue).toString();
-			if (brzyckiResult) brzyckiResult.textContent = Math.round(brzyckiValue).toString();
-			if (lombardiResult) lombardiResult.textContent = Math.round(lombardiValue).toString();
-			if (epleyUnit) epleyUnit.textContent = "lbs";
-			if (brzyckiUnit) brzyckiUnit.textContent = "lbs";
-			if (lombardiUnit) lombardiUnit.textContent = "lbs";
-		}
-
-		// Save current values to localStorage
-		saveCurrentValues();
-	}
-
-	// Save current values to localStorage
-	function saveCurrentValues() {
-		localStorage.setItem("cruxcalc-1rm-weight", currentWeightLbs.toString());
-		localStorage.setItem("cruxcalc-1rm-reps", currentReps.toString());
-		localStorage.setItem("cruxcalc-1rm-units", currentUnit);
-	}
-
-	// Load saved values from localStorage
-	function loadSavedValues() {
-		const savedWeight = localStorage.getItem("cruxcalc-1rm-weight");
-		const savedReps = localStorage.getItem("cruxcalc-1rm-reps");
-		const savedUnits = localStorage.getItem("cruxcalc-1rm-units");
-
-		if (savedWeight) {
-			currentWeightLbs = parseInt(savedWeight);
-		}
-		if (savedReps) {
-			currentReps = parseInt(savedReps);
-		}
-		if (savedUnits) {
-			currentUnit = savedUnits;
-			updateUnitButtons();
-		}
-
-		// Update slider values
-		const repsSlider = document.getElementById("reps");
-		if (repsSlider) {
-			repsSlider.value = currentReps;
-		}
-		updateWeightSliderRange();
-	}
-
-	// Update unit button states
-	function updateUnitButtons() {
-		document.querySelectorAll(".unit-btn").forEach((btn) => {
-			btn.classList.remove("active");
-			if (btn.getAttribute("data-unit") === currentUnit) {
-				btn.classList.add("active");
-			}
-		});
-	}
-
-	// Debounced calculation
-	let calculationTimeout;
-	function debouncedCalculation() {
-		clearTimeout(calculationTimeout);
-		calculationTimeout = setTimeout(calculateAndDisplayResults, 100);
-	}
-
-	// Initialize the calculator when DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		// Wait a bit for components to initialize
-		setTimeout(() => {
-			// Event listeners for sliders
-			const weightSlider = document.getElementById("weight");
-			const weightKgSlider = document.getElementById("weight-kg");
-			const repsSlider = document.getElementById("reps");
-
-			if (weightSlider) {
-				weightSlider.addEventListener("input", () => {
-					currentWeightLbs = parseInt(weightSlider.value);
-					updateDisplays();
-					debouncedCalculation();
-				});
+		constructor() {
+			// Initialize ReactiveSharedValues system
+			if ((window as any).ReactiveSharedValues) {
+				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
 			}
 
-			if (weightKgSlider) {
-				weightKgSlider.addEventListener("input", () => {
-					// Convert kg input back to lbs for storage
-					currentWeightLbs = Math.round(kgToLbs(parseInt(weightKgSlider.value)));
-					updateDisplays();
-					debouncedCalculation();
-				});
+			this.init();
+		}
+
+		private init(): void {
+			// Set up event listeners
+			this.setupEventListeners();
+
+			// Initialize default values if not already set
+			if (!this.reactiveSharedValues.get("weightLbs")) {
+				this.reactiveSharedValues.set("weightLbs", 135);
+			}
+			if (!this.reactiveSharedValues.get("weightKg")) {
+				this.reactiveSharedValues.set("weightKg", 61);
+			}
+			if (!this.reactiveSharedValues.get("repetitions")) {
+				this.reactiveSharedValues.set("repetitions", 5);
 			}
 
-			if (repsSlider) {
-				repsSlider.addEventListener("input", () => {
-					currentReps = parseInt(repsSlider.value);
-					updateDisplays();
-					debouncedCalculation();
-				});
-			}
+			// Initialize unit from saved data or default
+			const savedUnit = this.reactiveSharedValues.get("weightUnit") || "imperial";
+			this.toggleWeightUnit(savedUnit);
 
-			// Unit toggle functionality - targeting the new component structure
-			document.querySelectorAll(".unit-btn").forEach((btn) => {
-				btn.addEventListener("click", () => {
-					const newUnit = btn.getAttribute("data-unit");
-					if (newUnit) {
-						currentUnit = newUnit;
-						updateUnitButtons();
-						updateWeightSliderRange();
-						updateDisplays();
-						calculateAndDisplayResults();
-					}
-				});
+			// Initial calculation
+			this.calculate();
+		}
+
+		private setupEventListeners(): void {
+			// Listen for precision-range-change events with bidirectional sync
+			document.addEventListener("precision-range-change", (event) => {
+				const customEvent = event as CustomEvent;
+				const { sharedKey, value } = customEvent.detail;
+
+				console.log(`=== RANGE CHANGE DEBUG ===`);
+				console.log(`Precision range change: ${sharedKey} = ${value}`);
+
+				// Update ReactiveSharedValues for persistence
+				this.reactiveSharedValues.set(sharedKey, value);
+
+				// Bidirectional weight unit synchronization
+				if (sharedKey === "weightLbs") {
+					const lbsValue = parseFloat(value);
+					const kg = Math.round(lbsValue * 0.453592 * 10) / 10; // Round to 1 decimal place
+					console.log(
+						`Converting ${lbsValue} lbs to ${kg} kg (formula: ${lbsValue} * 0.453592 = ${lbsValue * 0.453592})`
+					);
+					this.reactiveSharedValues.set("weightKg", kg);
+					console.log(`After weight conversion - SharedValues:`, {
+						weightLbs: this.reactiveSharedValues.get("weightLbs"),
+						weightKg: this.reactiveSharedValues.get("weightKg"),
+					});
+				} else if (sharedKey === "weightKg") {
+					const kgValue = parseFloat(value);
+					const lbs = Math.round(kgValue / 0.453592);
+					console.log(`Converting ${kgValue} kg to ${lbs} lbs`);
+					this.reactiveSharedValues.set("weightLbs", lbs);
+				}
+
+				// Recalculate results
+				this.calculate();
 			});
 
-			// Initialize everything
-			loadSavedValues();
-			updateDisplays();
-			calculateAndDisplayResults();
-		}, 300);
+			// Unit toggle functionality
+			document.addEventListener("unit-toggle-change", (event) => {
+				const customEvent = event as CustomEvent;
+				if (customEvent.detail.attribute === "unit") {
+					console.log("=== UNIT TOGGLE DEBUG START ===");
+					console.log("Unit toggle change detected:", customEvent.detail.value);
+
+					// Log current state before sync
+					console.log("BEFORE sync - Current SharedValues state:", {
+						weightLbs: this.reactiveSharedValues.get("weightLbs"),
+						weightKg: this.reactiveSharedValues.get("weightKg"),
+						weightUnit: this.reactiveSharedValues.get("weightUnit"),
+					});
+
+					// First set the unit preference
+					this.reactiveSharedValues.set("weightUnit", customEvent.detail.value);
+
+					// Use ReactiveSharedValues sync method for proper conversion
+					console.log("Calling syncWeightUnits with:", customEvent.detail.value);
+					if (customEvent.detail.value === "metric") {
+						this.reactiveSharedValues.syncWeightUnits("metric");
+					} else {
+						this.reactiveSharedValues.syncWeightUnits("imperial");
+					}
+
+					// Log current state after sync
+					console.log("AFTER sync - Current SharedValues state:", {
+						weightLbs: this.reactiveSharedValues.get("weightLbs"),
+						weightKg: this.reactiveSharedValues.get("weightKg"),
+						weightUnit: this.reactiveSharedValues.get("weightUnit"),
+					});
+
+					// Toggle the display
+					this.toggleWeightUnit(customEvent.detail.value);
+
+					// After sync, update the visible sliders to show converted values
+					this.updateVisibleSliders();
+					console.log("=== UNIT TOGGLE DEBUG END ===");
+				}
+				this.calculate();
+			});
+		}
+
+		private toggleWeightUnit(unit: string): void {
+			const imperialGroup = document.querySelector(".imperial-weight") as HTMLElement;
+			const metricGroup = document.querySelector(".metric-weight") as HTMLElement;
+
+			console.log(`Converting weight units to: ${unit}`);
+
+			if (imperialGroup && metricGroup) {
+				if (unit === "imperial") {
+					imperialGroup.style.display = "block";
+					metricGroup.style.display = "none";
+				} else {
+					imperialGroup.style.display = "none";
+					metricGroup.style.display = "block";
+				}
+				// ReactiveSharedValues sync methods handle the actual conversion
+				// No need to force reload sliders - they will update automatically via precision-range-change events
+			}
+		}
+
+		private updateVisibleSliders(): void {
+			const currentUnit = this.reactiveSharedValues.get("weightUnit") || "imperial";
+
+			console.log(`=== UPDATE VISIBLE SLIDERS DEBUG ===`);
+			console.log(`Current unit: ${currentUnit}`);
+			console.log("Current SharedValues in updateVisibleSliders:", {
+				weightLbs: this.reactiveSharedValues.get("weightLbs"),
+				weightKg: this.reactiveSharedValues.get("weightKg"),
+				weightUnit: this.reactiveSharedValues.get("weightUnit"),
+			});
+
+			if (currentUnit === "imperial") {
+				// Update imperial slider with current SharedValues
+				const imperialSlider = document.querySelector(
+					".imperial-weight .precision-range-input"
+				) as HTMLInputElement;
+				const imperialNumberInput = document.querySelector(
+					".imperial-weight .precision-number-input"
+				) as HTMLInputElement;
+				const imperialDisplay = document.querySelector(
+					".imperial-weight #weight-display"
+				) as HTMLElement;
+
+				if (imperialSlider) {
+					const weightLbs = this.reactiveSharedValues.get("weightLbs") || 135;
+					console.log(`Updating imperial slider to: ${weightLbs} lbs`);
+
+					imperialSlider.value = weightLbs.toString();
+					if (imperialNumberInput) {
+						imperialNumberInput.value = weightLbs.toString();
+					}
+					if (imperialDisplay) {
+						imperialDisplay.textContent = weightLbs.toString();
+					}
+
+					// Trigger display update
+					imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+				} else {
+					console.log("Imperial slider not found!");
+				}
+			} else {
+				// Update metric slider with current SharedValues
+				const metricSlider = document.querySelector(
+					".metric-weight .precision-range-input"
+				) as HTMLInputElement;
+				const metricNumberInput = document.querySelector(
+					".metric-weight .precision-number-input"
+				) as HTMLInputElement;
+				const metricDisplay = document.querySelector(
+					".metric-weight #weight-kg-display"
+				) as HTMLElement;
+
+				console.log("Metric slider element:", metricSlider);
+				console.log("Metric number input element:", metricNumberInput);
+				console.log("Metric display element:", metricDisplay);
+
+				if (metricSlider) {
+					const weightKg = this.reactiveSharedValues.get("weightKg") || 73;
+					console.log(`Updating metric slider to: ${weightKg} kg`);
+
+					metricSlider.value = weightKg.toString();
+					if (metricNumberInput) {
+						metricNumberInput.value = weightKg.toString();
+					}
+					if (metricDisplay) {
+						metricDisplay.textContent = weightKg.toString();
+					}
+
+					// Trigger display update
+					metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+				} else {
+					console.log("Metric slider not found!");
+				}
+			}
+			console.log(`=== UPDATE VISIBLE SLIDERS DEBUG END ===`);
+		}
+
+		// 1RM calculation formulas
+		private calculateEpley(weight: number, reps: number): number {
+			if (reps === 1) return weight;
+			return weight * (1 + reps / 30);
+		}
+
+		private calculateBrzycki(weight: number, reps: number): number {
+			if (reps === 1) return weight;
+			return (weight * 36) / (37 - reps);
+		}
+
+		private calculateLombardi(weight: number, reps: number): number {
+			if (reps === 1) return weight;
+			return weight * Math.pow(reps, 0.1);
+		}
+
+		private calculate(): void {
+			try {
+				// Get current values from ReactiveSharedValues
+				const currentUnit = this.reactiveSharedValues.get("weightUnit") || "imperial";
+				const reps = this.reactiveSharedValues.get("repetitions") || 5;
+
+				// Get weight in pounds for calculations
+				let weightLbs: number;
+				if (currentUnit === "imperial") {
+					weightLbs = this.reactiveSharedValues.get("weightLbs") || 135;
+				} else {
+					const weightKg = this.reactiveSharedValues.get("weightKg") || 61;
+					weightLbs = weightKg / 0.453592; // Convert kg to lbs for calculation
+				}
+
+				// Calculate 1RM using all three formulas
+				const epleyValue = this.calculateEpley(weightLbs, reps);
+				const brzyckiValue = this.calculateBrzycki(weightLbs, reps);
+				const lombardiValue = this.calculateLombardi(weightLbs, reps);
+
+				// Update results display
+				this.updateResults(epleyValue, brzyckiValue, lombardiValue, currentUnit);
+			} catch (error) {
+				console.error("Calculation error:", error);
+			}
+		}
+
+		private updateResults(epley: number, brzycki: number, lombardi: number, unit: string): void {
+			// Get result elements
+			const epleyResult = document.querySelector("#epley-result .result-value__number");
+			const brzyckiResult = document.querySelector("#brzycki-result .result-value__number");
+			const lombardiResult = document.querySelector("#lombardi-result .result-value__number");
+			const epleyUnit = document.querySelector("#epley-result .result-value__unit");
+			const brzyckiUnit = document.querySelector("#brzycki-result .result-value__unit");
+			const lombardiUnit = document.querySelector("#lombardi-result .result-value__unit");
+
+			// Convert and display results based on current unit
+			if (unit === "metric") {
+				if (epleyResult) epleyResult.textContent = Math.round(epley * 0.453592).toString();
+				if (brzyckiResult) brzyckiResult.textContent = Math.round(brzycki * 0.453592).toString();
+				if (lombardiResult) lombardiResult.textContent = Math.round(lombardi * 0.453592).toString();
+				if (epleyUnit) epleyUnit.textContent = "kg";
+				if (brzyckiUnit) brzyckiUnit.textContent = "kg";
+				if (lombardiUnit) lombardiUnit.textContent = "kg";
+			} else {
+				if (epleyResult) epleyResult.textContent = Math.round(epley).toString();
+				if (brzyckiResult) brzyckiResult.textContent = Math.round(brzycki).toString();
+				if (lombardiResult) lombardiResult.textContent = Math.round(lombardi).toString();
+				if (epleyUnit) epleyUnit.textContent = "lbs";
+				if (brzyckiUnit) brzyckiUnit.textContent = "lbs";
+				if (lombardiUnit) lombardiUnit.textContent = "lbs";
+			}
+		}
+	}
+
+	// Initialize calculator when DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		new OneRepMaxCalculator();
 	});
 </script>

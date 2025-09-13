@@ -381,51 +381,152 @@ private convertAndToggleWeightUnits(unit: string): void {
 }
 ```
 
-**Solution:** Force sliders to reload from SharedValues when they become visible:
+**Solution:** Force sliders to reload from SharedValues when they become visible using **correct CSS selectors**:
 
 ```javascript
-private convertAndToggleWeightUnits(unit: string): void {
-    const imperialGroup = document.querySelector(".imperial-weight") as HTMLElement;
-    const metricGroup = document.querySelector(".metric-weight") as HTMLElement;
+private updateVisibleSliders(): void {
+    const currentUnit = this.reactiveSharedValues.get("weightUnit") || "imperial";
 
-    console.log(`Converting weight units to: ${unit}`);
+    if (currentUnit === "imperial") {
+        // CRITICAL: Use correct PrecisionRangeSlider CSS classes
+        const imperialSlider = document.querySelector(".imperial-weight .precision-range-input") as HTMLInputElement;
+        const imperialNumberInput = document.querySelector(".imperial-weight .precision-number-input") as HTMLInputElement;
+        const imperialDisplay = document.querySelector(".imperial-weight #weight-display") as HTMLElement;
 
-    if (imperialGroup && metricGroup) {
-        if (unit === "imperial") {
-            imperialGroup.style.display = "block";
-            metricGroup.style.display = "none";
-
-            // Force reload the imperial weight slider from shared values
-            const imperialSlider = imperialGroup.querySelector('input[type="range"]') as HTMLInputElement;
-            if (imperialSlider) {
-                const weightLbs = this.sharedValues.get("weightLbs") || 160;
-                console.log(`Setting imperial weight slider to: ${weightLbs} lbs`);
-                imperialSlider.value = weightLbs.toString();
-                imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+        if (imperialSlider) {
+            const weightLbs = this.reactiveSharedValues.get("weightLbs") || 135;
+            imperialSlider.value = weightLbs.toString();
+            if (imperialNumberInput) {
+                imperialNumberInput.value = weightLbs.toString();
             }
+            if (imperialDisplay) {
+                imperialDisplay.textContent = weightLbs.toString();
+            }
+            imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    } else {
+        // CRITICAL: Use correct PrecisionRangeSlider CSS classes
+        const metricSlider = document.querySelector(".metric-weight .precision-range-input") as HTMLInputElement;
+        const metricNumberInput = document.querySelector(".metric-weight .precision-number-input") as HTMLInputElement;
+        const metricDisplay = document.querySelector(".metric-weight #weight-kg-display") as HTMLElement;
 
+        if (metricSlider) {
+            const weightKg = this.reactiveSharedValues.get("weightKg") || 73;
+            metricSlider.value = weightKg.toString();
+            if (metricNumberInput) {
+                metricNumberInput.value = weightKg.toString();
+            }
+            if (metricDisplay) {
+                metricDisplay.textContent = weightKg.toString();
+            }
+            metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    }
+}
+
+// Complete unit toggle event handler pattern
+document.addEventListener("unit-toggle-change", (event) => {
+    const customEvent = event as CustomEvent;
+    if (customEvent.detail.attribute === "unit") {
+        // 1. Set unit preference
+        this.reactiveSharedValues.set("weightUnit", customEvent.detail.value);
+
+        // 2. Use sync method for conversion
+        if (customEvent.detail.value === "metric") {
+            this.reactiveSharedValues.syncWeightUnits("metric");
         } else {
-            imperialGroup.style.display = "none";
-            metricGroup.style.display = "block";
+            this.reactiveSharedValues.syncWeightUnits("imperial");
+        }
 
-            // Force reload the metric weight slider from shared values
-            const metricSlider = metricGroup.querySelector('input[type="range"]') as HTMLInputElement;
-            if (metricSlider) {
-                const weightKg = this.sharedValues.get("weightKg") || 73;
-                console.log(`Setting metric weight slider to: ${weightKg} kg`);
-                metricSlider.value = weightKg.toString();
-                metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
-            }
+        // 3. Toggle display
+        this.toggleWeightUnit(customEvent.detail.value);
+
+        // 4. Update visible sliders with converted values
+        this.updateVisibleSliders();
+    }
+    this.calculate();
+});
+```
+
+**Key Points:**
+
+- **CRITICAL CSS Selector Fix:** PrecisionRangeSlider uses `.precision-range-input` and `.precision-number-input` (NOT `.range-input` and `.number-input`)
+- Use ReactiveSharedValues `syncWeightUnits()` method for proper conversion
+- Update all three elements: range input, number input, and display span
+- Call `updateVisibleSliders()` AFTER the sync method completes
+
+### Problem 8: Incorrect CSS Selectors for PrecisionRangeSlider Elements
+
+**Issue:** Unit conversion appears to work in SharedValues but sliders don't update visually
+
+**Root Cause:** Using wrong CSS class names when selecting PrecisionRangeSlider elements for manual updates
+
+**Common Mistake:**
+
+```javascript
+// WRONG - these classes don't exist in PrecisionRangeSlider
+const slider = document.querySelector(".range-input");
+const numberInput = document.querySelector(".number-input");
+```
+
+**Correct Solution:**
+
+```javascript
+// CORRECT - actual PrecisionRangeSlider CSS classes
+const slider = document.querySelector(".precision-range-input");
+const numberInput = document.querySelector(".precision-number-input");
+const display = document.querySelector(`#${id}-display`);
+```
+
+**PrecisionRangeSlider DOM Structure:**
+
+```html
+<div class="precision-range-wrapper">
+	<input class="precision-range-input" type="range" id="weight-kg" />
+	<div class="precision-controls">
+		<button class="precision-decrement">−</button>
+		<input class="precision-number-input" type="number" id="weight-kg-number" />
+		<button class="precision-increment">+</button>
+	</div>
+	<div class="precision-display">
+		<span id="weight-kg-display">73</span>
+		<span class="precision-unit">kg</span>
+	</div>
+</div>
+```
+
+**Elements to Update When Force-Reloading:**
+
+1. **Range Slider:** `.precision-range-input` - Sets the slider position
+2. **Number Input:** `.precision-number-input` - Sets the number input value
+3. **Display Span:** `#${id}-display` - Sets the visual display text
+4. **Trigger Event:** Dispatch `input` event to update component state
+
+**Complete Update Pattern:**
+
+```javascript
+private updateSliderElements(containerId: string, value: number, unit: string): void {
+    const container = document.querySelector(containerId);
+    if (container) {
+        const slider = container.querySelector(".precision-range-input") as HTMLInputElement;
+        const numberInput = container.querySelector(".precision-number-input") as HTMLInputElement;
+        const display = container.querySelector(".precision-display span") as HTMLElement;
+
+        if (slider) {
+            slider.value = value.toString();
+            slider.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        if (numberInput) {
+            numberInput.value = value.toString();
+        }
+        if (display) {
+            display.textContent = value.toString();
         }
     }
 }
 ```
 
-**Key Points:**
-
-- Hardcoded `value` attributes in PrecisionRangeSlider components override SharedValues during unit toggle
-- Force sliders to reload current values from SharedValues when they become visible
-- Dispatch `input` event to update the visual display after setting the value
+**Key Insight:** Always check the actual component's rendered HTML structure rather than assuming CSS class names. The PrecisionRangeSlider component uses `precision-` prefixed classes, not generic `range-` or `number-` classes.
 
 ## Conversion Formulas Reference
 
@@ -464,6 +565,19 @@ After migration, verify:
 - [ ] Cross-calculator persistence works (values persist between pages)
 - [ ] No console errors related to undefined properties
 - [ ] Touch accessibility works on mobile devices
+- [ ] **CSS selectors target correct PrecisionRangeSlider elements** (`.precision-range-input`, not `.range-input`)
+- [ ] **Unit toggle updates all three elements:** range slider, number input, and display span
+- [ ] **Force reload pattern works:** Set weight to 300 lbs → switch to metric → should show 136.1 kg (not fallback values)
+
+## Debugging Checklist
+
+When unit conversion isn't working:
+
+1. **Check console logs:** Look for "SharedValues sync" debug output
+2. **Verify CSS selectors:** Ensure using `.precision-range-input` classes
+3. **Test sync methods:** Verify `syncWeightUnits()` is being called
+4. **Check element updates:** All three elements (slider, input, display) should update
+5. **Test cross-calculator:** Values should persist between different calculator pages
 
 ## Example: Complete Migration Pattern
 
