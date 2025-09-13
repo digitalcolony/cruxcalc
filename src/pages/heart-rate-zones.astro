@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
@@ -35,7 +35,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="age-group" data-method-group="formula">
 				<InputGroup label="Age" helpText="Your current age in years">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="age"
 						label=""
 						min={15}
@@ -52,7 +52,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					label="Your Maximum Heart Rate"
 					helpText="Enter your highest recorded heart rate during intense exercise"
 				>
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="custom-max-hr"
 						label=""
 						min={150}
@@ -178,18 +178,14 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 	</CalculatorLayout>
 </Layout>
 
-<script src="/sharedValues.js" is:inline></script>
 <script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// Heart Rate Zones Calculator - Refactored with Components
 	class HeartRateZonesCalculator {
-		private sharedValues: any;
 		private reactiveSharedValues: any;
 
 		constructor() {
-			// Initialize SharedValues systems
-			this.sharedValues = new (window as any).SharedValues();
-
+			// Initialize ReactiveSharedValues system
 			if ((window as any).ReactiveSharedValues) {
 				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
 			}
@@ -201,19 +197,34 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			// Set up event listeners
 			this.setupEventListeners();
 
-			// Set default method
-			this.sharedValues.set("maxHRMethod", "formula");
+			// Load method from ReactiveSharedValues or use default
+			const savedMethod = this.reactiveSharedValues.get("maxHRMethod") || "formula";
+			this.reactiveSharedValues.set("maxHRMethod", savedMethod);
 
 			// Initialize the UI state
-			this.toggleMaxHRMethod("formula");
+			this.toggleMaxHRMethod(savedMethod);
+
+			// Initialize default values if not already set
+			if (!this.reactiveSharedValues.get("age")) {
+				this.reactiveSharedValues.set("age", 30);
+			}
+			if (!this.reactiveSharedValues.get("customMaxHR")) {
+				this.reactiveSharedValues.set("customMaxHR", 190);
+			}
 
 			// Initial calculation
 			this.calculate();
 		}
 
 		private setupEventListeners(): void {
-			// Listen for input changes
-			document.addEventListener("range-slider-change", (event) => {
+			// Listen for precision-range-change events with bidirectional sync
+			document.addEventListener("precision-range-change", (event) => {
+				const customEvent = event as CustomEvent;
+				const { sharedKey, value } = customEvent.detail;
+
+				// Update ReactiveSharedValues for persistence
+				this.reactiveSharedValues.set(sharedKey, value);
+
 				this.calculate();
 			});
 
@@ -221,7 +232,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				const customEvent = event as CustomEvent;
 				if (customEvent.detail.attribute === "max-hr-method") {
 					this.toggleMaxHRMethod(customEvent.detail.value);
-					this.sharedValues.set("maxHRMethod", customEvent.detail.value);
+					this.reactiveSharedValues.set("maxHRMethod", customEvent.detail.value);
 				}
 				this.calculate();
 			});
@@ -244,14 +255,14 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 		private calculate(): void {
 			try {
-				const method = this.sharedValues.get("maxHRMethod") || "formula";
+				const method = this.reactiveSharedValues.get("maxHRMethod") || "formula";
 				let maxHR: number;
 
 				if (method === "formula") {
-					const age = this.sharedValues.get("age") || 30;
+					const age = this.reactiveSharedValues.get("age") || 30;
 					maxHR = 220 - age;
 				} else {
-					maxHR = this.sharedValues.get("customMaxHR") || 190;
+					maxHR = this.reactiveSharedValues.get("customMaxHR") || 190;
 				}
 
 				// Update max HR display
