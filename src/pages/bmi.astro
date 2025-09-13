@@ -508,7 +508,33 @@ const sharedValues = {
 			});
 
 			// Listen for precision range slider changes (from our PrecisionRangeSlider components)
-			document.addEventListener("precision-range-change", () => {
+			document.addEventListener("precision-range-change", (event) => {
+				const customEvent = event as CustomEvent;
+				const detail = customEvent.detail || {};
+				const { sharedKey, value } = detail;
+				if (sharedKey !== undefined) {
+					// Update this instance's ReactiveSharedValues so getAll() reflects latest values
+					this.sharedValues.set(sharedKey, value);
+
+					// Keep paired unit values in sync (mirrors logic elsewhere on page)
+					if (sharedKey === "heightTotalInches") {
+						const totalInches = parseFloat(value);
+						const cm = Math.round(totalInches * 2.54);
+						this.sharedValues.set("heightCm", cm);
+					} else if (sharedKey === "heightCm") {
+						const cm = parseFloat(value);
+						const totalInches = Math.round((cm / 2.54) * 2) / 2; // nearest 0.5
+						this.sharedValues.set("heightTotalInches", totalInches);
+					} else if (sharedKey === "weightLbs") {
+						const lbs = parseFloat(value);
+						const kg = Math.round(lbs * 0.453592 * 10) / 10; // 1 decimal
+						this.sharedValues.set("weightKg", kg);
+					} else if (sharedKey === "weightKg") {
+						const kg = parseFloat(value);
+						const lbs = Math.round(kg / 0.453592);
+						this.sharedValues.set("weightLbs", lbs);
+					}
+				}
 				this.calculate();
 			});
 
