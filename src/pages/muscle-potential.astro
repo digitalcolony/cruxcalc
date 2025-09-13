@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
@@ -33,7 +33,7 @@ import ResultValue from "../components/ResultValue.astro";
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-total-inches"
 						label=""
 						min={48}
@@ -49,7 +49,7 @@ import ResultValue from "../components/ResultValue.astro";
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-cm"
 						label=""
 						min={120}
@@ -78,7 +78,7 @@ import ResultValue from "../components/ResultValue.astro";
 					helpText="Measure around the smallest part, just below the wrist bone"
 					class="full-width"
 				>
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="wrist-inches"
 						label=""
 						min={5.5}
@@ -86,6 +86,7 @@ import ResultValue from "../components/ResultValue.astro";
 						step={0.1}
 						value={7}
 						unit="inches"
+						sharedKey="wristInches"
 					/>
 				</InputGroup>
 			</div>
@@ -96,7 +97,16 @@ import ResultValue from "../components/ResultValue.astro";
 					helpText="Measure around the smallest part, just below the wrist bone"
 					class="full-width"
 				>
-					<RangeSlider id="wrist-cm" label="" min={14} max={23} step={0.1} value={17.8} unit="cm" />
+					<PrecisionRangeSlider
+						id="wrist-cm"
+						label=""
+						min={14}
+						max={23}
+						step={0.1}
+						value={17.8}
+						unit="cm"
+						sharedKey="wristCm"
+					/>
 				</InputGroup>
 			</div>
 
@@ -117,7 +127,7 @@ import ResultValue from "../components/ResultValue.astro";
 					helpText="Measure around the smallest part, just above the ankle bone"
 					class="full-width"
 				>
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="ankle-inches"
 						label=""
 						min={7}
@@ -125,6 +135,7 @@ import ResultValue from "../components/ResultValue.astro";
 						step={0.1}
 						value={8.5}
 						unit="inches"
+						sharedKey="ankleInches"
 					/>
 				</InputGroup>
 			</div>
@@ -135,7 +146,16 @@ import ResultValue from "../components/ResultValue.astro";
 					helpText="Measure around the smallest part, just above the ankle bone"
 					class="full-width"
 				>
-					<RangeSlider id="ankle-cm" label="" min={18} max={28} step={0.1} value={21.6} unit="cm" />
+					<PrecisionRangeSlider
+						id="ankle-cm"
+						label=""
+						min={18}
+						max={28}
+						step={0.1}
+						value={21.6}
+						unit="cm"
+						sharedKey="ankleCm"
+					/>
 				</InputGroup>
 			</div>
 
@@ -143,7 +163,16 @@ import ResultValue from "../components/ResultValue.astro";
 				label="Target Body Fat %"
 				helpText="Your target body fat percentage for maximum muscle potential calculations"
 			>
-				<RangeSlider id="body-fat" label="" min={5} max={20} step={0.5} value={10} unit="%" />
+				<PrecisionRangeSlider
+					id="body-fat"
+					label=""
+					min={5}
+					max={20}
+					step={0.5}
+					value={10}
+					unit="%"
+					sharedKey="bodyFat"
+				/>
 			</InputGroup>
 		</div>
 
@@ -297,10 +326,7 @@ import ResultValue from "../components/ResultValue.astro";
 	}
 </style>
 
-<script>
-	// Ensure SharedValues is available
-</script>
-<script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// @ts-nocheck - Disable TypeScript checking for this Astro component
 	let currentHeightUnit = "imperial";
@@ -324,31 +350,32 @@ import ResultValue from "../components/ResultValue.astro";
 
 	// Calculate muscle potential using Casey Butt's formulas
 	function calculateMusclePotential() {
+		const shared = new (window as any).ReactiveSharedValues();
 		let heightInInches, wristInInches, ankleInInches, bodyFatPercent;
 
-		// Convert height to inches
+		// Get values from ReactiveSharedValues
 		if (currentHeightUnit === "imperial") {
-			heightInInches = parseFloat(heightTotalInches?.value || "68");
+			heightInInches = shared.get("heightTotalInches") || 68;
 		} else {
-			heightInInches = parseInt(heightCm?.value || "173") / 2.54;
+			heightInInches = (shared.get("heightCm") || 173) / 2.54;
 		}
 
 		// Get wrist measurement in inches
 		if (currentMeasurementUnit === "imperial") {
-			wristInInches = parseFloat(wristInches?.value || "7");
+			wristInInches = shared.get("wristInches") || 7;
 		} else {
-			wristInInches = parseFloat(wristCm?.value || "17.8") / 2.54;
+			wristInInches = (shared.get("wristCm") || 17.8) / 2.54;
 		}
 
 		// Get ankle measurement in inches
 		if (currentMeasurementUnit === "imperial") {
-			ankleInInches = parseFloat(ankleInches?.value || "8.5");
+			ankleInInches = shared.get("ankleInches") || 8.5;
 		} else {
-			ankleInInches = parseFloat(ankleCm?.value || "21.6") / 2.54;
+			ankleInInches = (shared.get("ankleCm") || 21.6) / 2.54;
 		}
 
 		// Get body fat percentage
-		bodyFatPercent = parseFloat(bodyFat?.value || "10") / 100;
+		bodyFatPercent = (shared.get("bodyFat") || 10) / 100;
 
 		// Casey Butt's formula for maximum lean body mass (Imperial Units)
 		// LBM = H^1.5 × (√W/22.667 + √A/17.01) × (F/224 + 1)
@@ -439,23 +466,64 @@ import ResultValue from "../components/ResultValue.astro";
 		}
 	}
 
-	// Event listeners for range sliders
-	[heightTotalInches, heightCm, wristInches, wristCm, ankleInches, ankleCm, bodyFat].forEach(
-		(slider) => {
-			if (slider) {
-				slider.addEventListener("input", () => {
-					updateDisplay();
-				});
+	// Modern event listeners for precision range sliders with bidirectional sync
+	document.addEventListener("precision-range-change", (event) => {
+		const customEvent = event as CustomEvent;
+		const { sharedKey, value } = customEvent.detail;
+
+		// Update ReactiveSharedValues for persistence
+		const shared = new (window as any).ReactiveSharedValues();
+		shared.set(sharedKey, value);
+
+		// Bidirectional unit synchronization
+		if (sharedKey === "heightTotalInches") {
+			const cm = Math.round(parseFloat(value) * 2.54);
+			shared.set("heightCm", cm);
+			// Force reload metric slider to reflect the change
+			const metricSlider = document.getElementById("height-cm");
+			if (metricSlider) {
+				metricSlider.dispatchEvent(new CustomEvent("force-update"));
 			}
+		} else if (sharedKey === "heightCm") {
+			const totalInches = Math.round((parseFloat(value) / 2.54) * 2) / 2;
+			shared.set("heightTotalInches", totalInches);
+			// Force reload imperial slider to reflect the change
+			const imperialSlider = document.getElementById("height-total-inches");
+			if (imperialSlider) {
+				imperialSlider.dispatchEvent(new CustomEvent("force-update"));
+			}
+		} else if (sharedKey === "wristInches") {
+			const cm = Math.round(parseFloat(value) * 2.54 * 10) / 10;
+			shared.set("wristCm", cm);
+		} else if (sharedKey === "wristCm") {
+			const inches = Math.round((parseFloat(value) / 2.54) * 10) / 10;
+			shared.set("wristInches", inches);
+		} else if (sharedKey === "ankleInches") {
+			const cm = Math.round(parseFloat(value) * 2.54 * 10) / 10;
+			shared.set("ankleCm", cm);
+		} else if (sharedKey === "ankleCm") {
+			const inches = Math.round((parseFloat(value) / 2.54) * 10) / 10;
+			shared.set("ankleInches", inches);
 		}
-	);
+
+		// Update the display
+		updateDisplay();
+	});
 
 	function setSliderValue(id, value) {
 		const slider = document.getElementById(id);
 		if (slider) {
-			slider.value = value.toString();
-			// trigger display update
-			slider.dispatchEvent(new Event("input", { bubbles: true }));
+			// For PrecisionRangeSlider, we need to update the internal input
+			const rangeInput = slider.querySelector(".range-input") as HTMLInputElement;
+			const numberInput = slider.querySelector(".number-input") as HTMLInputElement;
+
+			if (rangeInput) {
+				rangeInput.value = value.toString();
+				rangeInput.dispatchEvent(new Event("input", { bubbles: true }));
+			}
+			if (numberInput) {
+				numberInput.value = value.toString();
+			}
 		}
 	}
 
@@ -472,7 +540,7 @@ import ResultValue from "../components/ResultValue.astro";
 			const metricHeight = document.querySelector(".metric-height");
 
 			// Read existing shared values to avoid overwrites on simple page load
-			const shared = new (window as any).SharedValues();
+			const shared = new (window as any).ReactiveSharedValues();
 			const existingUnit = shared.get("heightUnit") || "imperial";
 			if (unit !== existingUnit) {
 				shared.set("heightUnit", unit);
@@ -546,9 +614,9 @@ import ResultValue from "../components/ResultValue.astro";
 	// Initialize the calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
 		updateDisplay();
-		// Initialize from SharedValues for height without forcing conversions
+		// Initialize from ReactiveSharedValues for height without forcing conversions
 		try {
-			const shared = new (window as any).SharedValues();
+			const shared = new (window as any).ReactiveSharedValues();
 			const savedHeightUnit = shared.get("heightUnit") || "imperial";
 			currentHeightUnit = savedHeightUnit;
 			const imperialHeight = document.querySelector(".imperial-height") as HTMLElement;
@@ -577,7 +645,7 @@ import ResultValue from "../components/ResultValue.astro";
 				heightToggle.classList.add("active");
 			}
 		} catch (e) {
-			console.warn("SharedValues init failed on muscle-potential:", e);
+			console.warn("ReactiveSharedValues init failed on muscle-potential:", e);
 		}
 	});
 </script>
