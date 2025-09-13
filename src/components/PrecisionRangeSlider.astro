@@ -1,0 +1,671 @@
+---
+export interface Props {
+	id: string;
+	label?: string;
+	min: number;
+	max: number;
+	step?: number;
+	value: number;
+	unit: string;
+	helpText?: string;
+	class?: string;
+	sharedKey?: string; // For SharedValues integration
+	formatAsHeight?: boolean; // For total inches display as feet'inches"
+	formatAsPace?: boolean; // For seconds display as mm:ss pace format
+}
+
+const {
+	id,
+	label = "",
+	min,
+	max,
+	step = 1,
+	value,
+	unit,
+	helpText,
+	class: className = "",
+	sharedKey,
+	formatAsHeight = false,
+	formatAsPace = false,
+} = Astro.props;
+---
+
+<div class={`precision-range-wrapper ${className}`}>
+	{
+		label && (
+			<label for={id} class="precision-label">
+				{label}
+			</label>
+		)
+	}
+	<div class="precision-range-slider">
+		<input
+			type="range"
+			id={id}
+			min={min}
+			max={max}
+			step={step}
+			value={value}
+			class="precision-range-input"
+			data-shared-key={sharedKey}
+			data-format-as-height={formatAsHeight}
+			data-format-as-pace={formatAsPace}
+		/>
+		<div class="precision-controls">
+			<button type="button" class="precision-btn precision-decrement" data-target={id}>−</button>
+			<input
+				type="number"
+				id={`${id}-number`}
+				min={min}
+				max={max}
+				step={step}
+				value={value}
+				class="precision-number-input"
+			/>
+			<button type="button" class="precision-btn precision-increment" data-target={id}>+</button>
+		</div>
+		<div class="precision-display">
+			<span id={`${id}-display`}>
+				{
+					formatAsPace
+						? `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, "0")}`
+						: formatAsHeight
+							? `${Math.floor(value / 12)}'${Math.round((value % 12) * 2) / 2}"`
+							: value
+				}
+			</span>
+			<span class="precision-unit">{unit}</span>
+		</div>
+	</div>
+	{helpText && <p class="input-help">{helpText}</p>}
+</div>
+
+<style>
+	/* PrecisionRangeSlider Styles */
+	.precision-range-wrapper {
+		margin-bottom: 2rem;
+	}
+
+	.precision-range-wrapper:last-child {
+		margin-bottom: 0;
+	}
+
+	.precision-label {
+		display: block;
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--color-text);
+		margin-bottom: 0.75rem;
+	}
+
+	.precision-range-slider {
+		position: relative;
+	}
+
+	.precision-range-input {
+		width: 100%;
+		height: 20px; /* Larger than standard 8px for better touch */
+		border-radius: 4px;
+		background: var(--color-bg);
+		outline: none;
+		border: var(--border-width) solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+		appearance: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin-bottom: 1rem;
+	}
+
+	.precision-range-input:hover {
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-range-input:focus {
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+	}
+
+	/* Enhanced thumb for better touch targets */
+	.precision-range-input::-webkit-slider-thumb {
+		appearance: none;
+		height: 44px; /* Touch-friendly 44px minimum */
+		width: 44px;
+		border-radius: 50%;
+		background: radial-gradient(
+			circle at center,
+			var(--color-primary) 0%,
+			var(--color-primary) 45%,
+			var(--color-primary) 50%,
+			transparent 50%
+		);
+		border: 2px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.precision-range-input::-webkit-slider-thumb:hover {
+		background: radial-gradient(
+			circle at center,
+			var(--color-secondary) 0%,
+			var(--color-secondary) 45%,
+			var(--color-secondary) 50%,
+			transparent 50%
+		);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-range-input::-moz-range-thumb {
+		height: 40px; /* Slightly smaller for Firefox */
+		width: 40px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		border: 2px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.precision-range-input::-moz-range-thumb:hover {
+		background: var(--color-secondary);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.precision-btn {
+		width: 44px; /* Touch-friendly minimum */
+		height: 44px;
+		border: var(--border-width) solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-size: 1.5rem;
+		font-weight: 600;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: var(--shadow-sm);
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.precision-btn:hover {
+		background: var(--color-accent);
+		color: white;
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-btn:active {
+		transform: scale(0.95);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.precision-number-input {
+		width: 80px;
+		height: 44px; /* Match button height */
+		border: var(--border-width) solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-size: 1rem;
+		font-weight: 600;
+		text-align: center;
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+		/* Ensure centering works across all browsers */
+		-webkit-text-align-last: center;
+		text-align-last: center;
+		padding: 0 8px;
+		box-sizing: border-box;
+	}
+
+	.precision-number-input:focus {
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+		outline: none;
+	}
+
+	.precision-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		font-size: 1.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.precision-unit {
+		margin-left: 0.5rem;
+		color: var(--color-text-muted);
+		font-size: 1.25rem;
+	}
+
+	.input-help {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin-top: 0.5rem;
+		margin-bottom: 0;
+		line-height: 1.4;
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 768px) {
+		.precision-range-input::-webkit-slider-thumb {
+			height: 48px; /* Even larger on mobile */
+			width: 48px;
+		}
+
+		.precision-btn {
+			width: 48px;
+			height: 48px;
+			font-size: 1.75rem;
+		}
+
+		.precision-number-input {
+			height: 48px;
+			width: 90px;
+			font-size: 1.125rem;
+			text-align: center;
+			-webkit-text-align-last: center;
+			text-align-last: center;
+		}
+
+		.precision-display {
+			font-size: 1.75rem;
+		}
+
+		.precision-controls {
+			gap: 0.75rem;
+		}
+	}
+</style>
+
+<script>
+	// Extend Window interface for SharedValues
+	declare global {
+		interface Window {
+			SharedValues: any;
+		}
+	}
+
+	// PrecisionRangeSlider functionality
+	class PrecisionRangeSliderComponent {
+		private container: HTMLElement;
+		private rangeInput: HTMLInputElement | null = null;
+		private numberInput: HTMLInputElement | null = null;
+		private display: HTMLElement | null = null;
+		private decrementBtn: HTMLElement | null = null;
+		private incrementBtn: HTMLElement | null = null;
+		private step: number = 1;
+		private min: number = 0;
+		private max: number = 100;
+		private sharedKey: string | undefined;
+		private sharedValues: any;
+		private rapidChangeTimer: NodeJS.Timeout | null = null;
+
+		constructor(container: HTMLElement) {
+			console.log("PrecisionRangeSlider: Initializing component", container);
+			this.container = container;
+			this.rangeInput = container.querySelector(".precision-range-input") as HTMLInputElement;
+
+			if (!this.rangeInput) {
+				console.error("PrecisionRangeSlider: Could not find range input in container", container);
+				return;
+			}
+
+			console.log("PrecisionRangeSlider: Found range input", this.rangeInput);
+
+			this.step = parseFloat(this.rangeInput.step) || 1;
+			this.min = parseFloat(this.rangeInput.min) || 0;
+			this.max = parseFloat(this.rangeInput.max) || 100;
+			this.sharedKey = this.rangeInput.dataset.sharedKey;
+
+			console.log(
+				`PrecisionRangeSlider: Config - min: ${this.min}, max: ${this.max}, step: ${this.step}, sharedKey: ${this.sharedKey}`
+			);
+
+			// Find related elements
+			const targetId = this.rangeInput.id;
+			this.numberInput = document.getElementById(`${targetId}-number`) as HTMLInputElement;
+			this.display = document.getElementById(`${targetId}-display`) as HTMLElement;
+			this.decrementBtn = document.querySelector(
+				`[data-target="${targetId}"].precision-decrement`
+			) as HTMLElement;
+			this.incrementBtn = document.querySelector(
+				`[data-target="${targetId}"].precision-increment`
+			) as HTMLElement;
+
+			console.log("PrecisionRangeSlider: Found elements:", {
+				numberInput: !!this.numberInput,
+				display: !!this.display,
+				decrementBtn: !!this.decrementBtn,
+				incrementBtn: !!this.incrementBtn,
+			});
+
+			// Initialize SharedValues if available
+			if (typeof window !== "undefined" && (window as any).SharedValues && this.sharedKey) {
+				console.log("PrecisionRangeSlider: Initializing SharedValues");
+				this.sharedValues = new (window as any).SharedValues();
+				this.loadFromSharedValues();
+			} else {
+				console.log("PrecisionRangeSlider: SharedValues not available or no sharedKey");
+			}
+
+			this.init();
+		}
+
+		private loadFromSharedValues(): void {
+			if (this.sharedValues && this.sharedKey && this.rangeInput) {
+				const savedValue = this.sharedValues.get(this.sharedKey);
+				if (savedValue !== undefined && savedValue !== null) {
+					this.rangeInput.value = savedValue.toString();
+					this.syncValues();
+				}
+			}
+		}
+
+		private init(): void {
+			if (!this.rangeInput) {
+				console.error("PrecisionRangeSlider: Cannot initialize - no range input");
+				return;
+			}
+
+			console.log("PrecisionRangeSlider: Initializing event listeners");
+
+			// Sync all inputs
+			this.syncValues();
+
+			// Range input events
+			this.rangeInput.addEventListener("input", () => {
+				console.log("PrecisionRangeSlider: Range input changed");
+				this.syncValues();
+				this.saveToSharedValues();
+				this.dispatchChangeEvent();
+			});
+
+			// Number input events
+			if (this.numberInput) {
+				this.numberInput.addEventListener("input", () => {
+					console.log("PrecisionRangeSlider: Number input changed");
+					const value = this.clampValue(parseFloat(this.numberInput!.value));
+					this.setValue(value);
+					this.saveToSharedValues();
+					this.dispatchChangeEvent();
+				});
+
+				this.numberInput.addEventListener("blur", () => {
+					// Ensure valid value on blur
+					const value = this.clampValue(parseFloat(this.numberInput!.value) || this.getValue());
+					this.setValue(value);
+				});
+			} else {
+				console.warn("PrecisionRangeSlider: Number input not found");
+			}
+
+			// Button events
+			if (this.decrementBtn) {
+				console.log("PrecisionRangeSlider: Setting up decrement button");
+				this.setupButtonEvents(this.decrementBtn, () => this.decrement());
+			} else {
+				console.warn("PrecisionRangeSlider: Decrement button not found");
+			}
+
+			if (this.incrementBtn) {
+				console.log("PrecisionRangeSlider: Setting up increment button");
+				this.setupButtonEvents(this.incrementBtn, () => this.increment());
+			} else {
+				console.warn("PrecisionRangeSlider: Increment button not found");
+			}
+
+			console.log("PrecisionRangeSlider: Initialization complete");
+		}
+
+		private setupButtonEvents(button: HTMLElement, action: () => void): void {
+			let longPressTimer: NodeJS.Timeout;
+			let isLongPressing = false;
+
+			button.addEventListener("click", action);
+
+			button.addEventListener("mousedown", () => {
+				longPressTimer = setTimeout(() => {
+					isLongPressing = true;
+					this.startRapidChange(action);
+				}, 500);
+			});
+
+			button.addEventListener("mouseup", () => {
+				clearTimeout(longPressTimer);
+				if (isLongPressing) {
+					this.stopRapidChange();
+					isLongPressing = false;
+				}
+			});
+
+			button.addEventListener("mouseleave", () => {
+				clearTimeout(longPressTimer);
+				if (isLongPressing) {
+					this.stopRapidChange();
+					isLongPressing = false;
+				}
+			});
+
+			// Touch events for mobile
+			button.addEventListener("touchstart", (e) => {
+				e.preventDefault();
+				longPressTimer = setTimeout(() => {
+					isLongPressing = true;
+					this.startRapidChange(action);
+				}, 500);
+			});
+
+			button.addEventListener("touchend", (e) => {
+				e.preventDefault();
+				clearTimeout(longPressTimer);
+				if (isLongPressing) {
+					this.stopRapidChange();
+					isLongPressing = false;
+				} else {
+					action();
+				}
+			});
+		}
+
+		private startRapidChange(action: () => void): void {
+			action();
+			this.rapidChangeTimer = setInterval(() => {
+				action();
+			}, 100);
+		}
+
+		private stopRapidChange(): void {
+			if (this.rapidChangeTimer) {
+				clearInterval(this.rapidChangeTimer);
+				this.rapidChangeTimer = null;
+			}
+		}
+
+		private getValue(): number {
+			return this.rangeInput ? parseFloat(this.rangeInput.value) : 0;
+		}
+
+		private setValue(value: number): void {
+			if (!this.rangeInput) return;
+
+			const clampedValue = this.clampValue(value);
+			this.rangeInput.value = clampedValue.toString();
+			if (this.numberInput) {
+				// Format the number input to match the display format
+				if (this.step < 1) {
+					const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+					this.numberInput.value = clampedValue.toFixed(decimalPlaces);
+				} else {
+					this.numberInput.value = Math.round(clampedValue).toString();
+				}
+			}
+			this.updateDisplay(clampedValue);
+		}
+
+		private clampValue(value: number): number {
+			if (isNaN(value)) return this.getValue();
+			return Math.max(this.min, Math.min(this.max, value));
+		}
+
+		private decrement(): void {
+			const currentValue = this.getValue();
+			const newValue = currentValue - this.step;
+			this.setValue(newValue);
+			this.saveToSharedValues();
+			this.dispatchChangeEvent();
+		}
+
+		private increment(): void {
+			const currentValue = this.getValue();
+			const newValue = currentValue + this.step;
+			this.setValue(newValue);
+			this.saveToSharedValues();
+			this.dispatchChangeEvent();
+		}
+
+		private syncValues(): void {
+			const value = this.getValue();
+			if (this.numberInput) {
+				// Format the number input to match the display format
+				if (this.step < 1) {
+					const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+					this.numberInput.value = value.toFixed(decimalPlaces);
+				} else {
+					this.numberInput.value = Math.round(value).toString();
+				}
+			}
+			this.updateDisplay(value);
+		}
+
+		private updateDisplay(value: number): void {
+			if (this.display && this.rangeInput) {
+				const formatAsHeight = this.rangeInput.getAttribute("data-format-as-height") === "true";
+				const formatAsPace = this.rangeInput.getAttribute("data-format-as-pace") === "true";
+
+				if (formatAsHeight) {
+					// Format total inches as feet'inches"
+					const feet = Math.floor(value / 12);
+					const inches = Math.round((value % 12) * 2) / 2; // Round to nearest 0.5
+					this.display.textContent = `${feet}'${inches}"`;
+				} else if (formatAsPace) {
+					// Format seconds as mm:ss pace format
+					const minutes = Math.floor(value / 60);
+					const seconds = Math.round(value % 60);
+					this.display.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+				} else {
+					// Handle decimal precision for normal values
+					if (this.step < 1) {
+						// For decimal steps, show appropriate precision
+						const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+						this.display.textContent = value.toFixed(decimalPlaces);
+					} else {
+						this.display.textContent = Math.round(value).toString();
+					}
+				}
+			}
+		}
+
+		private saveToSharedValues(): void {
+			if (this.sharedValues && this.sharedKey) {
+				const value = this.getValue();
+				this.sharedValues.set(this.sharedKey, value);
+			}
+		}
+
+		private dispatchChangeEvent(): void {
+			if (this.rangeInput) {
+				this.container.dispatchEvent(
+					new CustomEvent("precision-range-change", {
+						detail: {
+							id: this.rangeInput.id,
+							value: this.getValue(),
+							sharedKey: this.sharedKey,
+						},
+						bubbles: true,
+					})
+				);
+			}
+		}
+
+		// Public method to update value programmatically
+		public setValueProgrammatically(newValue: string | number): void {
+			this.setValue(parseFloat(newValue.toString()));
+		}
+
+		// Public method to get current value
+		public getCurrentValue(): number {
+			return this.getValue();
+		}
+	}
+
+	// Initialize all precision range sliders on the page
+	function initializePrecisionRangeSliders() {
+		console.log("PrecisionRangeSlider: Starting initialization...");
+		const precisionSliders = document.querySelectorAll(".precision-range-wrapper");
+		console.log(`PrecisionRangeSlider: Found ${precisionSliders.length} components to initialize`);
+
+		precisionSliders.forEach((container, index) => {
+			console.log(
+				`PrecisionRangeSlider: Initializing component ${index + 1}/${precisionSliders.length}`,
+				container
+			);
+			new PrecisionRangeSliderComponent(container as HTMLElement);
+		});
+
+		console.log("PrecisionRangeSlider: Initialization complete");
+	}
+
+	// Wait for both DOM and SharedValues to be available
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initializeWhenReady);
+	} else {
+		// DOM already loaded
+		initializeWhenReady();
+	}
+
+	function initializeWhenReady() {
+		console.log("PrecisionRangeSlider: DOM ready, checking for SharedValues...");
+
+		// Check multiple times with increasing delays to ensure SharedValues loads
+		let attempts = 0;
+		const maxAttempts = 40; // 40 attempts over 4 seconds
+
+		function checkAndInitialize() {
+			attempts++;
+			console.log(
+				`PrecisionRangeSlider: Attempt ${attempts}/${maxAttempts} - checking SharedValues`
+			);
+
+			if (typeof (window as any).SharedValues !== "undefined") {
+				console.log("PrecisionRangeSlider: SharedValues found, initializing now");
+				initializePrecisionRangeSliders();
+				return;
+			}
+
+			if (attempts < maxAttempts) {
+				// Exponential backoff: first 10 attempts every 50ms, then every 100ms
+				const delay = attempts <= 10 ? 50 : 100;
+				setTimeout(checkAndInitialize, delay);
+			} else {
+				console.log(
+					"PrecisionRangeSlider: SharedValues not found after all attempts, initializing anyway"
+				);
+				initializePrecisionRangeSliders();
+			}
+		}
+
+		checkAndInitialize();
+	}
+</script>

@@ -125,17 +125,29 @@ class SharedValues {
 	// Sync height units - when height unit changes, convert and update values
 	syncHeightUnits(newUnit) {
 		const values = this.load();
+		console.log("syncHeightUnits called with newUnit:", newUnit);
+		console.log("Current values.heightUnit:", values.heightUnit);
+
 		if (values.heightUnit !== newUnit) {
 			if (newUnit === "metric") {
 				// Convert imperial to metric
 				const totalInches =
 					values.heightTotalInches || values.heightFeet * 12 + values.heightInches;
+				console.log("Converting to metric. totalInches:", totalInches);
 				const cm = this.totalInchesToCm(totalInches);
+				console.log("Converted to cm:", cm);
 				this.update({ heightUnit: newUnit, heightCm: cm, heightTotalInches: totalInches });
 			} else {
 				// Convert metric to imperial
 				const totalInches = this.cmToTotalInches(values.heightCm);
+				console.log(
+					"Converting to imperial. heightCm:",
+					values.heightCm,
+					"totalInches:",
+					totalInches
+				);
 				const { feet, inches } = this.totalInchesToFeetInches(totalInches);
+				console.log("Converted to feet/inches:", feet, "feet", inches, "inches");
 				this.update({
 					heightUnit: newUnit,
 					heightFeet: feet,
@@ -143,6 +155,8 @@ class SharedValues {
 					heightTotalInches: totalInches,
 				});
 			}
+		} else {
+			console.log("No conversion needed, units already match");
 		}
 	}
 

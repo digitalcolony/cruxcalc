@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import InputGroup from "../components/InputGroup.astro";
 import ResultCard from "../components/ResultCard.astro";
@@ -37,7 +37,7 @@ const sharedValues = {
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-total-inches"
 						label=""
 						min={48}
@@ -53,11 +53,12 @@ const sharedValues = {
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-cm"
 						label=""
 						min={120}
 						max={220}
+						step={1}
 						value={173}
 						unit="cm"
 						sharedKey="heightCm"
@@ -78,7 +79,7 @@ const sharedValues = {
 
 			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight-lbs"
 						label=""
 						min={80}
@@ -92,7 +93,7 @@ const sharedValues = {
 
 			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight-kg"
 						label=""
 						min={35}
@@ -363,7 +364,7 @@ const sharedValues = {
 	}
 </style>
 
-<script src="/sharedValues.js" is:inline></script>
+<script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// Extend Window interface for SharedValues
 	declare global {
@@ -384,7 +385,8 @@ const sharedValues = {
 		private asianScale: HTMLInputElement | null = null;
 
 		constructor() {
-			this.sharedValues = new (window as any).SharedValues();
+			// Use ReactiveSharedValues
+			this.sharedValues = new (window as any).ReactiveSharedValues();
 			this.initializeElements();
 			this.loadSharedValues();
 			this.attachEventListeners();
@@ -401,8 +403,8 @@ const sharedValues = {
 		}
 
 		private loadSharedValues(): void {
-			const values = this.sharedValues.load();
-			console.log("BMI Calculator - Loaded SharedValues:", values);
+			const values = this.sharedValues.getAll();
+			console.log("BMI Calculator - Loaded SharedValues (updated):", values);
 
 			// Load Asian scale preference
 			if (this.asianScale) {
@@ -459,13 +461,13 @@ const sharedValues = {
 		}
 
 		private updateRangeSliders(values: any): void {
-			console.log("Updating range sliders with values:", values);
+			console.log("Updating precision range sliders with values:", values);
 
-			// Find all range sliders and trigger their update
-			const rangeSliders = document.querySelectorAll(".range-slider");
-			rangeSliders.forEach((slider) => {
+			// Find all precision range sliders and trigger their update
+			const precisionSliders = document.querySelectorAll(".precision-range-wrapper");
+			precisionSliders.forEach((wrapper) => {
 				// Dispatch a custom event to tell the slider to refresh from SharedValues
-				slider.dispatchEvent(
+				wrapper.dispatchEvent(
 					new CustomEvent("refresh-from-shared-values", {
 						bubbles: true,
 					})
@@ -505,8 +507,8 @@ const sharedValues = {
 				this.handleUnitChange(event as CustomEvent);
 			});
 
-			// Listen for range slider changes (from our components)
-			document.addEventListener("range-slider-change", () => {
+			// Listen for precision range slider changes (from our PrecisionRangeSlider components)
+			document.addEventListener("precision-range-change", () => {
 				this.calculate();
 			});
 
@@ -560,14 +562,14 @@ const sharedValues = {
 				}
 
 				// Refresh range sliders to show converted values
-				this.updateRangeSliders(this.sharedValues.load());
+				this.updateRangeSliders(this.sharedValues.getAll());
 				this.showCurrentUnitInputs();
 				this.calculate();
 			}
 		}
 
 		public calculate(): void {
-			const values = this.sharedValues.load();
+			const values = this.sharedValues.getAll();
 			let heightInMeters, weightInKg;
 
 			// Convert height to meters
@@ -672,14 +674,45 @@ const sharedValues = {
 
 	// Initialize BMI calculator when DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
-		// Ensure SharedValues is available
-		if (typeof (window as any).SharedValues === "undefined") {
-			console.error("SharedValues not loaded");
+		// Ensure ReactiveSharedValues is available
+		if (typeof (window as any).ReactiveSharedValues === "undefined") {
+			console.error("ReactiveSharedValues not loaded");
 			return;
 		}
 
-		const sharedValues = new (window as any).SharedValues();
-		const values = sharedValues.load();
+		// Use the global ReactiveSharedValues instance
+		const sharedValues = new (window as any).ReactiveSharedValues();
+		const values = sharedValues.getAll();
+
+		console.log("Initializing BMI page with ReactiveSharedValues:", values);
+
+		// Add debug button to test values
+		const debugBtn = document.createElement("button");
+		debugBtn.textContent = "Debug & Test";
+		debugBtn.style.cssText =
+			"position: fixed; top: 10px; right: 10px; z-index: 1000; background: red; color: white; padding: 5px; border: none; border-radius: 3px; cursor: pointer;";
+		debugBtn.onclick = () => {
+			console.log("=== DEBUG VALUES ===");
+			const currentValues = sharedValues.getAll();
+			console.log("Current values:", currentValues);
+
+			// Test setting height to 74 inches manually
+			console.log("Setting heightTotalInches to 74...");
+			sharedValues.set("heightTotalInches", 74);
+
+			const updatedValues = sharedValues.getAll();
+			console.log("After setting to 74:", updatedValues);
+
+			// Test conversion
+			console.log("Testing conversion to metric...");
+			sharedValues.set("heightUnit", "metric");
+			sharedValues.syncHeightUnits("metric");
+
+			const finalValues = sharedValues.getAll();
+			console.log("After conversion:", finalValues);
+			console.log("Expected: 188 cm, Got:", finalValues.heightCm);
+		};
+		document.body.appendChild(debugBtn);
 
 		console.log("Initializing BMI page with values:", values);
 
@@ -722,7 +755,7 @@ const sharedValues = {
 
 		// Show/hide appropriate input containers based on units
 		function showCurrentUnitInputs() {
-			const currentValues = sharedValues.load();
+			const currentValues = sharedValues.getAll();
 
 			// Height inputs
 			document.querySelectorAll(".height-inputs").forEach((input) => {
@@ -747,7 +780,7 @@ const sharedValues = {
 
 		// Update range sliders with current values
 		function updateRangeSliders() {
-			const currentValues = sharedValues.load();
+			const currentValues = sharedValues.getAll();
 			const sliderUpdates = [
 				{ id: "height-total-inches", key: "heightTotalInches" },
 				{ id: "height-cm", key: "heightCm" },
@@ -756,10 +789,29 @@ const sharedValues = {
 			];
 
 			sliderUpdates.forEach(({ id, key }) => {
-				const slider = document.getElementById(id) as HTMLInputElement;
-				const display = document.getElementById(id + "-display");
-				if (slider && currentValues[key] !== undefined) {
-					slider.value = currentValues[key];
+				// Find the precision range slider wrapper
+				const wrapper = document.querySelector(`.precision-range-wrapper:has(#${id})`);
+				if (wrapper && currentValues[key] !== undefined) {
+					const slider = document.getElementById(id) as HTMLInputElement;
+					const display = document.getElementById(id + "-display");
+					const numberInput = document.getElementById(`${id}-number`) as HTMLInputElement;
+
+					if (slider) {
+						slider.value = currentValues[key];
+					}
+
+					if (numberInput) {
+						const value = parseFloat(currentValues[key]);
+						// Format the number input according to step precision
+						const step = parseFloat(slider?.step || "1");
+						if (step < 1) {
+							const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+							numberInput.value = value.toFixed(decimalPlaces);
+						} else {
+							numberInput.value = Math.round(value).toString();
+						}
+					}
+
 					if (display) {
 						const value = parseFloat(currentValues[key]);
 
@@ -770,7 +822,7 @@ const sharedValues = {
 							display.textContent = `${feet}'${inches}"`;
 						} else {
 							// Standard formatting
-							const step = parseFloat(slider.step || "1");
+							const step = parseFloat(slider?.step || "1");
 							if (step < 1) {
 								const decimalPlaces = step.toString().split(".")[1]?.length || 1;
 								display.textContent = value.toFixed(decimalPlaces);
@@ -783,11 +835,251 @@ const sharedValues = {
 			});
 		}
 
-		// Initialize everything
+		// Initialize precision range sliders
+		function initializePrecisionRangeSliders() {
+			console.log("BMI Page: Initializing precision range sliders");
+			const precisionWrappers = document.querySelectorAll(".precision-range-wrapper");
+			console.log(`BMI Page: Found ${precisionWrappers.length} precision range slider components`);
+
+			precisionWrappers.forEach((wrapper, index) => {
+				const rangeInput = wrapper.querySelector(".precision-range-input") as HTMLInputElement;
+				if (!rangeInput) {
+					console.error(`BMI Page: No range input found in wrapper ${index}`);
+					return;
+				}
+
+				console.log(`BMI Page: Initializing precision slider ${index + 1}: ${rangeInput.id}`);
+				initializeSinglePrecisionSlider(wrapper as HTMLElement, rangeInput);
+			});
+		}
+
+		function initializeSinglePrecisionSlider(wrapper: HTMLElement, rangeInput: HTMLInputElement) {
+			const sliderId = rangeInput.id;
+			const numberInput = document.getElementById(`${sliderId}-number`) as HTMLInputElement;
+			const display = document.getElementById(`${sliderId}-display`) as HTMLElement;
+			const decrementBtn = wrapper.querySelector(".precision-decrement") as HTMLElement;
+			const incrementBtn = wrapper.querySelector(".precision-increment") as HTMLElement;
+			const sharedKey = rangeInput.dataset.sharedKey;
+
+			console.log(`BMI Page: Slider ${sliderId} - Elements found:`, {
+				numberInput: !!numberInput,
+				display: !!display,
+				decrementBtn: !!decrementBtn,
+				incrementBtn: !!incrementBtn,
+				sharedKey,
+			});
+
+			// Load initial value from SharedValues
+			if (sharedKey) {
+				const savedValue = sharedValues.get(sharedKey);
+				if (savedValue !== undefined && savedValue !== null) {
+					rangeInput.value = savedValue.toString();
+					if (numberInput) numberInput.value = savedValue.toString();
+					updateDisplay(rangeInput, display);
+				}
+			}
+
+			// Range slider events
+			rangeInput.addEventListener("input", () => {
+				console.log(
+					`BMI Page: Range input changed for ${sliderId}, new value: ${rangeInput.value}`
+				);
+				if (sharedKey) {
+					sharedValues.set(sharedKey, parseFloat(rangeInput.value));
+
+					// IMPORTANT: If height total inches changes, also update the cm equivalent
+					if (sharedKey === "heightTotalInches") {
+						const totalInches = parseFloat(rangeInput.value);
+						const cm = Math.round(totalInches * 2.54);
+						console.log(`Syncing height: ${totalInches} inches = ${cm} cm`);
+						sharedValues.set("heightCm", cm);
+					}
+					// Similarly for height cm to inches
+					else if (sharedKey === "heightCm") {
+						const cm = parseFloat(rangeInput.value);
+						const totalInches = Math.round((cm / 2.54) * 2) / 2; // Round to nearest 0.5
+						console.log(`Syncing height: ${cm} cm = ${totalInches} inches`);
+						sharedValues.set("heightTotalInches", totalInches);
+					}
+					// IMPORTANT: If weight lbs changes, also update the kg equivalent
+					else if (sharedKey === "weightLbs") {
+						const lbs = parseFloat(rangeInput.value);
+						const kg = Math.round(lbs * 0.453592 * 10) / 10; // Round to 1 decimal
+						console.log(`Syncing weight: ${lbs} lbs = ${kg} kg`);
+						sharedValues.set("weightKg", kg);
+					}
+					// Similarly for weight kg to lbs
+					else if (sharedKey === "weightKg") {
+						const kg = parseFloat(rangeInput.value);
+						const lbs = Math.round(kg / 0.453592);
+						console.log(`Syncing weight: ${kg} kg = ${lbs} lbs`);
+						sharedValues.set("weightLbs", lbs);
+					}
+				}
+				syncSliderValues(rangeInput, numberInput, display);
+				if ((window as any).bmiCalculator) (window as any).bmiCalculator.calculate();
+			});
+
+			// Number input events
+			if (numberInput) {
+				numberInput.addEventListener("input", () => {
+					console.log(`BMI Page: Number input changed for ${sliderId}`);
+					const value = clampValue(parseFloat(numberInput.value), rangeInput);
+					rangeInput.value = value.toString();
+					numberInput.value = value.toString();
+					updateDisplay(rangeInput, display);
+					if (sharedKey) {
+						sharedValues.set(sharedKey, value);
+
+						// IMPORTANT: Keep height values in sync
+						if (sharedKey === "heightTotalInches") {
+							const cm = Math.round(value * 2.54);
+							sharedValues.set("heightCm", cm);
+						} else if (sharedKey === "heightCm") {
+							const totalInches = Math.round((value / 2.54) * 2) / 2;
+							sharedValues.set("heightTotalInches", totalInches);
+						}
+						// IMPORTANT: Keep weight values in sync
+						else if (sharedKey === "weightLbs") {
+							const kg = Math.round(value * 0.453592 * 10) / 10;
+							sharedValues.set("weightKg", kg);
+						} else if (sharedKey === "weightKg") {
+							const lbs = Math.round(value / 0.453592);
+							sharedValues.set("weightLbs", lbs);
+						}
+					}
+					if ((window as any).bmiCalculator) (window as any).bmiCalculator.calculate();
+				});
+			}
+
+			// Button events
+			if (decrementBtn) {
+				decrementBtn.addEventListener("click", () => {
+					console.log(`BMI Page: Decrement clicked for ${sliderId}`);
+					const currentValue = parseFloat(rangeInput.value);
+					const step = parseFloat(rangeInput.step) || 1;
+					const newValue = clampValue(currentValue - step, rangeInput);
+					rangeInput.value = newValue.toString();
+					syncSliderValues(rangeInput, numberInput, display);
+					if (sharedKey) {
+						sharedValues.set(sharedKey, newValue);
+
+						// Keep height values in sync
+						if (sharedKey === "heightTotalInches") {
+							const cm = Math.round(newValue * 2.54);
+							sharedValues.set("heightCm", cm);
+						} else if (sharedKey === "heightCm") {
+							const totalInches = Math.round((newValue / 2.54) * 2) / 2;
+							sharedValues.set("heightTotalInches", totalInches);
+						}
+						// Keep weight values in sync
+						else if (sharedKey === "weightLbs") {
+							const kg = Math.round(newValue * 0.453592 * 10) / 10;
+							sharedValues.set("weightKg", kg);
+						} else if (sharedKey === "weightKg") {
+							const lbs = Math.round(newValue / 0.453592);
+							sharedValues.set("weightLbs", lbs);
+						}
+					}
+					if ((window as any).bmiCalculator) (window as any).bmiCalculator.calculate();
+				});
+			}
+
+			if (incrementBtn) {
+				incrementBtn.addEventListener("click", () => {
+					console.log(`BMI Page: Increment clicked for ${sliderId}`);
+					const currentValue = parseFloat(rangeInput.value);
+					const step = parseFloat(rangeInput.step) || 1;
+					const newValue = clampValue(currentValue + step, rangeInput);
+					rangeInput.value = newValue.toString();
+					syncSliderValues(rangeInput, numberInput, display);
+					if (sharedKey) {
+						sharedValues.set(sharedKey, newValue);
+
+						// Keep height values in sync
+						if (sharedKey === "heightTotalInches") {
+							const cm = Math.round(newValue * 2.54);
+							sharedValues.set("heightCm", cm);
+						} else if (sharedKey === "heightCm") {
+							const totalInches = Math.round((newValue / 2.54) * 2) / 2;
+							sharedValues.set("heightTotalInches", totalInches);
+						}
+						// Keep weight values in sync
+						else if (sharedKey === "weightLbs") {
+							const kg = Math.round(newValue * 0.453592 * 10) / 10;
+							sharedValues.set("weightKg", kg);
+						} else if (sharedKey === "weightKg") {
+							const lbs = Math.round(newValue / 0.453592);
+							sharedValues.set("weightLbs", lbs);
+						}
+					}
+					if ((window as any).bmiCalculator) (window as any).bmiCalculator.calculate();
+				});
+			}
+		}
+
+		function clampValue(value: number, rangeInput: HTMLInputElement): number {
+			const min = parseFloat(rangeInput.min) || 0;
+			const max = parseFloat(rangeInput.max) || 100;
+			if (isNaN(value)) value = min;
+			return Math.max(min, Math.min(max, value));
+		}
+
+		function syncSliderValues(
+			rangeInput: HTMLInputElement,
+			numberInput: HTMLInputElement | null,
+			display: HTMLElement | null
+		) {
+			const value = parseFloat(rangeInput.value);
+			if (numberInput) {
+				const step = parseFloat(rangeInput.step) || 1;
+				if (step < 1) {
+					const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+					numberInput.value = value.toFixed(decimalPlaces);
+				} else {
+					numberInput.value = Math.round(value).toString();
+				}
+			}
+			updateDisplay(rangeInput, display);
+		}
+
+		function updateDisplay(rangeInput: HTMLInputElement, display: HTMLElement | null) {
+			if (!display) return;
+
+			const value = parseFloat(rangeInput.value);
+			const formatAsHeight = rangeInput.getAttribute("data-format-as-height") === "true";
+			const formatAsPace = rangeInput.getAttribute("data-format-as-pace") === "true";
+
+			if (formatAsHeight) {
+				// Format total inches as feet'inches"
+				const feet = Math.floor(value / 12);
+				const inches = Math.round((value % 12) * 2) / 2; // Round to nearest 0.5
+				display.textContent = `${feet}'${inches}"`;
+			} else if (formatAsPace) {
+				// Format seconds as mm:ss pace format
+				const minutes = Math.floor(value / 60);
+				const seconds = Math.round(value % 60);
+				display.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+			} else {
+				// Handle decimal precision for normal values
+				const step = parseFloat(rangeInput.step) || 1;
+				if (step < 1) {
+					const decimalPlaces = step.toString().split(".")[1]?.length || 1;
+					display.textContent = value.toFixed(decimalPlaces);
+				} else {
+					display.textContent = Math.round(value).toString();
+				}
+			}
+		}
+
+		// Initialize everything after DOM and SharedValues are available
 		setTimeout(() => {
 			initializeUnitToggles();
 			showCurrentUnitInputs();
 			updateRangeSliders();
+
+			// Initialize precision range sliders before BMI calculator
+			initializePrecisionRangeSliders();
 
 			// Initialize BMI calculator
 			(window as any).bmiCalculator = new BMICalculator();
@@ -805,7 +1097,15 @@ const sharedValues = {
 				const labelText = label?.textContent?.toLowerCase() || "";
 
 				if (labelText.includes("height")) {
-					console.log("Updating height unit to:", customEvent.detail.value);
+					console.log("Converting height units to:", customEvent.detail.value);
+
+					// IMPORTANT: Before conversion, ensure current slider value is saved
+					const heightSlider = document.getElementById("height-total-inches") as HTMLInputElement;
+					if (heightSlider && sharedValues.get("heightUnit") === "imperial") {
+						const currentSliderValue = parseFloat(heightSlider.value);
+						sharedValues.set("heightTotalInches", currentSliderValue);
+					}
+
 					sharedValues.set("heightUnit", customEvent.detail.value);
 					if (customEvent.detail.value === "metric") {
 						sharedValues.syncHeightUnits("metric");
@@ -813,7 +1113,24 @@ const sharedValues = {
 						sharedValues.syncHeightUnits("imperial");
 					}
 				} else if (labelText.includes("weight")) {
-					console.log("Updating weight unit to:", customEvent.detail.value);
+					console.log("Converting weight units to:", customEvent.detail.value);
+
+					// IMPORTANT: Before conversion, ensure current slider value is saved
+					const currentUnit = sharedValues.get("weightUnit");
+					if (currentUnit === "imperial") {
+						const weightSlider = document.getElementById("weight-lbs") as HTMLInputElement;
+						if (weightSlider) {
+							const currentSliderValue = parseFloat(weightSlider.value);
+							sharedValues.set("weightLbs", currentSliderValue);
+						}
+					} else if (currentUnit === "metric") {
+						const weightSlider = document.getElementById("weight-kg") as HTMLInputElement;
+						if (weightSlider) {
+							const currentSliderValue = parseFloat(weightSlider.value);
+							sharedValues.set("weightKg", currentSliderValue);
+						}
+					}
+
 					sharedValues.set("weightUnit", customEvent.detail.value);
 					if (customEvent.detail.value === "metric") {
 						sharedValues.syncWeightUnits("metric");

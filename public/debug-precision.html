@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Debug PrecisionRangeSlider</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 20px;
+			}
+			#console {
+				background: #f0f0f0;
+				padding: 10px;
+				margin-top: 20px;
+				border: 1px solid #ccc;
+			}
+			.log {
+				margin: 5px 0;
+			}
+			.error {
+				color: red;
+			}
+			.warn {
+				color: orange;
+			}
+			.info {
+				color: blue;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>PrecisionRangeSlider Debug</h1>
+		<p>Open browser developer tools (F12) and navigate to <a href="/bmi">BMI Calculator</a></p>
+		<p>Check the Console tab for PrecisionRangeSlider debug messages.</p>
+
+		<div id="console">
+			<h3>Expected Console Messages:</h3>
+			<div class="log info">PrecisionRangeSlider: DOM loaded, checking for SharedValues...</div>
+			<div class="log info">PrecisionRangeSlider: SharedValues found, initializing immediately</div>
+			<div class="log info">PrecisionRangeSlider: Starting initialization...</div>
+			<div class="log info">PrecisionRangeSlider: Found 4 components to initialize</div>
+			<div class="log info">PrecisionRangeSlider: Initializing component 1/4</div>
+			<div class="log info">PrecisionRangeSlider: Found range input</div>
+			<div class="log info">
+				PrecisionRangeSlider: Config - min: X, max: X, step: X, sharedKey: X
+			</div>
+			<div class="log info">
+				PrecisionRangeSlider: Found elements: {numberInput: true, display: true, decrementBtn: true,
+				incrementBtn: true}
+			</div>
+			<div class="log info">PrecisionRangeSlider: Initializing SharedValues</div>
+			<div class="log info">PrecisionRangeSlider: Initializing event listeners</div>
+			<div class="log info">PrecisionRangeSlider: Setting up decrement button</div>
+			<div class="log info">PrecisionRangeSlider: Setting up increment button</div>
+			<div class="log info">PrecisionRangeSlider: Initialization complete</div>
+		</div>
+
+		<div style="margin-top: 20px">
+			<h3>Quick Navigation:</h3>
+			<ul>
+				<li><a href="/bmi">BMI Calculator (test page)</a></li>
+				<li><a href="/components">Components Showcase (working example)</a></li>
+			</ul>
+		</div>
+
+		<script>
+			console.log("Debug page loaded - navigate to /bmi and check console");
+		</script>
+	</body>
+</html>

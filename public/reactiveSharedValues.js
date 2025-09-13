@@ -10,6 +10,7 @@ class ReactiveSharedValues extends EventTarget {
 			age: 30,
 			heightFeet: 5,
 			heightInches: 8,
+			heightTotalInches: 68, // 5'8" = 68 inches
 			heightCm: 173,
 			weightLbs: 160,
 			weightKg: 73,
@@ -274,18 +275,44 @@ class ReactiveSharedValues extends EventTarget {
 
 	// Enhanced unit synchronization with events
 	syncHeightUnits(newUnit) {
+		console.log("syncHeightUnits called with newUnit:", newUnit);
+		console.log("Current values before sync:", this.values);
+
 		if (this.values.heightUnit !== newUnit) {
 			if (newUnit === "metric") {
-				const cm = this.heightToCm(this.values.heightFeet, this.values.heightInches);
-				this.update({ heightUnit: newUnit, heightCm: cm });
+				// Convert imperial to metric
+				const totalInches =
+					this.values.heightTotalInches || this.values.heightFeet * 12 + this.values.heightInches;
+				console.log("Converting to metric - totalInches:", totalInches);
+				console.log("heightTotalInches:", this.values.heightTotalInches);
+				console.log(
+					"heightFeet * 12 + heightInches:",
+					this.values.heightFeet * 12 + this.values.heightInches
+				);
+				const cm = Math.round(totalInches * 2.54);
+				console.log("Calculated cm:", cm);
+				this.update({ heightUnit: newUnit, heightCm: cm, heightTotalInches: totalInches });
 			} else {
-				const { feet, inches } = this.heightToImperial(this.values.heightCm);
+				// Convert metric to imperial
+				const totalInches = Math.round((this.values.heightCm / 2.54) * 2) / 2; // Round to nearest 0.5 inch
+				console.log(
+					"Converting to imperial - heightCm:",
+					this.values.heightCm,
+					"totalInches:",
+					totalInches
+				);
+				const feet = Math.floor(totalInches / 12);
+				const inches = Math.round((totalInches % 12) * 2) / 2; // Round to nearest 0.5
+				console.log("Calculated feet/inches:", feet, "feet", inches, "inches");
 				this.update({
 					heightUnit: newUnit,
 					heightFeet: feet,
 					heightInches: inches,
+					heightTotalInches: totalInches,
 				});
 			}
+		} else {
+			console.log("No conversion needed - units already match");
 		}
 	}
 

@@ -146,6 +146,151 @@ import GenderToggle from "../components/GenderToggle.astro";
 			</div>
 
 			<div class="component-section">
+				<h2>PrecisionRangeSlider Component</h2>
+				<p>
+					Enhanced range slider for mobile devices with touch-friendly precision controls. Combines
+					a visual slider for coarse adjustment with increment/decrement buttons and direct number
+					input for precise values.
+				</p>
+
+				<div class="component-examples">
+					<div class="example">
+						<h3>Body Fat Percentage - High Precision</h3>
+						<div class="precision-range-wrapper">
+							<label for="bodyfat-precision" class="precision-label">Body Fat Percentage</label>
+							<div class="precision-range-slider">
+								<input
+									type="range"
+									id="bodyfat-precision"
+									min="3"
+									max="50"
+									step="0.1"
+									value="15.5"
+									class="precision-range-input"
+								/>
+								<div class="precision-controls">
+									<button
+										type="button"
+										class="precision-btn precision-decrement"
+										data-target="bodyfat-precision">−</button
+									>
+									<input
+										type="number"
+										id="bodyfat-precision-number"
+										min="3"
+										max="50"
+										step="0.1"
+										value="15.5"
+										class="precision-number-input"
+									/>
+									<button
+										type="button"
+										class="precision-btn precision-increment"
+										data-target="bodyfat-precision">+</button
+									>
+								</div>
+								<div class="precision-display">
+									<span id="bodyfat-precision-display">15.5</span>
+									<span class="precision-unit">%</span>
+								</div>
+							</div>
+							<p class="input-help">
+								Use slider for quick adjustment, +/- buttons or direct input for precision
+							</p>
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Weight - Medium Precision</h3>
+						<div class="precision-range-wrapper">
+							<label for="weight-precision" class="precision-label">Weight</label>
+							<div class="precision-range-slider">
+								<input
+									type="range"
+									id="weight-precision"
+									min="80"
+									max="400"
+									step="0.5"
+									value="160"
+									class="precision-range-input"
+								/>
+								<div class="precision-controls">
+									<button
+										type="button"
+										class="precision-btn precision-decrement"
+										data-target="weight-precision">−</button
+									>
+									<input
+										type="number"
+										id="weight-precision-number"
+										min="80"
+										max="400"
+										step="0.5"
+										value="160"
+										class="precision-number-input"
+									/>
+									<button
+										type="button"
+										class="precision-btn precision-increment"
+										data-target="weight-precision">+</button
+									>
+								</div>
+								<div class="precision-display">
+									<span id="weight-precision-display">160</span>
+									<span class="precision-unit">lbs</span>
+								</div>
+							</div>
+							<p class="input-help">Optimized for mobile touch with 44px minimum touch targets</p>
+						</div>
+					</div>
+
+					<div class="example">
+						<h3>Age - Coarse Values</h3>
+						<div class="precision-range-wrapper">
+							<label for="age-precision" class="precision-label">Age</label>
+							<div class="precision-range-slider">
+								<input
+									type="range"
+									id="age-precision"
+									min="15"
+									max="80"
+									step="1"
+									value="30"
+									class="precision-range-input"
+								/>
+								<div class="precision-controls">
+									<button
+										type="button"
+										class="precision-btn precision-decrement"
+										data-target="age-precision">−</button
+									>
+									<input
+										type="number"
+										id="age-precision-number"
+										min="15"
+										max="80"
+										step="1"
+										value="30"
+										class="precision-number-input"
+									/>
+									<button
+										type="button"
+										class="precision-btn precision-increment"
+										data-target="age-precision">+</button
+									>
+								</div>
+								<div class="precision-display">
+									<span id="age-precision-display">30</span>
+									<span class="precision-unit">years</span>
+								</div>
+							</div>
+							<p class="input-help">Integer values with single unit increments</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="component-section">
 				<h2>UnitToggle Component</h2>
 				<div class="component-examples">
 					<div class="example">
@@ -695,9 +840,266 @@ import GenderToggle from "../components/GenderToggle.astro";
 		}
 	}
 
+	// PrecisionRangeSlider functionality
+	class PrecisionRangeSlider {
+		private rangeInput: HTMLInputElement;
+		private numberInput: HTMLInputElement;
+		private display: HTMLElement;
+		private decrementBtn: HTMLElement;
+		private incrementBtn: HTMLElement;
+		private step: number;
+		private min: number;
+		private max: number;
+
+		constructor(rangeInput: HTMLInputElement) {
+			this.rangeInput = rangeInput;
+			this.step = parseFloat(rangeInput.step) || 1;
+			this.min = parseFloat(rangeInput.min) || 0;
+			this.max = parseFloat(rangeInput.max) || 100;
+
+			// Find related elements
+			const targetId = rangeInput.id;
+			this.numberInput = document.getElementById(`${targetId}-number`) as HTMLInputElement;
+			this.display = document.getElementById(`${targetId}-display`) as HTMLElement;
+			this.decrementBtn = document.querySelector(
+				`[data-target="${targetId}"].precision-decrement`
+			) as HTMLElement;
+			this.incrementBtn = document.querySelector(
+				`[data-target="${targetId}"].precision-increment`
+			) as HTMLElement;
+
+			this.init();
+		}
+
+		private init(): void {
+			// Sync all inputs
+			this.syncValues();
+
+			// Range input events
+			this.rangeInput.addEventListener("input", () => {
+				this.syncValues();
+			});
+
+			// Number input events
+			if (this.numberInput) {
+				this.numberInput.addEventListener("input", () => {
+					const value = this.clampValue(parseFloat(this.numberInput.value));
+					this.setValue(value);
+				});
+
+				this.numberInput.addEventListener("blur", () => {
+					// Ensure valid value on blur
+					const value = this.clampValue(parseFloat(this.numberInput.value) || this.getValue());
+					this.setValue(value);
+				});
+			}
+
+			// Button events
+			if (this.decrementBtn) {
+				this.decrementBtn.addEventListener("click", () => {
+					this.decrement();
+				});
+
+				// Long press for rapid decrement
+				let longPressTimer: NodeJS.Timeout;
+				let isLongPressing = false;
+
+				this.decrementBtn.addEventListener("mousedown", () => {
+					longPressTimer = setTimeout(() => {
+						isLongPressing = true;
+						this.startRapidDecrement();
+					}, 500);
+				});
+
+				this.decrementBtn.addEventListener("mouseup", () => {
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					}
+				});
+
+				this.decrementBtn.addEventListener("mouseleave", () => {
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					}
+				});
+
+				// Touch events for mobile
+				this.decrementBtn.addEventListener("touchstart", (e) => {
+					e.preventDefault();
+					longPressTimer = setTimeout(() => {
+						isLongPressing = true;
+						this.startRapidDecrement();
+					}, 500);
+				});
+
+				this.decrementBtn.addEventListener("touchend", (e) => {
+					e.preventDefault();
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					} else {
+						this.decrement();
+					}
+				});
+			}
+
+			if (this.incrementBtn) {
+				this.incrementBtn.addEventListener("click", () => {
+					this.increment();
+				});
+
+				// Long press for rapid increment
+				let longPressTimer: NodeJS.Timeout;
+				let isLongPressing = false;
+
+				this.incrementBtn.addEventListener("mousedown", () => {
+					longPressTimer = setTimeout(() => {
+						isLongPressing = true;
+						this.startRapidIncrement();
+					}, 500);
+				});
+
+				this.incrementBtn.addEventListener("mouseup", () => {
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					}
+				});
+
+				this.incrementBtn.addEventListener("mouseleave", () => {
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					}
+				});
+
+				// Touch events for mobile
+				this.incrementBtn.addEventListener("touchstart", (e) => {
+					e.preventDefault();
+					longPressTimer = setTimeout(() => {
+						isLongPressing = true;
+						this.startRapidIncrement();
+					}, 500);
+				});
+
+				this.incrementBtn.addEventListener("touchend", (e) => {
+					e.preventDefault();
+					clearTimeout(longPressTimer);
+					if (isLongPressing) {
+						this.stopRapidChange();
+						isLongPressing = false;
+					} else {
+						this.increment();
+					}
+				});
+			}
+		}
+
+		private rapidChangeTimer: NodeJS.Timeout | null = null;
+
+		private startRapidDecrement(): void {
+			this.decrement();
+			this.rapidChangeTimer = setInterval(() => {
+				this.decrement();
+			}, 100);
+		}
+
+		private startRapidIncrement(): void {
+			this.increment();
+			this.rapidChangeTimer = setInterval(() => {
+				this.increment();
+			}, 100);
+		}
+
+		private stopRapidChange(): void {
+			if (this.rapidChangeTimer) {
+				clearInterval(this.rapidChangeTimer);
+				this.rapidChangeTimer = null;
+			}
+		}
+
+		private getValue(): number {
+			return parseFloat(this.rangeInput.value);
+		}
+
+		private setValue(value: number): void {
+			const clampedValue = this.clampValue(value);
+			this.rangeInput.value = clampedValue.toString();
+			if (this.numberInput) {
+				// Format the number input to match the display format
+				if (this.step < 1) {
+					const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+					this.numberInput.value = clampedValue.toFixed(decimalPlaces);
+				} else {
+					this.numberInput.value = Math.round(clampedValue).toString();
+				}
+			}
+			this.updateDisplay(clampedValue);
+		}
+
+		private clampValue(value: number): number {
+			if (isNaN(value)) return this.getValue();
+			return Math.max(this.min, Math.min(this.max, value));
+		}
+
+		private decrement(): void {
+			const currentValue = this.getValue();
+			const newValue = currentValue - this.step;
+			this.setValue(newValue);
+		}
+
+		private increment(): void {
+			const currentValue = this.getValue();
+			const newValue = currentValue + this.step;
+			this.setValue(newValue);
+		}
+
+		private syncValues(): void {
+			const value = this.getValue();
+			if (this.numberInput) {
+				// Format the number input to match the display format
+				if (this.step < 1) {
+					const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+					this.numberInput.value = value.toFixed(decimalPlaces);
+				} else {
+					this.numberInput.value = Math.round(value).toString();
+				}
+			}
+			this.updateDisplay(value);
+		}
+
+		private updateDisplay(value: number): void {
+			if (this.display) {
+				// Format based on step precision
+				if (this.step < 1) {
+					const decimalPlaces = this.step.toString().split(".")[1]?.length || 1;
+					this.display.textContent = value.toFixed(decimalPlaces);
+				} else {
+					this.display.textContent = Math.round(value).toString();
+				}
+			}
+		}
+	}
+
+	// Initialize PrecisionRangeSliders
+	function initializePrecisionRangeSliders() {
+		const precisionSliders = document.querySelectorAll(".precision-range-input");
+		precisionSliders.forEach((slider) => {
+			new PrecisionRangeSlider(slider as HTMLInputElement);
+		});
+	}
+
 	// Initialize showcase manager
 	document.addEventListener("DOMContentLoaded", () => {
 		new ShowcaseManager();
+		initializePrecisionRangeSliders();
 	});
 </script>
 
@@ -874,6 +1276,201 @@ import GenderToggle from "../components/GenderToggle.astro";
 		border-radius: var(--border-radius);
 		font-size: 0.875rem;
 		white-space: pre-wrap;
+	}
+
+	/* PrecisionRangeSlider Styles */
+	.precision-range-wrapper {
+		margin-bottom: 2rem;
+	}
+
+	.precision-label {
+		display: block;
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--color-text);
+		margin-bottom: 0.75rem;
+	}
+
+	.precision-range-slider {
+		position: relative;
+	}
+
+	.precision-range-input {
+		width: 100%;
+		height: 20px; /* Larger than standard 8px for better touch */
+		border-radius: 4px;
+		background: var(--color-bg);
+		outline: none;
+		border: var(--border-width) solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+		appearance: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin-bottom: 1rem;
+	}
+
+	.precision-range-input:hover {
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-range-input:focus {
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+	}
+
+	/* Enhanced thumb for better touch targets */
+	.precision-range-input::-webkit-slider-thumb {
+		appearance: none;
+		height: 44px; /* Touch-friendly 44px minimum */
+		width: 44px;
+		border-radius: 50%;
+		background: radial-gradient(
+			circle at center,
+			var(--color-primary) 0%,
+			var(--color-primary) 45%,
+			var(--color-primary) 50%,
+			transparent 50%
+		);
+		border: 2px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.precision-range-input::-webkit-slider-thumb:hover {
+		background: radial-gradient(
+			circle at center,
+			var(--color-secondary) 0%,
+			var(--color-secondary) 45%,
+			var(--color-secondary) 50%,
+			transparent 50%
+		);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-range-input::-moz-range-thumb {
+		height: 40px; /* Slightly smaller for Firefox */
+		width: 40px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		border: 2px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.precision-range-input::-moz-range-thumb:hover {
+		background: var(--color-secondary);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.precision-btn {
+		width: 44px; /* Touch-friendly minimum */
+		height: 44px;
+		border: var(--border-width) solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-size: 1.5rem;
+		font-weight: 600;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: var(--shadow-sm);
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.precision-btn:hover {
+		background: var(--color-accent);
+		color: white;
+		box-shadow: var(--shadow-hover);
+	}
+
+	.precision-btn:active {
+		transform: scale(0.95);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.precision-number-input {
+		width: 80px;
+		height: 44px; /* Match button height */
+		border: var(--border-width) solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-size: 1rem;
+		font-weight: 600;
+		text-align: center;
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+		/* Ensure centering works across all browsers */
+		-webkit-text-align-last: center;
+		text-align-last: center;
+		padding: 0 8px;
+		box-sizing: border-box;
+	}
+
+	.precision-number-input:focus {
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+		outline: none;
+	}
+
+	.precision-display {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-primary);
+		font-size: 1.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.precision-unit {
+		margin-left: 0.5rem;
+		color: var(--color-text-muted);
+		font-size: 1.25rem;
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 768px) {
+		.precision-range-input::-webkit-slider-thumb {
+			height: 48px; /* Even larger on mobile */
+			width: 48px;
+		}
+
+		.precision-btn {
+			width: 48px;
+			height: 48px;
+			font-size: 1.75rem;
+		}
+
+		.precision-number-input {
+			height: 48px;
+			width: 90px;
+			font-size: 1.125rem;
+			text-align: center;
+			-webkit-text-align-last: center;
+			text-align-last: center;
+		}
+
+		.precision-display {
+			font-size: 1.75rem;
+		}
+
+		.precision-controls {
+			gap: 0.75rem;
+		}
 	}
 
 	@media (max-width: 768px) {
