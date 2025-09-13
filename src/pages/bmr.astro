@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
 import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import UnitToggle from "../components/UnitToggle.astro";
 import GenderToggle from "../components/GenderToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
@@ -24,7 +25,7 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			</InputGroup>
 
 			<InputGroup label="Age" helpText="Age impacts metabolic rate">
-				<RangeSlider id="age" label="" min={15} max={80} value={30} unit="years" sharedKey="age" />
+				<PrecisionRangeSlider id="age" min={15} max={80} value={30} unit="years" sharedKey="age" />
 			</InputGroup>
 
 			<InputGroup label="Height" helpText="Choose your preferred measurement system">
@@ -40,9 +41,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-total-inches"
-						label=""
 						min={48}
 						max={84}
 						step={0.5}
@@ -56,9 +56,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="" class="full-width">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="height-cm"
-						label=""
 						min={120}
 						max={220}
 						value={173}
@@ -81,9 +80,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
 				<InputGroup label="" helpText="">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight-lbs"
-						label=""
 						min={80}
 						max={400}
 						value={160}
@@ -95,9 +93,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
 				<InputGroup label="" helpText="">
-					<RangeSlider
+					<PrecisionRangeSlider
 						id="weight-kg"
-						label=""
 						min={35}
 						max={180}
 						value={73}
@@ -111,9 +108,8 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 				label="Body Fat Percentage"
 				helpText="Optional: Required only for Katch-McArdle formula"
 			>
-				<RangeSlider
+				<PrecisionRangeSlider
 					id="body-fat"
-					label=""
 					min={5}
 					max={50}
 					step={0.5}
@@ -250,22 +246,16 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 	</CalculatorLayout>
 </Layout>
 
-<script src="/sharedValues.js" is:inline></script>
 <script src="/reactiveSharedValues.js" is:inline></script>
 <script>
 	// BMR Calculator - Refactored with Components
 	class BMRCalculator {
 		private sharedValues: any;
-		private reactiveSharedValues: any;
 		private activityMultiplier: number = 1.2;
 
 		constructor() {
-			// Initialize SharedValues systems
-			this.sharedValues = new (window as any).SharedValues();
-
-			if ((window as any).ReactiveSharedValues) {
-				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
-			}
+			// Initialize ReactiveSharedValues system
+			this.sharedValues = new (window as any).ReactiveSharedValues();
 
 			console.log(
 				"[BMR Calculator] Initializing with existing SharedValues:",
@@ -278,24 +268,28 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			// Set up event listeners
 			this.setupEventListeners();
 
-			// Only set default values if they don't already exist
-			const existingGender = this.sharedValues.get("gender");
-			const existingHeightUnit = this.sharedValues.get("heightUnit");
-			const existingWeightUnit = this.sharedValues.get("weightUnit");
+			// Set default values if not already present - comprehensive approach
+			const defaults = {
+				gender: "male",
+				age: 30,
+				heightUnit: "imperial",
+				weightUnit: "imperial",
+				heightTotalInches: 68,
+				heightCm: 173,
+				weightLbs: 160,
+				weightKg: 73,
+				bodyFat: 15,
+			};
 
-			if (!existingGender) {
-				this.sharedValues.set("gender", "male");
-			}
-			if (!existingHeightUnit) {
-				this.sharedValues.set("heightUnit", "imperial");
-			}
-			if (!existingWeightUnit) {
-				this.sharedValues.set("weightUnit", "imperial");
-			}
+			Object.entries(defaults).forEach(([key, defaultValue]) => {
+				if (this.sharedValues.get(key) === null) {
+					this.sharedValues.set(key, defaultValue);
+				}
+			});
 
 			// Use existing values or defaults for UI initialization
-			const heightUnit = existingHeightUnit || "imperial";
-			const weightUnit = existingWeightUnit || "imperial";
+			const heightUnit = this.sharedValues.get("heightUnit") || "imperial";
+			const weightUnit = this.sharedValues.get("weightUnit") || "imperial";
 
 			// Initialize UI state with existing preferences
 			this.convertAndToggleHeightUnits(heightUnit);
@@ -306,8 +300,35 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 		}
 
 		private setupEventListeners(): void {
-			// Listen for input changes
-			document.addEventListener("range-slider-change", () => {
+			// Listen for precision range slider changes
+			document.addEventListener("precision-range-change", (event) => {
+				const customEvent = event as CustomEvent;
+				const sharedKey = customEvent.detail.sharedKey;
+				const value = customEvent.detail.value;
+
+				console.log(`BMR Calculator: Range change for ${sharedKey}, value: ${value}`);
+
+				// Bidirectional unit sync for height
+				if (sharedKey === "heightTotalInches") {
+					const cm = Math.round(value * 2.54);
+					console.log(`Syncing height: ${value} inches = ${cm} cm`);
+					this.sharedValues.set("heightCm", cm);
+				} else if (sharedKey === "heightCm") {
+					const totalInches = Math.round((value / 2.54) * 2) / 2;
+					console.log(`Syncing height: ${value} cm = ${totalInches} inches`);
+					this.sharedValues.set("heightTotalInches", totalInches);
+				}
+				// Bidirectional unit sync for weight
+				else if (sharedKey === "weightLbs") {
+					const kg = Math.round(value * 0.453592 * 10) / 10;
+					console.log(`Syncing weight: ${value} lbs = ${kg} kg`);
+					this.sharedValues.set("weightKg", kg);
+				} else if (sharedKey === "weightKg") {
+					const lbs = Math.round(value / 0.453592);
+					console.log(`Syncing weight: ${value} kg = ${lbs} lbs`);
+					this.sharedValues.set("weightLbs", lbs);
+				}
+
 				this.calculate();
 			});
 
@@ -317,12 +338,32 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 			document.addEventListener("unit-toggle-change", (event) => {
 				const customEvent = event as CustomEvent;
+				console.log("BMR Unit change event received:", customEvent.detail);
+
 				if (customEvent.detail.attribute === "height-unit") {
-					this.convertAndToggleHeightUnits(customEvent.detail.value);
+					console.log("Updating height unit to:", customEvent.detail.value);
 					this.sharedValues.set("heightUnit", customEvent.detail.value);
+
+					// Use ReactiveSharedValues sync method for proper conversion
+					if (customEvent.detail.value === "metric") {
+						this.sharedValues.syncHeightUnits("metric");
+					} else {
+						this.sharedValues.syncHeightUnits("imperial");
+					}
+
+					this.convertAndToggleHeightUnits(customEvent.detail.value);
 				} else if (customEvent.detail.attribute === "weight-unit") {
-					this.convertAndToggleWeightUnits(customEvent.detail.value);
+					console.log("Updating weight unit to:", customEvent.detail.value);
 					this.sharedValues.set("weightUnit", customEvent.detail.value);
+
+					// Use ReactiveSharedValues sync method for proper conversion
+					if (customEvent.detail.value === "metric") {
+						this.sharedValues.syncWeightUnits("metric");
+					} else {
+						this.sharedValues.syncWeightUnits("imperial");
+					}
+
+					this.convertAndToggleWeightUnits(customEvent.detail.value);
 				}
 				this.calculate();
 			});
@@ -345,33 +386,12 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
-
-					// Only convert if we're actually switching from metric to imperial
-					const currentUnit = this.sharedValues.get("heightUnit");
-					if (currentUnit === "metric") {
-						// Converting from metric to imperial
-						const currentCm = this.sharedValues.get("heightCm") || 173;
-						const totalInches = Math.round((currentCm / 2.54) * 2) / 2; // Round to nearest 0.5
-						this.sharedValues.set("heightTotalInches", totalInches);
-						this.updateSliderValue("height-total-inches", totalInches);
-					}
-					// If we're not converting, let the existing heightTotalInches value be used
 				} else {
 					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
-
-					// Only convert if we're actually switching from imperial to metric
-					const currentUnit = this.sharedValues.get("heightUnit");
-					if (currentUnit === "imperial") {
-						// Converting from imperial to metric
-						const totalInches = this.sharedValues.get("heightTotalInches") || 68;
-						const cm = Math.round(totalInches * 2.54);
-						this.sharedValues.set("heightCm", cm);
-						this.updateSliderValue("height-cm", cm);
-					}
-					// If we're not converting, let the existing heightCm value be used
 				}
+				// ReactiveSharedValues sync methods handle the actual conversion
 			}
 		}
 
@@ -384,44 +404,12 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
-
-					// Only convert if we're actually switching from metric to imperial
-					const currentUnit = this.sharedValues.get("weightUnit");
-					if (currentUnit === "metric") {
-						// Converting from metric to imperial
-						const currentKg = this.sharedValues.get("weightKg") || 73;
-						const lbs = Math.round(currentKg / 0.453592);
-						this.sharedValues.set("weightLbs", lbs);
-						this.updateSliderValue("weight-lbs", lbs);
-					}
-					// If we're not converting, let the existing weightLbs value be used
 				} else {
 					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
-
-					// Only convert if we're actually switching from imperial to metric
-					const currentUnit = this.sharedValues.get("weightUnit");
-					if (currentUnit === "imperial") {
-						// Converting from imperial to metric
-						const lbs = this.sharedValues.get("weightLbs") || 160;
-						const kg = Math.round(lbs * 0.453592);
-						this.sharedValues.set("weightKg", kg);
-						this.updateSliderValue("weight-kg", kg);
-					}
-					// If we're not converting, let the existing weightKg value be used
 				}
-			}
-		}
-
-		private updateSliderValue(sliderId: string, value: number): void {
-			const slider = document.getElementById(sliderId) as HTMLInputElement;
-			if (slider) {
-				slider.value = value.toString();
-
-				// Trigger the display update
-				const event = new Event("input", { bubbles: true });
-				slider.dispatchEvent(event);
+				// ReactiveSharedValues sync methods handle the actual conversion
 			}
 		}
 
