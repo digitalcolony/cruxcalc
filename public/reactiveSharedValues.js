@@ -317,14 +317,25 @@ class ReactiveSharedValues extends EventTarget {
 	}
 
 	syncWeightUnits(newUnit) {
+		console.log("syncWeightUnits called with newUnit:", newUnit);
+		console.log("Current weight values before sync:", {
+			weightUnit: this.values.weightUnit,
+			weightLbs: this.values.weightLbs,
+			weightKg: this.values.weightKg,
+		});
+
 		if (this.values.weightUnit !== newUnit) {
 			if (newUnit === "metric") {
 				const kg = this.weightToKg(this.values.weightLbs);
+				console.log(`Converting ${this.values.weightLbs} lbs to ${kg} kg`);
 				this.update({ weightUnit: newUnit, weightKg: kg });
 			} else {
 				const lbs = this.weightToLbs(this.values.weightKg);
+				console.log(`Converting ${this.values.weightKg} kg to ${lbs} lbs`);
 				this.update({ weightUnit: newUnit, weightLbs: lbs });
 			}
+		} else {
+			console.log("No weight conversion needed - units already match");
 		}
 	}
 

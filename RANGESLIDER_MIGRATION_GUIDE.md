@@ -336,7 +336,96 @@ document.addEventListener("precision-range-change", ...);
 
 **Root Cause:** Unit toggle handlers don't use ReactiveSharedValues sync methods
 
-**Solution:** Use `syncHeightUnits()` and `syncWeightUnits()` methods in unit toggle handlers (Step 5)
+### Problem 7: Unit Conversion Shows Wrong Values After User Input
+
+**Issue:** User sets weight to 172 lbs, switches to metric, but sees 73 kg instead of 78 kg
+
+**Root Cause:** Sliders initialize from hardcoded HTML template values (`value={160}`, `value={73}`) instead of loading current SharedValues when they become visible during unit toggle.
+
+**Debugging Steps:**
+
+1. **Add debug logging to unit toggle handlers:**
+
+```javascript
+console.log("Current weight values before unit change:", {
+	weightLbs: this.sharedValues.get("weightLbs"),
+	weightKg: this.sharedValues.get("weightKg"),
+	weightUnit: this.sharedValues.get("weightUnit"),
+});
+```
+
+2. **Add debug logging to ReactiveSharedValues sync methods:**
+
+```javascript
+syncWeightUnits(newUnit) {
+    console.log("syncWeightUnits called with newUnit:", newUnit);
+    console.log("Current weight values:", {
+        weightLbs: this.values.weightLbs,
+        weightKg: this.values.weightKg
+    });
+    // ... rest of method
+}
+```
+
+3. **Check if sliders reload values when becoming visible:**
+
+```javascript
+private convertAndToggleWeightUnits(unit: string): void {
+    // Add logging to see what values are being set
+    console.log(`Converting weight units to: ${unit}`);
+
+    if (unit === "metric") {
+        const weightKg = this.sharedValues.get("weightKg") || 73;
+        console.log(`Should show metric weight: ${weightKg} kg`);
+    }
+}
+```
+
+**Solution:** Force sliders to reload from SharedValues when they become visible:
+
+```javascript
+private convertAndToggleWeightUnits(unit: string): void {
+    const imperialGroup = document.querySelector(".imperial-weight") as HTMLElement;
+    const metricGroup = document.querySelector(".metric-weight") as HTMLElement;
+
+    console.log(`Converting weight units to: ${unit}`);
+
+    if (imperialGroup && metricGroup) {
+        if (unit === "imperial") {
+            imperialGroup.style.display = "block";
+            metricGroup.style.display = "none";
+
+            // Force reload the imperial weight slider from shared values
+            const imperialSlider = imperialGroup.querySelector('input[type="range"]') as HTMLInputElement;
+            if (imperialSlider) {
+                const weightLbs = this.sharedValues.get("weightLbs") || 160;
+                console.log(`Setting imperial weight slider to: ${weightLbs} lbs`);
+                imperialSlider.value = weightLbs.toString();
+                imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+
+        } else {
+            imperialGroup.style.display = "none";
+            metricGroup.style.display = "block";
+
+            // Force reload the metric weight slider from shared values
+            const metricSlider = metricGroup.querySelector('input[type="range"]') as HTMLInputElement;
+            if (metricSlider) {
+                const weightKg = this.sharedValues.get("weightKg") || 73;
+                console.log(`Setting metric weight slider to: ${weightKg} kg`);
+                metricSlider.value = weightKg.toString();
+                metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+        }
+    }
+}
+```
+
+**Key Points:**
+
+- Hardcoded `value` attributes in PrecisionRangeSlider components override SharedValues during unit toggle
+- Force sliders to reload current values from SharedValues when they become visible
+- Dispatch `input` event to update the visual display after setting the value
 
 ## Conversion Formulas Reference
 

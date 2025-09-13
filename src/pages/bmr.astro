@@ -268,7 +268,11 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			// Set up event listeners
 			this.setupEventListeners();
 
-			// Set default values if not already present - comprehensive approach
+			// Load current values first
+			const currentValues = this.sharedValues.getAll();
+			console.log("BMR Calculator - Loaded existing values:", currentValues);
+
+			// Set default values only if they don't exist (using proper null/undefined check)
 			const defaults = {
 				gender: "male",
 				age: 30,
@@ -282,8 +286,11 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			};
 
 			Object.entries(defaults).forEach(([key, defaultValue]) => {
-				if (this.sharedValues.get(key) === null) {
+				if (currentValues[key] === undefined || currentValues[key] === null) {
+					console.log(`Setting default for ${key}: ${defaultValue}`);
 					this.sharedValues.set(key, defaultValue);
+				} else {
+					console.log(`Using existing value for ${key}: ${currentValues[key]}`);
 				}
 			});
 
@@ -354,6 +361,14 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					this.convertAndToggleHeightUnits(customEvent.detail.value);
 				} else if (customEvent.detail.attribute === "weight-unit") {
 					console.log("Updating weight unit to:", customEvent.detail.value);
+
+					// Debug current values before unit change
+					console.log("Current weight values before unit change:", {
+						weightLbs: this.sharedValues.get("weightLbs"),
+						weightKg: this.sharedValues.get("weightKg"),
+						weightUnit: this.sharedValues.get("weightUnit"),
+					});
+
 					this.sharedValues.set("weightUnit", customEvent.detail.value);
 
 					// Use ReactiveSharedValues sync method for proper conversion
@@ -362,6 +377,13 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 					} else {
 						this.sharedValues.syncWeightUnits("imperial");
 					}
+
+					// Debug values after sync
+					console.log("Weight values after sync:", {
+						weightLbs: this.sharedValues.get("weightLbs"),
+						weightKg: this.sharedValues.get("weightKg"),
+						weightUnit: this.sharedValues.get("weightUnit"),
+					});
 
 					this.convertAndToggleWeightUnits(customEvent.detail.value);
 				}
@@ -381,15 +403,39 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			const imperialGroup = document.querySelector(".imperial-height") as HTMLElement;
 			const metricGroup = document.querySelector(".metric-height") as HTMLElement;
 
+			console.log(`Converting height units to: ${unit}`);
+
 			if (imperialGroup && metricGroup) {
 				if (unit === "imperial") {
 					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
+
+					// Force reload the imperial height slider from shared values
+					const imperialSlider = imperialGroup.querySelector(
+						'input[type="range"]'
+					) as HTMLInputElement;
+					if (imperialSlider) {
+						const heightTotalInches = this.sharedValues.get("heightTotalInches") || 68;
+						console.log(`Setting imperial height slider to: ${heightTotalInches} inches`);
+						imperialSlider.value = heightTotalInches.toString();
+						// Trigger an input event to update the display
+						imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				} else {
 					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
+
+					// Force reload the metric height slider from shared values
+					const metricSlider = metricGroup.querySelector('input[type="range"]') as HTMLInputElement;
+					if (metricSlider) {
+						const heightCm = this.sharedValues.get("heightCm") || 173;
+						console.log(`Setting metric height slider to: ${heightCm} cm`);
+						metricSlider.value = heightCm.toString();
+						// Trigger an input event to update the display
+						metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				}
 				// ReactiveSharedValues sync methods handle the actual conversion
 			}
@@ -399,15 +445,39 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 			const imperialGroup = document.querySelector(".imperial-weight") as HTMLElement;
 			const metricGroup = document.querySelector(".metric-weight") as HTMLElement;
 
+			console.log(`Converting weight units to: ${unit}`);
+
 			if (imperialGroup && metricGroup) {
 				if (unit === "imperial") {
 					// Show imperial, hide metric
 					imperialGroup.style.display = "block";
 					metricGroup.style.display = "none";
+
+					// Force reload the imperial weight slider from shared values
+					const imperialSlider = imperialGroup.querySelector(
+						'input[type="range"]'
+					) as HTMLInputElement;
+					if (imperialSlider) {
+						const weightLbs = this.sharedValues.get("weightLbs") || 160;
+						console.log(`Setting imperial weight slider to: ${weightLbs} lbs`);
+						imperialSlider.value = weightLbs.toString();
+						// Trigger an input event to update the display
+						imperialSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				} else {
 					// Show metric, hide imperial
 					imperialGroup.style.display = "none";
 					metricGroup.style.display = "block";
+
+					// Force reload the metric weight slider from shared values
+					const metricSlider = metricGroup.querySelector('input[type="range"]') as HTMLInputElement;
+					if (metricSlider) {
+						const weightKg = this.sharedValues.get("weightKg") || 73;
+						console.log(`Setting metric weight slider to: ${weightKg} kg`);
+						metricSlider.value = weightKg.toString();
+						// Trigger an input event to update the display
+						metricSlider.dispatchEvent(new Event("input", { bubbles: true }));
+					}
 				}
 				// ReactiveSharedValues sync methods handle the actual conversion
 			}
