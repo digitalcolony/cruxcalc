@@ -20,6 +20,7 @@ class ReactiveSharedValues extends EventTarget {
 			useAsianBMI: false, // for BMI calculator
 			bodyFat: 15, // for body fat calculations
 			activityLevel: "moderate", // for BMR/TDEE calculations
+			runningPace: 490, // 8:10 pace (490 seconds) for running calculator
 		};
 
 		// Initialize with stored values

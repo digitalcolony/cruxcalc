@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
-import RangeSlider from "../components/RangeSlider.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
 import InputGroup from "../components/InputGroup.astro";
 ---
 
@@ -17,16 +17,15 @@ import InputGroup from "../components/InputGroup.astro";
 		description="See your finish times for different race distances based on your pace per mile"
 	>
 		<div slot="inputs">
-			<InputGroup label="">
-				<RangeSlider
+			<InputGroup label="Pace per Mile">
+				<PrecisionRangeSlider
 					id="pace-slider"
-					label="Pace per Mile"
-					sharedKey="runningPace"
 					min={240}
 					max={1440}
 					step={5}
 					value={490}
-					unit=""
+					unit="min/mi"
+					sharedKey="runningPace"
 					formatAsPace={true}
 				/>
 				<div class="pace-range">
@@ -171,91 +170,80 @@ import InputGroup from "../components/InputGroup.astro";
 		}
 		return PACE_CATEGORIES[PACE_CATEGORIES.length - 1];
 	}
-	function savePaceValue(paceSeconds: number) {
-		try {
-			localStorage.setItem("cruxcalc-running-pace", paceSeconds.toString());
-			// Also sync with ReactiveSharedValues for cross-calculator integration if available
-			if (typeof ReactiveSharedValues !== "undefined") {
-				(ReactiveSharedValues as any).set("runningPace", paceSeconds);
-			}
-		} catch (error) {
-			console.warn("Error saving pace value to localStorage:", error);
-		}
-	}
-
-	function loadPaceValue() {
-		try {
-			const savedPace = localStorage.getItem("cruxcalc-running-pace");
-			if (savedPace) {
-				return parseInt(savedPace);
-			}
-		} catch (error) {
-			console.warn("Error loading pace value from localStorage:", error);
-		}
-		// Default to 8:10 (490 seconds) if no saved value
-		return 490;
-	}
-
-	function updateCalculations() {
-		console.log("updateCalculations called");
-
-		// Read pace from the slider
-		const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
-		if (!paceSlider) {
-			console.log("Could not find pace slider");
-			return;
-		}
-
-		const paceSeconds = parseInt(paceSlider.value);
-		console.log("Current pace value:", paceSeconds);
-
-		// Calculate and display race times
-		const raceTimes = calculateRaceTimes(paceSeconds);
-		console.log("Calculated race times:", raceTimes);
-
-		const time5k = document.getElementById("time-5k");
-		console.log("5K element found:", !!time5k);
-		if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
-
-		const time10k = document.getElementById("time-10k");
-		console.log("10K element found:", !!time10k);
-		if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
-
-		const timeHalf = document.getElementById("time-half");
-		console.log("Half element found:", !!timeHalf);
-		if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
-
-		const timeFull = document.getElementById("time-full");
-		console.log("Full element found:", !!timeFull);
-		if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
-
-		// Update pace category
-		const category = getPaceCategory(paceSeconds);
-		console.log("Pace category:", category);
-		const categoryElement = document.getElementById("pace-category");
-		const descriptionElement = document.getElementById("pace-description");
-
-		console.log("Category element found:", !!categoryElement);
-		console.log("Description element found:", !!descriptionElement);
-
-		if (categoryElement) {
-			categoryElement.textContent = category.name;
-			categoryElement.style.backgroundColor = category.color;
-			console.log("Updated category to:", category.name, "with color:", category.color);
-		}
-
-		if (descriptionElement) {
-			descriptionElement.textContent = category.description;
-			console.log("Updated description to:", category.description);
-		}
-
-		// Save the pace value to localStorage
-		savePaceValue(paceSeconds);
-		console.log("Updated calculations complete");
-	}
 	// Initialize calculator
 	document.addEventListener("DOMContentLoaded", function () {
 		console.log("Running calculator initializing...");
+
+		// Initialize ReactiveSharedValues
+		const sharedValues = new (window as any).ReactiveSharedValues();
+
+		function savePaceValue(paceSeconds: number) {
+			// Use ReactiveSharedValues for persistence and cross-calculator integration
+			sharedValues.set("runningPace", paceSeconds);
+		}
+
+		function loadPaceValue() {
+			// Load from ReactiveSharedValues
+			return sharedValues.get("runningPace") || 490; // Default to 8:10 (490 seconds)
+		}
+
+		function updateCalculations() {
+			console.log("updateCalculations called");
+
+			// Read pace from the slider - use PrecisionRangeSlider selector
+			const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
+			if (!paceSlider) {
+				console.log("Could not find pace slider");
+				return;
+			}
+
+			const paceSeconds = parseInt(paceSlider.value);
+			console.log("Current pace value:", paceSeconds);
+
+			// Calculate and display race times
+			const raceTimes = calculateRaceTimes(paceSeconds);
+			console.log("Calculated race times:", raceTimes);
+
+			const time5k = document.getElementById("time-5k");
+			console.log("5K element found:", !!time5k);
+			if (time5k) time5k.textContent = formatTime(raceTimes["5k"]);
+
+			const time10k = document.getElementById("time-10k");
+			console.log("10K element found:", !!time10k);
+			if (time10k) time10k.textContent = formatTime(raceTimes["10k"]);
+
+			const timeHalf = document.getElementById("time-half");
+			console.log("Half element found:", !!timeHalf);
+			if (timeHalf) timeHalf.textContent = formatTime(raceTimes["half"]);
+
+			const timeFull = document.getElementById("time-full");
+			console.log("Full element found:", !!timeFull);
+			if (timeFull) timeFull.textContent = formatTime(raceTimes["full"]);
+
+			// Update pace category
+			const category = getPaceCategory(paceSeconds);
+			console.log("Pace category:", category);
+			const categoryElement = document.getElementById("pace-category");
+			const descriptionElement = document.getElementById("pace-description");
+
+			console.log("Category element found:", !!categoryElement);
+			console.log("Description element found:", !!descriptionElement);
+
+			if (categoryElement) {
+				categoryElement.textContent = category.name;
+				categoryElement.style.backgroundColor = category.color;
+				console.log("Updated category to:", category.name, "with color:", category.color);
+			}
+
+			if (descriptionElement) {
+				descriptionElement.textContent = category.description;
+				console.log("Updated description to:", category.description);
+			}
+
+			// Save the pace value using ReactiveSharedValues
+			savePaceValue(paceSeconds);
+			console.log("Updated calculations complete");
+		}
 
 		// Load saved pace value or use default (8:10 = 490 seconds)
 		const savedPaceSeconds = loadPaceValue();
@@ -267,13 +255,27 @@ import InputGroup from "../components/InputGroup.astro";
 			updateCalculations();
 		}
 
+		// Listen for precision range slider changes
+		document.addEventListener("precision-range-change", (event) => {
+			const customEvent = event as CustomEvent;
+			const sharedKey = customEvent.detail.sharedKey;
+			const value = customEvent.detail.value;
+
+			console.log(`Precision range change for ${sharedKey}, value: ${value}`);
+
+			if (sharedKey === "runningPace") {
+				console.log(`Updating running pace to: ${value} seconds`);
+				updateCalculations();
+			}
+		});
+
 		// Wait for components to load, then set up everything
 		setTimeout(() => {
 			console.log("Setting up slider...");
 
 			const paceSlider = document.getElementById("pace-slider") as HTMLInputElement;
 			if (paceSlider) {
-				// Set initial value
+				// Set initial value from SharedValues
 				paceSlider.value = savedPaceSeconds.toString();
 				console.log("Set slider value to:", savedPaceSeconds);
 
@@ -285,9 +287,6 @@ import InputGroup from "../components/InputGroup.astro";
 			} else {
 				console.log("ERROR: Pace slider not found!");
 			}
-
-			// Also listen for the custom events
-			document.addEventListener("range-slider-change", handlePaceChange);
 
 			// Trigger initial calculation
 			console.log("Triggering initial calculation...");
@@ -395,5 +394,25 @@ import InputGroup from "../components/InputGroup.astro";
 	/* Dark mode adjustments */
 	[data-theme="dark"] .race-card {
 		background: var(--color-surface);
+	}
+
+	/* Hide number input between + and - buttons on running page */
+	:global(.precision-controls .precision-number-input) {
+		display: none !important;
+	}
+
+	/* Alternative selector in case the above doesn't work */
+	:global(input.precision-number-input) {
+		display: none !important;
+	}
+
+	/* Very specific selector for the pace slider number input */
+	:global(#pace-slider-number) {
+		display: none !important;
+	}
+
+	/* Align buttons to left and right when number input is hidden */
+	:global(.precision-controls) {
+		justify-content: space-between !important;
 	}
 </style>
