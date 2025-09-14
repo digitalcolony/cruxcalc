@@ -16,6 +16,7 @@ class ReactiveSharedValues extends EventTarget {
 			weightKg: 73,
 			heightUnit: "imperial", // 'imperial' or 'metric'
 			weightUnit: "imperial", // 'imperial' or 'metric'
+			unitSystem: "imperial", // new global unit system key
 			gender: "male", // for BMR calculators
 			useAsianBMI: false, // for BMI calculator
 			bodyFat: 15, // for body fat calculations
@@ -197,7 +198,74 @@ class ReactiveSharedValues extends EventTarget {
 
 	// Set a specific value with automatic event emission
 	set(key, value, options = {}) {
+		// Intercept unitSystem changes to orchestrate conversions & event
+		if (key === "unitSystem") {
+			return this.setUnitSystem(value, options);
+		}
 		return this.save({ [key]: value }, options);
+	}
+
+	// Unified global unit system setter
+	setUnitSystem(newSystem, options = {}) {
+		const prev = this.values.unitSystem || this.defaultValues.unitSystem || "imperial";
+		if (newSystem !== "imperial" && newSystem !== "metric") {
+			console.warn("Invalid unitSystem value:", newSystem);
+			return this.values;
+		}
+		if (prev === newSystem) {
+			return this.values; // no-op
+		}
+
+		// Update base key first (silent to batch conversions & then emit composite events)
+		this.save({ unitSystem: newSystem }, { silent: true });
+
+		// Perform synchronized conversions leveraging existing helpers
+		if (newSystem === "metric") {
+			// Convert height if currently imperial
+			if (this.values.heightUnit !== "metric") {
+				this.syncHeightUnits("metric");
+			}
+			// Convert weight if currently imperial
+			if (this.values.weightUnit !== "metric") {
+				this.syncWeightUnits("metric");
+			}
+			this.values.heightUnit = "metric";
+			this.values.weightUnit = "metric";
+		} else {
+			// Switch to imperial
+			if (this.values.heightUnit !== "imperial") {
+				this.syncHeightUnits("imperial");
+			}
+			if (this.values.weightUnit !== "imperial") {
+				this.syncWeightUnits("imperial");
+			}
+			this.values.heightUnit = "imperial";
+			this.values.weightUnit = "imperial";
+		}
+
+		// Emit explicit unit-system-change event (single event object reused)
+		const unitEvent = new CustomEvent("unit-system-change", {
+			detail: { value: newSystem, previous: prev, allValues: this.getAll() },
+			bubbles: true,
+			composed: true,
+		});
+		this.dispatchEvent(unitEvent);
+
+		// Also broadcast at window & document level for any global listeners (non-instance bound)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(unitEvent);
+			if (typeof document !== "undefined") {
+				document.dispatchEvent(unitEvent);
+			}
+		}
+
+		// Also emit general change event for unitSystem itself now
+		if (!options.silent) {
+			this.emitChangeEvents({ ...this.values, unitSystem: prev }, this.values, {
+				unitSystem: newSystem,
+			});
+		}
+		return this.values;
 	}
 
 	// Update multiple values at once

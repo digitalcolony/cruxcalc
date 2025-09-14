@@ -2,7 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
-import UnitToggle from "../components/UnitToggle.astro";
+// Replacing per-field UnitToggle components with a single global toggle
+import GlobalUnitToggle from "../components/GlobalUnitToggle.astro";
 import InputGroup from "../components/InputGroup.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
@@ -24,19 +25,12 @@ const sharedValues = {
 		description="Calculate your Body Mass Index with real-time visual feedback"
 	>
 		<div slot="inputs">
-			<InputGroup label="Height" helpText="Choose your preferred measurement system">
-				<UnitToggle
-					options={[
-						{ value: "imperial", label: "ft/in" },
-						{ value: "metric", label: "cm" },
-					]}
-					activeValue={sharedValues.heightUnit}
-					dataAttribute="unit"
-				/>
+			<InputGroup label="Units" helpText="">
+				<GlobalUnitToggle />
 			</InputGroup>
 
 			<div class="height-inputs imperial-height" data-unit-group="imperial">
-				<InputGroup label="" helpText="" class="full-width">
+				<InputGroup label="Height" helpText="" class="full-width">
 					<PrecisionRangeSlider
 						id="height-total-inches"
 						label=""
@@ -52,7 +46,7 @@ const sharedValues = {
 			</div>
 
 			<div class="height-inputs metric-height" data-unit-group="metric" style="display: none;">
-				<InputGroup label="" helpText="" class="full-width">
+				<InputGroup label="Height" helpText="" class="full-width">
 					<PrecisionRangeSlider
 						id="height-cm"
 						label=""
@@ -66,19 +60,8 @@ const sharedValues = {
 				</InputGroup>
 			</div>
 
-			<InputGroup label="Weight" helpText="Choose your preferred measurement system">
-				<UnitToggle
-					options={[
-						{ value: "imperial", label: "lbs" },
-						{ value: "metric", label: "kg" },
-					]}
-					activeValue={sharedValues.weightUnit}
-					dataAttribute="unit"
-				/>
-			</InputGroup>
-
 			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
-				<InputGroup label="" helpText="" class="full-width">
+				<InputGroup label="Weight" helpText="" class="full-width">
 					<PrecisionRangeSlider
 						id="weight-lbs"
 						label=""
@@ -92,7 +75,7 @@ const sharedValues = {
 			</div>
 
 			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
-				<InputGroup label="" helpText="" class="full-width">
+				<InputGroup label="Weight" helpText="" class="full-width">
 					<PrecisionRangeSlider
 						id="weight-kg"
 						label=""
@@ -417,47 +400,13 @@ const sharedValues = {
 			// Show appropriate input containers
 			this.showCurrentUnitInputs();
 
-			// Force refresh of all range sliders after a short delay to ensure they load saved values
-			setTimeout(() => {
-				this.updateRangeSliders(values);
-			}, 50);
+			// Immediately refresh range sliders (delay removed for instant responsiveness)
+			this.updateRangeSliders(values);
 		}
 
 		private initializeUnitToggles(values: any): void {
-			console.log("Initializing unit toggles with values:", values);
-
-			// Find and update height unit toggle
-			const heightToggle = document.querySelector(
-				'.input-group:has(label[for="height"]) .unit-toggle'
-			);
-			if (heightToggle) {
-				const heightButtons = heightToggle.querySelectorAll(".unit-btn");
-				heightButtons.forEach((btn) => {
-					btn.classList.remove("active");
-					if (btn.getAttribute("data-unit") === values.heightUnit) {
-						btn.classList.add("active");
-						console.log("Set height unit toggle to:", values.heightUnit);
-					}
-				});
-			}
-
-			// Find and update weight unit toggle
-			const weightToggle = document.querySelector(
-				'.input-group:has(label[for="weight"]) .unit-toggle'
-			);
-			if (weightToggle) {
-				const weightButtons = weightToggle.querySelectorAll(".unit-btn");
-				weightButtons.forEach((btn) => {
-					btn.classList.remove("active");
-					if (btn.getAttribute("data-unit") === values.weightUnit) {
-						btn.classList.add("active");
-						console.log("Set weight unit toggle to:", values.weightUnit);
-					}
-				});
-			}
-
-			// Update the range sliders to show current values
-			this.updateRangeSliders(values);
+			// Per-field unit toggle initialization removed (now using global unit toggle)
+			this.updateRangeSliders(values); // still refresh sliders
 		}
 
 		private updateRangeSliders(values: any): void {
@@ -477,23 +426,22 @@ const sharedValues = {
 
 		private showCurrentUnitInputs(): void {
 			const values = this.sharedValues.load();
+			const system = values.unitSystem || values.heightUnit || values.weightUnit || "imperial";
 
-			// Show/hide height inputs based on current unit
-			const heightInputs = document.querySelectorAll(".height-inputs");
-			heightInputs.forEach((input) => {
+			// Height inputs
+			document.querySelectorAll(".height-inputs").forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(`${values.heightUnit}-height`)) {
+				if (input.classList.contains(`${system}-height`)) {
 					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
 				}
 			});
 
-			// Show/hide weight inputs based on current unit
-			const weightInputs = document.querySelectorAll(".weight-inputs");
-			weightInputs.forEach((input) => {
+			// Weight inputs
+			document.querySelectorAll(".weight-inputs").forEach((input) => {
 				const htmlInput = input as HTMLElement;
-				if (input.classList.contains(`${values.weightUnit}-weight`)) {
+				if (input.classList.contains(`${system}-weight`)) {
 					htmlInput.style.display = "block";
 				} else {
 					htmlInput.style.display = "none";
@@ -502,9 +450,11 @@ const sharedValues = {
 		}
 
 		private attachEventListeners(): void {
-			// Listen for unit toggle changes
-			document.addEventListener("unit-toggle-change", (event) => {
-				this.handleUnitChange(event as CustomEvent);
+			// Listen for global unit system changes (window-level for reliability)
+			window.addEventListener("unit-system-change", () => {
+				this.showCurrentUnitInputs();
+				this.updateRangeSliders(this.sharedValues.getAll());
+				this.calculate();
 			});
 
 			// Listen for precision range slider changes (from our PrecisionRangeSlider components)
@@ -547,70 +497,20 @@ const sharedValues = {
 			}
 		}
 
-		private handleUnitChange(event: CustomEvent): void {
-			console.log("Unit change event received:", event.detail);
-
-			if (event.detail.attribute === "unit") {
-				// Get the unit toggle that dispatched this event
-				const unitToggle = event.target as HTMLElement;
-				const inputGroup = unitToggle?.closest(".input-group");
-
-				if (!inputGroup) {
-					console.error("Could not find input group for unit toggle");
-					return;
-				}
-
-				const label = inputGroup.querySelector("label");
-				if (!label) {
-					console.error("Could not find label in input group");
-					return;
-				}
-
-				const labelText = label.textContent?.toLowerCase() || "";
-				console.log("Label text:", labelText, "New value:", event.detail.value);
-
-				if (labelText.includes("height")) {
-					console.log("Updating height unit to:", event.detail.value);
-					this.sharedValues.set("heightUnit", event.detail.value);
-					if (event.detail.value === "metric") {
-						this.sharedValues.syncHeightUnits("metric");
-					} else {
-						this.sharedValues.syncHeightUnits("imperial");
-					}
-				} else if (labelText.includes("weight")) {
-					console.log("Updating weight unit to:", event.detail.value);
-					this.sharedValues.set("weightUnit", event.detail.value);
-					if (event.detail.value === "metric") {
-						this.sharedValues.syncWeightUnits("metric");
-					} else {
-						this.sharedValues.syncWeightUnits("imperial");
-					}
-				}
-
-				// Refresh range sliders to show converted values
-				this.updateRangeSliders(this.sharedValues.getAll());
-				this.showCurrentUnitInputs();
-				this.calculate();
-			}
-		}
+		// handleUnitChange removed - superseded by global unit-system-change
 
 		public calculate(): void {
 			const values = this.sharedValues.getAll();
 			let heightInMeters, weightInKg;
+			const system = values.unitSystem || values.heightUnit || values.weightUnit || "imperial";
 
-			// Convert height to meters
-			if (values.heightUnit === "imperial") {
-				const totalInches = values.heightTotalInches || 68;
+			if (system === "imperial") {
+				const totalInches = values.heightTotalInches ?? 68;
 				heightInMeters = totalInches * 0.0254;
+				weightInKg = (values.weightLbs ?? 160) * 0.453592;
 			} else {
-				heightInMeters = values.heightCm / 100;
-			}
-
-			// Convert weight to kg
-			if (values.weightUnit === "imperial") {
-				weightInKg = values.weightLbs * 0.453592;
-			} else {
-				weightInKg = values.weightKg;
+				heightInMeters = (values.heightCm ?? 173) / 100;
+				weightInKg = values.weightKg ?? 73;
 			}
 
 			const bmi = weightInKg / (heightInMeters * heightInMeters);
@@ -713,43 +613,6 @@ const sharedValues = {
 		console.log("Initializing BMI page with ReactiveSharedValues:", values);
 
 		console.log("Initializing BMI page with values:", values);
-
-		// Initialize unit toggles first - ensure at least one button is active
-		function initializeUnitToggles() {
-			// Height unit toggle
-			const heightButtons = document.querySelectorAll(
-				'.input-group:has(label[for="height"]) .unit-btn'
-			);
-			let heightActiveSet = false;
-			heightButtons.forEach((btn) => {
-				btn.classList.remove("active");
-				if (btn.getAttribute("data-unit") === values.heightUnit) {
-					btn.classList.add("active");
-					heightActiveSet = true;
-				}
-			});
-			if (!heightActiveSet && heightButtons.length > 0) {
-				heightButtons[0].classList.add("active");
-				sharedValues.set("heightUnit", heightButtons[0].getAttribute("data-unit"));
-			}
-
-			// Weight unit toggle
-			const weightButtons = document.querySelectorAll(
-				'.input-group:has(label[for="weight"]) .unit-btn'
-			);
-			let weightActiveSet = false;
-			weightButtons.forEach((btn) => {
-				btn.classList.remove("active");
-				if (btn.getAttribute("data-unit") === values.weightUnit) {
-					btn.classList.add("active");
-					weightActiveSet = true;
-				}
-			});
-			if (!weightActiveSet && weightButtons.length > 0) {
-				weightButtons[0].classList.add("active");
-				sharedValues.set("weightUnit", weightButtons[0].getAttribute("data-unit"));
-			}
-		}
 
 		// Show/hide appropriate input containers based on units
 		function showCurrentUnitInputs() {
@@ -1070,82 +933,10 @@ const sharedValues = {
 			}
 		}
 
-		// Initialize everything after DOM and SharedValues are available
-		setTimeout(() => {
-			initializeUnitToggles();
-			showCurrentUnitInputs();
-			updateRangeSliders();
-
-			// Initialize precision range sliders before BMI calculator
-			initializePrecisionRangeSliders();
-
-			// Initialize BMI calculator
-			(window as any).bmiCalculator = new BMICalculator();
-		}, 200);
-
-		// Handle unit toggle changes
-		document.addEventListener("unit-toggle-change", function (event: Event) {
-			const customEvent = event as CustomEvent;
-			console.log("Unit toggle change detected:", customEvent.detail);
-
-			if (customEvent.detail.attribute === "unit") {
-				const unitToggle = customEvent.target as HTMLElement;
-				const inputGroup = unitToggle?.closest(".input-group");
-				const label = inputGroup?.querySelector("label");
-				const labelText = label?.textContent?.toLowerCase() || "";
-
-				if (labelText.includes("height")) {
-					console.log("Converting height units to:", customEvent.detail.value);
-
-					// IMPORTANT: Before conversion, ensure current slider value is saved
-					const heightSlider = document.getElementById("height-total-inches") as HTMLInputElement;
-					if (heightSlider && sharedValues.get("heightUnit") === "imperial") {
-						const currentSliderValue = parseFloat(heightSlider.value);
-						sharedValues.set("heightTotalInches", currentSliderValue);
-					}
-
-					sharedValues.set("heightUnit", customEvent.detail.value);
-					if (customEvent.detail.value === "metric") {
-						sharedValues.syncHeightUnits("metric");
-					} else {
-						sharedValues.syncHeightUnits("imperial");
-					}
-				} else if (labelText.includes("weight")) {
-					console.log("Converting weight units to:", customEvent.detail.value);
-
-					// IMPORTANT: Before conversion, ensure current slider value is saved
-					const currentUnit = sharedValues.get("weightUnit");
-					if (currentUnit === "imperial") {
-						const weightSlider = document.getElementById("weight-lbs") as HTMLInputElement;
-						if (weightSlider) {
-							const currentSliderValue = parseFloat(weightSlider.value);
-							sharedValues.set("weightLbs", currentSliderValue);
-						}
-					} else if (currentUnit === "metric") {
-						const weightSlider = document.getElementById("weight-kg") as HTMLInputElement;
-						if (weightSlider) {
-							const currentSliderValue = parseFloat(weightSlider.value);
-							sharedValues.set("weightKg", currentSliderValue);
-						}
-					}
-
-					sharedValues.set("weightUnit", customEvent.detail.value);
-					if (customEvent.detail.value === "metric") {
-						sharedValues.syncWeightUnits("metric");
-					} else {
-						sharedValues.syncWeightUnits("imperial");
-					}
-				}
-
-				// Refresh everything
-				showCurrentUnitInputs();
-				updateRangeSliders();
-
-				// Trigger BMI recalculation if calculator exists
-				if ((window as any).bmiCalculator && (window as any).bmiCalculator.calculate) {
-					(window as any).bmiCalculator.calculate();
-				}
-			}
-		});
+		// Initialize everything immediately (removed delay for instant UI updates)
+		showCurrentUnitInputs();
+		updateRangeSliders();
+		initializePrecisionRangeSliders();
+		(window as any).bmiCalculator = new BMICalculator();
 	});
 </script>

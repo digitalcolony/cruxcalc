@@ -1,0 +1,114 @@
+---
+/**
+ * GlobalUnitToggle.astro
+ * A shared toggle that switches the global unit system (imperial/metric) using ReactiveSharedValues.
+ * Emits changes by calling sharedValues.set('unitSystem', value) which triggers conversions & events.
+ */
+import "../styles/global.css";
+---
+
+<style>
+	.unit-toggle {
+		display: flex;
+		gap: 0;
+		margin-bottom: 1rem;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		box-shadow: var(--shadow-sm);
+		background: var(--color-surface);
+		font-family: "JetBrains Mono", monospace;
+	}
+
+	.unit-btn {
+		flex: 1;
+		padding: 0.75rem 1.25rem;
+		border: none;
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-right: var(--border-width) solid var(--color-border);
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		font-size: 0.85rem;
+	}
+
+	.unit-btn:last-child {
+		border-right: none;
+	}
+	.unit-btn:hover {
+		background: var(--color-bg);
+	}
+	.unit-btn.active {
+		background: var(--color-primary);
+		color: #fff;
+	}
+	.unit-btn.active:hover {
+		background: var(--color-primary);
+	}
+
+	@media (max-width: 480px) {
+		.unit-toggle {
+			flex-direction: column;
+		}
+		.unit-btn {
+			border-right: none;
+			border-bottom: var(--border-width) solid var(--color-border);
+		}
+		.unit-btn:last-child {
+			border-bottom: none;
+		}
+	}
+</style>
+<div class="unit-toggle" id="global-unit-toggle" role="group" aria-label="Unit system toggle">
+	<button
+		class="unit-btn"
+		id="toggle-imperial"
+		type="button"
+		aria-pressed="false"
+		data-value="imperial">Imperial<span aria-hidden="true"> (ft/lbs)</span></button
+	>
+	<button class="unit-btn" id="toggle-metric" type="button" aria-pressed="false" data-value="metric"
+		>Metric<span aria-hidden="true"> (cm/kg)</span></button
+	>
+</div>
+<script>
+	// Access via global (loaded from /reactiveSharedValues.js on pages) instead of ESM import to avoid build resolution issues
+	const sharedValues = new (window as any).ReactiveSharedValues();
+
+	const container = document.getElementById("global-unit-toggle");
+	const imperialBtn = document.getElementById("toggle-imperial");
+	const metricBtn = document.getElementById("toggle-metric");
+
+	// @ts-ignore allow untyped param in inline script
+	function applyState(current) {
+		const imperialActive = current === "imperial";
+		const metricActive = current === "metric";
+		imperialBtn?.setAttribute("aria-pressed", String(imperialActive));
+		metricBtn?.setAttribute("aria-pressed", String(metricActive));
+		imperialBtn?.classList.toggle("active", imperialActive);
+		metricBtn?.classList.toggle("active", metricActive);
+	}
+
+	// Initialize state from shared values
+	applyState(sharedValues.get("unitSystem") || "imperial");
+
+	container?.addEventListener("click", (e) => {
+		const target = (e.target as HTMLElement)?.closest("button[data-value]");
+		if (!target) return;
+		const value = target.getAttribute("data-value");
+		if (value && value !== sharedValues.get("unitSystem")) {
+			sharedValues.set("unitSystem", value);
+		}
+	});
+
+	// @ts-ignore custom event detail typing not required here
+	sharedValues.addEventListener("unit-system-change", (e) => {
+		applyState(e.detail.value);
+	});
+</script>
