@@ -315,6 +315,11 @@ import ComparisonTable from "../components/ComparisonTable.astro";
 
 				console.log(`BMR Calculator: Range change for ${sharedKey}, value: ${value}`);
 
+				// Persist the changed slider's own value first so base keys stay current
+				if (sharedKey) {
+					this.sharedValues.set(sharedKey, value);
+				}
+
 				// Bidirectional unit sync for height
 				if (sharedKey === "heightTotalInches") {
 					const cm = Math.round(value * 2.54);
