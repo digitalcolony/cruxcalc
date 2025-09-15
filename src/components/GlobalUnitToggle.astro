@@ -78,37 +78,89 @@ import "../styles/global.css";
 	>
 </div>
 <script>
-	// Access via global (loaded from /reactiveSharedValues.js on pages) instead of ESM import to avoid build resolution issues
-	const sharedValues = new (window as any).ReactiveSharedValues();
-
-	const container = document.getElementById("global-unit-toggle");
-	const imperialBtn = document.getElementById("toggle-imperial");
-	const metricBtn = document.getElementById("toggle-metric");
-
-	// @ts-ignore allow untyped param in inline script
-	function applyState(current) {
-		const imperialActive = current === "imperial";
-		const metricActive = current === "metric";
-		imperialBtn?.setAttribute("aria-pressed", String(imperialActive));
-		metricBtn?.setAttribute("aria-pressed", String(metricActive));
-		imperialBtn?.classList.toggle("active", imperialActive);
-		metricBtn?.classList.toggle("active", metricActive);
-	}
-
-	// Initialize state from shared values
-	applyState(sharedValues.get("unitSystem") || "imperial");
-
-	container?.addEventListener("click", (e) => {
-		const target = (e.target as HTMLElement)?.closest("button[data-value]");
-		if (!target) return;
-		const value = target.getAttribute("data-value");
-		if (value && value !== sharedValues.get("unitSystem")) {
-			sharedValues.set("unitSystem", value);
+	// @ts-nocheck
+	// Defer initialization until DOM is ready & ReactiveSharedValues global is available
+	(function start() {
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", runInit);
+		} else {
+			runInit();
 		}
-	});
 
-	// @ts-ignore custom event detail typing not required here
-	sharedValues.addEventListener("unit-system-change", (e) => {
-		applyState(e.detail.value);
-	});
+		function runInit() {
+			initWhenReady();
+		}
+
+		function initWhenReady(attempt = 0) {
+			if (typeof (window as any).ReactiveSharedValues === "undefined") {
+				if (attempt < 20) {
+					// try for ~500ms
+					return setTimeout(() => initWhenReady(attempt + 1), 25);
+				}
+				return; // give up (silently) - page will just not toggle globally
+			}
+
+			const sharedValues = new (window as any).ReactiveSharedValues();
+			const container = document.getElementById("global-unit-toggle");
+			const imperialBtn = document.getElementById("toggle-imperial");
+			const metricBtn = document.getElementById("toggle-metric");
+
+			// Apply visual active state to buttons
+			/**
+			 * @param {string} current
+			 */
+			function applyState(/** @type {string} */ current) {
+				const imperialActive = current === "imperial";
+				const metricActive = current === "metric";
+				imperialBtn?.setAttribute("aria-pressed", String(imperialActive));
+				metricBtn?.setAttribute("aria-pressed", String(metricActive));
+				imperialBtn?.classList.toggle("active", imperialActive);
+				metricBtn?.classList.toggle("active", metricActive);
+			}
+
+			// Immediate visibility fallback for height / weight input groups
+			/**
+			 * @param {string} system
+			 */
+			function immediateVisibility(/** @type {string} */ system) {
+				// Height groups
+				document.querySelectorAll(".height-inputs").forEach((el) => {
+					const show = el.classList.contains(`${system}-height`);
+					(el as HTMLElement).style.display = show ? "" : "none";
+				});
+				// Weight groups
+				document.querySelectorAll(".weight-inputs").forEach((el) => {
+					const show = el.classList.contains(`${system}-weight`);
+					(el as HTMLElement).style.display = show ? "" : "none";
+				});
+			}
+
+			const current = sharedValues.get("unitSystem") || "imperial";
+			applyState(current);
+			immediateVisibility(current);
+
+			container?.addEventListener("click", (e) => {
+				const target = (e.target as HTMLElement)?.closest("button[data-value]");
+				if (!target) return;
+				const value = target.getAttribute("data-value");
+				if (value && value !== sharedValues.get("unitSystem")) {
+					sharedValues.set("unitSystem", value);
+					// Provide immediate UI feedback before other listeners run
+					immediateVisibility(value);
+				}
+			});
+
+			// Listen for global events (window-level) and update toggle + visibility
+			window.addEventListener("unit-system-change", (e) => {
+				try {
+					const system = (e as CustomEvent).detail?.value;
+					if (!system) return;
+					applyState(system);
+					immediateVisibility(system);
+				} catch {
+					/* swallow */
+				}
+			});
+		}
+	})();
 </script>

@@ -243,19 +243,29 @@ class ReactiveSharedValues extends EventTarget {
 			this.values.weightUnit = "imperial";
 		}
 
-		// Emit explicit unit-system-change event (single event object reused)
-		const unitEvent = new CustomEvent("unit-system-change", {
-			detail: { value: newSystem, previous: prev, allValues: this.getAll() },
-			bubbles: true,
-			composed: true,
-		});
-		this.dispatchEvent(unitEvent);
+		// Persist the derived per-dimension unit flags together with unitSystem
+		this.save(
+			{
+				unitSystem: newSystem,
+				heightUnit: this.values.heightUnit,
+				weightUnit: this.values.weightUnit,
+			},
+			{ silent: true }
+		);
+
+		// Emit explicit unit-system-change events (distinct objects for each target)
+		const detail = { value: newSystem, previous: prev, allValues: this.getAll() };
+		this.dispatchEvent(
+			new CustomEvent("unit-system-change", { detail, bubbles: true, composed: true })
+		);
 
 		// Also broadcast at window & document level for any global listeners (non-instance bound)
 		if (typeof window !== "undefined") {
-			window.dispatchEvent(unitEvent);
+			window.dispatchEvent(new CustomEvent("unit-system-change", { detail }));
 			if (typeof document !== "undefined") {
-				document.dispatchEvent(unitEvent);
+				document.dispatchEvent(
+					new CustomEvent("unit-system-change", { detail, bubbles: true, composed: true })
+				);
 			}
 		}
 
