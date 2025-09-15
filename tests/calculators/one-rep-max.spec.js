@@ -53,8 +53,8 @@ test.describe("One Rep Max Calculator", () => {
 		await page.locator("#weight").fill("200");
 		await page.locator("#reps").fill("5");
 
-		// Switch to metric
-		await page.click('[data-unit="metric"]');
+		// Switch to metric (global toggle)
+		await page.click("#toggle-metric");
 		await page.waitForTimeout(500);
 
 		// Weight should convert to ~91 kg (200 / 2.205)
@@ -65,7 +65,7 @@ test.describe("One Rep Max Calculator", () => {
 		await expect(epleyUnit).toContainText("kg");
 
 		// Switch back to imperial
-		await page.click('[data-unit="imperial"]');
+		await page.click("#toggle-imperial");
 		await page.waitForTimeout(500);
 
 		// Should convert back to lbs
