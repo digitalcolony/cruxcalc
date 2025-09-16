@@ -384,6 +384,11 @@ const {
 			// Sync all inputs
 			this.syncValues();
 
+			// Support external refresh so pages can force sliders to reload from shared values
+			this.container.addEventListener("refresh-from-shared-values", () => {
+				this.loadFromSharedValues();
+			});
+
 			// Range input events
 			this.rangeInput.addEventListener("input", () => {
 				console.log("PrecisionRangeSlider: Range input changed");

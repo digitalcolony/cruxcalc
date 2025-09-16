@@ -116,8 +116,8 @@ test.describe("Potato Hack Calculator", () => {
 		await page.locator("#potato-pounds").fill("4");
 		await page.waitForTimeout(200);
 
-		// Switch to metric using correct selector
-		await page.click('[data-potato-unit="metric"]');
+		// Switch to metric using the global unit toggle
+		await page.click("#toggle-metric");
 		await page.waitForTimeout(800);
 
 		// Weight should convert to ~1.8 kg (4 lbs ÷ 2.205)
@@ -135,8 +135,8 @@ test.describe("Potato Hack Calculator", () => {
 		await page.locator("#potato-kg").fill("1.9");
 		await page.waitForTimeout(200);
 
-		// Switch back to imperial
-		await page.click('[data-potato-unit="imperial"]');
+		// Switch back to imperial (global toggle)
+		await page.click("#toggle-imperial");
 		await page.waitForTimeout(800);
 
 		// Should convert back to lbs (1.9 kg × 2.205 ≈ 4.19 lbs)

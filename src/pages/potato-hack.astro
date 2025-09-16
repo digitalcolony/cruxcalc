@@ -3,14 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import CalculatorLayout from "../components/CalculatorLayout.astro";
 import InputGroup from "../components/InputGroup.astro";
 import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
-import UnitToggle from "../components/UnitToggle.astro";
+// Use the global unit system toggle instead of per-field toggles
+import GlobalUnitToggle from "../components/GlobalUnitToggle.astro";
 import ResultCard from "../components/ResultCard.astro";
 import ResultValue from "../components/ResultValue.astro";
 
-// Initialize SharedValues on the server side
-const sharedValues = {
-	potatoUnit: "imperial",
-};
+// No server-side unit defaults; the global unit toggle + ReactiveSharedValues handle this
 ---
 
 <Layout
@@ -25,21 +23,11 @@ const sharedValues = {
 		description="Calculate your daily calorie deficit on a potato-only diet. Choose between pounds or kilograms for convenience. Cooling potatoes overnight increases resistant starch, reducing available calories by 17%."
 	>
 		<div slot="inputs">
-			<InputGroup
-				label="Daily Weight of Cooked Potatoes"
-				helpText="Choose your preferred measurement system"
-			>
-				<UnitToggle
-					options={[
-						{ value: "imperial", label: "lbs" },
-						{ value: "metric", label: "kg" },
-					]}
-					activeValue={sharedValues.potatoUnit}
-					dataAttribute="potato-unit"
-				/>
+			<InputGroup label="Units" helpText="Switch between imperial and metric">
+				<GlobalUnitToggle />
 			</InputGroup>
 
-			<div class="weight-inputs imperial-potato" data-unit-group="imperial">
+			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
 				<InputGroup label="" helpText="Amount of cooked potatoes consumed daily" class="full-width">
 					<PrecisionRangeSlider
 						id="potato-pounds"
@@ -54,7 +42,7 @@ const sharedValues = {
 				</InputGroup>
 			</div>
 
-			<div class="weight-inputs metric-potato" data-unit-group="metric" style="display: none;">
+			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
 				<InputGroup
 					label="Potato Weight"
 					helpText="Amount of cooked potatoes consumed daily"
@@ -432,276 +420,184 @@ const sharedValues = {
 	// @ts-nocheck - Disable TypeScript checking for this Astro component
 
 	class PotatoHackCalculator {
-		private reactiveSharedValues: any;
-		private currentPotatoUnit = "imperial";
+		private sharedValues: any;
+		private get unitSystem(): string {
+			return this.sharedValues.get("unitSystem") || "imperial";
+		}
 
 		constructor() {
-			// Initialize ReactiveSharedValues system
-			if ((window as any).ReactiveSharedValues) {
-				this.reactiveSharedValues = new (window as any).ReactiveSharedValues();
-			}
-
+			this.sharedValues = new (window as any).ReactiveSharedValues();
 			this.init();
 		}
 
 		private init(): void {
-			// Set up event listeners
-			this.setupEventListeners();
+			// Defaults
+			const defaults = {
+				unitSystem: this.sharedValues.get("unitSystem") || "imperial",
+				potatoPounds: this.sharedValues.get("potatoPounds") ?? 4.0,
+				potatoKg: this.sharedValues.get("potatoKg") ?? 1.8,
+				tdee: this.sharedValues.get("tdee") ?? 1700,
+			};
+			Object.entries(defaults).forEach(([k, v]) => this.sharedValues.set(k, v as any));
 
-			// Initialize default values if not already set
-			if (!this.reactiveSharedValues.get("potatoPounds")) {
-				this.reactiveSharedValues.set("potatoPounds", "4.0");
-			}
-			if (!this.reactiveSharedValues.get("potatoKg")) {
-				this.reactiveSharedValues.set("potatoKg", "1.8");
-			}
-			if (!this.reactiveSharedValues.get("tdee")) {
-				this.reactiveSharedValues.set("tdee", "1700");
-			}
-
-			// Initialize unit from saved data or default
-			const savedUnit = this.reactiveSharedValues.get("potatoUnit") || "imperial";
-			console.log("Potato calculator initializing with unit:", savedUnit);
-			console.log("Server-side default was 'imperial', but saved preference is:", savedUnit);
-
-			this.togglePotatoUnit(savedUnit);
-
-			// Initial slider update and calculation
-			console.log("Initial values loaded:", {
-				potatoPounds: this.reactiveSharedValues.get("potatoPounds"),
-				potatoKg: this.reactiveSharedValues.get("potatoKg"),
-				tdee: this.reactiveSharedValues.get("tdee"),
-				unit: savedUnit,
-			});
-
-			this.updateVisibleSliders();
+			this.bindEvents();
+			this.syncVisibility();
+			this.refreshInputsFromShared();
 			this.calculateResults();
 		}
 
-		private setupEventListeners(): void {
-			// Listen for precision-range-change events with bidirectional sync
-			document.addEventListener("precision-range-change", (event) => {
-				const customEvent = event as CustomEvent;
-				const { sharedKey, value } = customEvent.detail;
+		private bindEvents(): void {
+			document.addEventListener("precision-range-change", (e) => {
+				const { sharedKey, value } = (e as CustomEvent).detail || {};
+				if (!sharedKey) return;
+				this.sharedValues.set(sharedKey, value);
 
-				// Update ReactiveSharedValues for persistence
-				this.reactiveSharedValues.set(sharedKey, value);
-
-				// For potato weight changes, sync the corresponding unit
-				if (sharedKey === "potatoPounds" && this.currentPotatoUnit === "imperial") {
-					const kg = parseFloat(value) * 0.453592;
-					this.reactiveSharedValues.set("potatoKg", kg.toFixed(2));
-				} else if (sharedKey === "potatoKg" && this.currentPotatoUnit === "metric") {
-					const lbs = parseFloat(value) / 0.453592;
-					this.reactiveSharedValues.set("potatoPounds", lbs.toFixed(1));
+				// Keep kg<->lbs in sync regardless of current unit, mirroring BMR/BMI patterns
+				if (sharedKey === "potatoPounds") {
+					const kg = Math.round(parseFloat(value) * 0.453592 * 100) / 100; // 2 decimals
+					this.sharedValues.set("potatoKg", kg);
+				} else if (sharedKey === "potatoKg") {
+					const lbs = Math.round((parseFloat(value) / 0.453592) * 100) / 100; // keep 2 decimals internally
+					// but our slider uses 0.1 granularity; round when rendering
+					this.sharedValues.set("potatoPounds", Math.round(lbs * 10) / 10);
 				}
 
-				// Recalculate results
 				this.calculateResults();
 			});
 
-			// Listen for unit toggle changes
-			document.addEventListener("unit-toggle-change", (event) => {
-				const customEvent = event as CustomEvent;
-				const unit = customEvent.detail.value;
-				const attribute = customEvent.detail.attribute;
-
-				if (attribute === "potato-unit") {
-					console.log("Potato unit toggle to:", unit);
-
-					// Convert current potato values between units
-					const currentPounds = parseFloat(this.reactiveSharedValues.get("potatoPounds") || "4.0");
-					const currentKg = parseFloat(this.reactiveSharedValues.get("potatoKg") || "1.8");
-
-					if (unit === "metric") {
-						// Convert current pounds to kg
-						const kg = currentPounds * 0.453592;
-						this.reactiveSharedValues.set("potatoKg", kg.toFixed(2));
-						console.log(`Converted ${currentPounds} lbs to ${kg.toFixed(2)} kg`);
-					} else {
-						// Convert current kg to pounds
-						const lbs = currentKg / 0.453592;
-						this.reactiveSharedValues.set("potatoPounds", lbs.toFixed(1));
-						console.log(`Converted ${currentKg} kg to ${lbs.toFixed(1)} lbs`);
-					}
-
-					this.togglePotatoUnit(unit);
+			// Global unit system changes
+			window.addEventListener("unit-system-change", () => {
+				// Before toggling visibility, convert potato value to target unit with slider-step rounding
+				const system = this.unitSystem;
+				const roundTo = (val: number, step: number) => Math.round(val / step) * step;
+				if (system === "metric") {
+					const lbs = parseFloat(this.sharedValues.get("potatoPounds") ?? 4.0);
+					const kg = roundTo(lbs * 0.453592, 0.05);
+					this.sharedValues.set("potatoKg", parseFloat(kg.toFixed(2)));
+				} else {
+					const kg = parseFloat(this.sharedValues.get("potatoKg") ?? 1.8);
+					const lbs = roundTo(kg / 0.453592, 0.1);
+					this.sharedValues.set("potatoPounds", parseFloat(lbs.toFixed(1)));
 				}
+
+				this.syncVisibility();
+				// Directly set the active slider to the converted value before any refresh
+				if (system === "metric") {
+					const kgInput = document.getElementById("potato-kg") as HTMLInputElement | null;
+					const v = this.sharedValues.get("potatoKg");
+					if (kgInput && v != null) {
+						kgInput.value = String(v);
+						kgInput.dispatchEvent(new Event("input", { bubbles: true }));
+					}
+				} else {
+					const lbsInput = document.getElementById("potato-pounds") as HTMLInputElement | null;
+					const v = this.sharedValues.get("potatoPounds");
+					if (lbsInput && v != null) {
+						lbsInput.value = String(v);
+						lbsInput.dispatchEvent(new Event("input", { bubbles: true }));
+					}
+				}
+				// Ensure sliders reload values from shared state as well
+				document.querySelectorAll(".precision-range-wrapper").forEach((w) => {
+					w.dispatchEvent(new CustomEvent("refresh-from-shared-values", { bubbles: true }));
+				});
+				this.refreshInputsFromShared();
+				this.calculateResults();
 			});
 
-			// Listen for checkbox changes
-			const cooledOvernight = document.getElementById("cooled-overnight");
-			if (cooledOvernight) {
-				cooledOvernight.addEventListener("change", () => {
-					this.calculateResults();
-				});
-			}
+			// Resistant starch checkbox
+			const cooled = document.getElementById("cooled-overnight");
+			cooled?.addEventListener("change", () => this.calculateResults());
 		}
 
-		private togglePotatoUnit(unit: string): void {
-			this.currentPotatoUnit = unit;
-			this.reactiveSharedValues.set("potatoUnit", unit);
-
-			const imperialPotato = document.querySelector(".imperial-potato");
-			const metricPotato = document.querySelector(".metric-potato");
-
-			if (unit === "metric") {
-				if (imperialPotato) imperialPotato.style.display = "none";
-				if (metricPotato) metricPotato.style.display = "block";
-			} else {
-				if (imperialPotato) imperialPotato.style.display = "block";
-				if (metricPotato) metricPotato.style.display = "none";
-			}
-
-			// Update the UnitToggle component to match the active unit
-			const unitToggle = document.querySelector(".unit-toggle");
-			if (unitToggle) {
-				const buttons = unitToggle.querySelectorAll(".unit-btn");
-				buttons.forEach((button: HTMLElement) => {
-					const buttonUnit = button.getAttribute("data-potato-unit");
-					if (buttonUnit === unit) {
-						button.classList.add("active");
-						console.log(`Updated button for ${buttonUnit} to active`);
-					} else {
-						button.classList.remove("active");
-						console.log(`Updated button for ${buttonUnit} to inactive`);
-					}
-				});
-			}
-
-			// After sync, update the visible sliders to show converted values
-			this.updateVisibleSliders();
-			this.calculateResults();
+		private syncVisibility(): void {
+			const system = this.unitSystem;
+			document.querySelectorAll(".weight-inputs").forEach((el) => {
+				const show = el.classList.contains(`${system}-weight`);
+				(el as HTMLElement).style.display = show ? "" : "none";
+			});
 		}
 
-		private updateVisibleSliders(): void {
-			// Update potato pounds slider
-			const poundsInput = document.querySelector(
-				"#potato-pounds .precision-range-input"
-			) as HTMLInputElement;
+		private refreshInputsFromShared(): void {
+			const poundsInput = document.getElementById("potato-pounds") as HTMLInputElement | null;
 			if (poundsInput) {
-				const poundsValue = this.reactiveSharedValues.get("potatoPounds");
-				if (poundsValue && poundsInput.value !== poundsValue.toString()) {
-					poundsInput.value = poundsValue.toString();
+				const v = this.sharedValues.get("potatoPounds");
+				if (v != null && poundsInput.value !== String(v)) {
+					poundsInput.value = String(v);
 					poundsInput.dispatchEvent(new Event("input", { bubbles: true }));
-					console.log("Updated pounds input to:", poundsValue);
 				}
 			}
 
-			// Update potato kg slider
-			const kgInput = document.querySelector(
-				"#potato-kg .precision-range-input"
-			) as HTMLInputElement;
+			const kgInput = document.getElementById("potato-kg") as HTMLInputElement | null;
 			if (kgInput) {
-				const kgValue = this.reactiveSharedValues.get("potatoKg");
-				if (kgValue && kgInput.value !== kgValue.toString()) {
-					kgInput.value = kgValue.toString();
+				const v = this.sharedValues.get("potatoKg");
+				if (v != null && kgInput.value !== String(v)) {
+					kgInput.value = String(v);
 					kgInput.dispatchEvent(new Event("input", { bubbles: true }));
-					console.log("Updated kg input to:", kgValue);
 				}
 			}
 
-			// Update TDEE slider
-			const tdeeInput = document.querySelector("#tdee .precision-range-input") as HTMLInputElement;
+			const tdeeInput = document.getElementById("tdee") as HTMLInputElement | null;
 			if (tdeeInput) {
-				const tdeeValue = this.reactiveSharedValues.get("tdee");
-				if (tdeeValue && tdeeInput.value !== tdeeValue.toString()) {
-					tdeeInput.value = tdeeValue.toString();
+				const v = this.sharedValues.get("tdee");
+				if (v != null && tdeeInput.value !== String(v)) {
+					tdeeInput.value = String(v);
 					tdeeInput.dispatchEvent(new Event("input", { bubbles: true }));
 				}
 			}
 		}
 
 		private calculateResults(): void {
-			const potatoWeight =
-				this.currentPotatoUnit === "imperial"
-					? parseFloat(this.reactiveSharedValues.get("potatoPounds") || "4.0")
-					: parseFloat(this.reactiveSharedValues.get("potatoKg") || "1.8");
+			const system = this.unitSystem;
+			const pounds = parseFloat(this.sharedValues.get("potatoPounds") ?? 4.0);
+			const kg = parseFloat(this.sharedValues.get("potatoKg") ?? 1.8);
+			const tdee = parseFloat(this.sharedValues.get("tdee") ?? 1700);
+			const cooled =
+				(document.getElementById("cooled-overnight") as HTMLInputElement)?.checked || false;
 
-			const tdee = parseFloat(this.reactiveSharedValues.get("tdee") || "1700");
-			const cooledOvernight = document.getElementById("cooled-overnight") as HTMLInputElement;
-			const isCooled = cooledOvernight?.checked || false;
+			// Match tests: baseline 350 cal per lb cooked potatoes, metric via conversion
+			let totalCalories = system === "imperial" ? pounds * 350 : kg * (350 / 0.453592);
+			if (cooled) totalCalories *= 0.83; // 17% reduction
 
-			// Convert weight to grams for calculation
-			let potatoGrams;
-			if (this.currentPotatoUnit === "imperial") {
-				potatoGrams = potatoWeight * 453.592; // pounds to grams
-			} else {
-				potatoGrams = potatoWeight * 1000; // kg to grams
-			}
+			const deficit = tdee - totalCalories; // positive number means deficit
 
-			// Potato calories: ~77 cal per 100g
-			let totalCalories = (potatoGrams / 100) * 77;
+			// Fat loss projections
+			const perPoundCals = 3500;
+			const perKgCals = 7700;
+			const denom = system === "imperial" ? perPoundCals : perKgCals;
+			const d3 = Math.max(0, (deficit * 3) / denom);
+			const d4 = Math.max(0, (deficit * 4) / denom);
+			const d5 = Math.max(0, (deficit * 5) / denom);
+			const d7 = Math.max(0, (deficit * 7) / denom);
 
-			// If cooled overnight, resistant starch reduces available calories by 17%
-			if (isCooled) {
-				totalCalories = totalCalories * 0.83;
-			}
-
-			// Calculate deficit
-			const calorieDeficit = tdee - totalCalories;
-
-			// Fat loss calculation (1 lb fat = 3500 calories, 1 kg fat = 7700 calories)
-			let threeDayFatChange, fourDayFatChange, fiveDayFatChange, weeklyFatChange;
-
-			if (this.currentPotatoUnit === "imperial") {
-				threeDayFatChange = (calorieDeficit * 3) / 3500;
-				fourDayFatChange = (calorieDeficit * 4) / 3500;
-				fiveDayFatChange = (calorieDeficit * 5) / 3500;
-				weeklyFatChange = (calorieDeficit * 7) / 3500;
-			} else {
-				threeDayFatChange = (calorieDeficit * 3) / 7700;
-				fourDayFatChange = (calorieDeficit * 4) / 7700;
-				fiveDayFatChange = (calorieDeficit * 5) / 7700;
-				weeklyFatChange = (calorieDeficit * 7) / 7700;
-			}
-
-			// Update displays
-			const totalCaloriesDisplay = document.querySelector("#total-calories .result-value__number");
-			const calorieDeficitDisplay = document.querySelector(
-				"#calorie-deficit .result-value__number"
-			);
-			const threeDayChangeDisplay = document.querySelector(
-				"#three-day-change .result-value__number"
-			);
-			const fourDayChangeDisplay = document.querySelector("#four-day-change .result-value__number");
-			const fiveDayChangeDisplay = document.querySelector("#five-day-change .result-value__number");
-			const weeklyChangeDisplay = document.querySelector("#weekly-change .result-value__number");
-
-			// Unit displays
-			const threeDayUnitDisplay = document.querySelector("#three-day-change .result-value__unit");
-			const fourDayUnitDisplay = document.querySelector("#four-day-change .result-value__unit");
-			const fiveDayUnitDisplay = document.querySelector("#five-day-change .result-value__unit");
-			const weeklyUnitDisplay = document.querySelector("#weekly-change .result-value__unit");
-
-			if (totalCaloriesDisplay) totalCaloriesDisplay.textContent = Math.round(totalCalories);
-			if (calorieDeficitDisplay) calorieDeficitDisplay.textContent = Math.round(calorieDeficit);
-
-			// Helper function to update fat change displays
-			const updateFatChangeDisplay = (fatChange, changeDisplay, unitDisplay) => {
-				if (changeDisplay) {
-					const absChange = Math.abs(fatChange);
-					changeDisplay.textContent = absChange.toFixed(1);
-				}
-				if (unitDisplay) {
-					unitDisplay.textContent = this.currentPotatoUnit === "imperial" ? "lbs" : "kg";
-				}
+			// Update UI
+			const setNum = (sel: string, val: number) => {
+				const el = document.querySelector(`${sel} .result-value__number`);
+				if (el) (el as HTMLElement).textContent = Math.round(val).toLocaleString();
 			};
+			setNum("#total-calories", totalCalories);
+			setNum("#calorie-deficit", deficit);
 
-			// Update all fat change displays
-			updateFatChangeDisplay(threeDayFatChange, threeDayChangeDisplay, threeDayUnitDisplay);
-			updateFatChangeDisplay(fourDayFatChange, fourDayChangeDisplay, fourDayUnitDisplay);
-			updateFatChangeDisplay(fiveDayFatChange, fiveDayChangeDisplay, fiveDayUnitDisplay);
-			updateFatChangeDisplay(weeklyFatChange, weeklyChangeDisplay, weeklyUnitDisplay);
+			const setProj = (id: string, val: number) => {
+				const numEl = document.querySelector(`${id} .result-value__number`);
+				const unitEl = document.querySelector(`${id} .result-value__unit`);
+				if (numEl) (numEl as HTMLElement).textContent = val.toFixed(1);
+				if (unitEl) (unitEl as HTMLElement).textContent = system === "imperial" ? "lbs" : "kg";
+			};
+			setProj("#three-day-change", d3);
+			setProj("#four-day-change", d4);
+			setProj("#five-day-change", d5);
+			setProj("#weekly-change", d7);
 		}
 	}
 
-	// Initialize the calculator when DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		console.log("=== POTATO HACK CALCULATOR INITIALIZATION ===");
-		// Wait a brief moment to ensure all DOM elements are fully rendered
-		setTimeout(() => {
-			const calculator = new PotatoHackCalculator();
-		}, 50);
-	});
+	// Initialize
+	(function start() {
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", run);
+		} else run();
+		function run() {
+			new PotatoHackCalculator();
+		}
+	})();
 </script>

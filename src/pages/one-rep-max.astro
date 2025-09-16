@@ -180,6 +180,10 @@ import ResultValue from "../components/ResultValue.astro";
 				});
 				window.addEventListener("unit-system-change", () => {
 					this.syncVisibility();
+					// Refresh sliders from shared values so visible input reflects the converted counterpart
+					document.querySelectorAll(".precision-range-wrapper").forEach((w) => {
+						w.dispatchEvent(new CustomEvent("refresh-from-shared-values", { bubbles: true }));
+					});
 					this.calculate();
 				});
 			}
