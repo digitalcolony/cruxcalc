@@ -11,6 +11,14 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Dev server (Astro)",
+			"type": "shell",
+			"command": "npm run dev",
+			"args": [],
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }
