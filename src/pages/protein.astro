@@ -17,7 +17,7 @@ import ResultValue from "../components/ResultValue.astro";
 >
 	<CalculatorLayout
 		title="Protein Calculator"
-		description="Get daily protein recommendations based on multiple guidelines (USA/Canada/UK RDA, Seniors, Pregnancy, Bodybuilding, Longevity)."
+		description="Get daily protein recommendations based on multiple guidelines."
 	>
 		<div slot="inputs">
 			<InputGroup label="Units" helpText="Switch between imperial and metric">
@@ -66,21 +66,21 @@ import ResultValue from "../components/ResultValue.astro";
 		</div>
 
 		<div slot="results">
-			<ResultCard title="Daily Protein Recommendations (RDA)" variant="primary">
+			<ResultCard title="Daily Protein Recommendations" variant="primary">
 				<div class="stacked-results">
 					<div class="stacked-row">
 						<div class="stacked-label">USA</div>
-						<ResultValue id="rec-usa" value="—" unit="g/day" size="xl" color="primary" />
+						<ResultValue id="rec-usa" value="—" unit="g" size="xl" color="primary" />
 						<p class="result-subtext">0.8 g/kg/day</p>
 					</div>
 					<div class="stacked-row">
 						<div class="stacked-label">Canada</div>
-						<ResultValue id="rec-canada" value="—" unit="g/day" size="xl" color="primary" />
+						<ResultValue id="rec-canada" value="—" unit="g" size="xl" color="primary" />
 						<p class="result-subtext">0.66–0.80 g/kg/day</p>
 					</div>
 					<div class="stacked-row">
 						<div class="stacked-label">United Kingdom</div>
-						<ResultValue id="rec-uk" value="—" unit="g/day" size="xl" color="primary" />
+						<ResultValue id="rec-uk" value="—" unit="g" size="xl" color="primary" />
 						<p class="result-subtext">0.75 g/kg/day</p>
 					</div>
 				</div>
@@ -90,17 +90,17 @@ import ResultValue from "../components/ResultValue.astro";
 				<div class="stacked-results">
 					<div class="stacked-row">
 						<div class="stacked-label">Bodybuilding</div>
-						<ResultValue id="rec-bodybuilding" value="—" unit="g/day" size="xl" color="success" />
+						<ResultValue id="rec-bodybuilding" value="—" unit="g" size="xl" color="success" />
 						<p class="result-subtext"><span id="rec-bodybuilding-note">1.6–2.2 g/kg</span></p>
 					</div>
 					<div class="stacked-row">
 						<div class="stacked-label">Pregnancy</div>
-						<ResultValue id="rec-pregnancy1" value="—" unit="g/day" size="xl" color="warning" />
+						<ResultValue id="rec-pregnancy1" value="—" unit="g" size="xl" color="warning" />
 						<p class="result-subtext">1.1 g/kg (pre-pregnancy weight)</p>
 					</div>
 					<div class="stacked-row" id="rec-longevity-row" style="display:none;">
 						<div class="stacked-label">Longevity</div>
-						<ResultValue id="rec-longevity" value="—" unit="g/day" size="xl" />
+						<ResultValue id="rec-longevity" value="—" unit="g" size="xl" />
 						<p class="result-subtext">10–12% of calories ÷ 4</p>
 					</div>
 				</div>
