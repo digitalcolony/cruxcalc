@@ -20,7 +20,7 @@ import ResultValue from "../components/ResultValue.astro";
 >
 	<CalculatorLayout
 		title="Potato Hack Calculator"
-		description="Calculate your daily calorie deficit on a potato-only diet. Choose between pounds or kilograms for convenience. Cooling potatoes overnight increases resistant starch, reducing available calories by 17%."
+		description="Calculate your daily calorie deficit on a potato-only diet."
 	>
 		<div slot="inputs">
 			<InputGroup label="Units" helpText="Switch between imperial and metric">
@@ -95,53 +95,58 @@ import ResultValue from "../components/ResultValue.astro";
 					<p slot="description" class="result-description">From daily potato consumption</p>
 				</ResultCard>
 
-				<ResultCard title="Daily Calorie Change" variant="success">
-					<ResultValue id="calorie-deficit" value={-300} unit="" size="xl" color="success" />
+				<ResultCard title="Daily Calorie Deficit" variant="success">
+					<ResultValue id="calorie-deficit" value={0} unit="" size="xl" color="success" />
 					<p slot="description" class="result-description">Compared to your TDEE</p>
 				</ResultCard>
 			</div>
 
-			<div class="duration-results">
-				<h3>Weight Loss Projections</h3>
+			<ResultCard title="Weight Loss Projections">
 				<div class="duration-grid">
 					<ResultCard title="3 Day Hack" variant="default">
 						<ResultValue
 							id="three-day-change"
 							value={0.3}
-							unit="lbs loss"
+							unit=" lbs"
 							size="lg"
 							color="default"
+							class="weight-loss"
 						/>
 					</ResultCard>
-
 					<ResultCard title="4 Day Hack" variant="default">
 						<ResultValue
 							id="four-day-change"
 							value={0.3}
-							unit="lbs loss"
+							unit=" lbs"
 							size="lg"
 							color="default"
+							class="weight-loss"
 						/>
 					</ResultCard>
-
 					<ResultCard title="5 Day Hack" variant="default">
 						<ResultValue
 							id="five-day-change"
 							value={0.4}
-							unit="lbs loss"
+							unit=" lbs"
 							size="lg"
 							color="default"
+							class="weight-loss"
 						/>
 					</ResultCard>
-
-					<ResultCard title="Weekly Hack" variant="warning">
-						<ResultValue id="weekly-change" value={0.6} unit="lbs loss" size="lg" color="warning" />
+					<ResultCard title="Weekly Hack" variant="success">
+						<ResultValue
+							id="weekly-change"
+							value={0.6}
+							unit=" lbs"
+							size="lg"
+							color="success"
+							class="weight-loss"
+						/>
 					</ResultCard>
 				</div>
-			</div>
+			</ResultCard>
 
-			<div class="formula-info">
-				<h4>Formula & Notes</h4>
+			<ResultCard title="Formula & Notes">
 				<p class="formula-note">
 					Cooled potatoes contain resistant starch which reduces available calories by approximately
 					17%. Weight loss calculations use 3,500 calories = 1 pound of fat loss. See the <a
@@ -149,7 +154,7 @@ import ResultValue from "../components/ResultValue.astro";
 						target="_blank">math behind potato hack</a
 					> for details.
 				</p>
-			</div>
+			</ResultCard>
 		</div>
 	</CalculatorLayout>
 </Layout>
@@ -349,33 +354,35 @@ import ResultValue from "../components/ResultValue.astro";
 		gap: 1rem;
 	}
 
-	.result-card {
-		background: var(--color-bg);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 1.5rem;
+	/* Right column layout for potato hack */
+	.main-results {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0;
+	}
+
+	.result-description {
+		margin-top: 0.75rem;
+		color: var(--color-text-muted);
 		text-align: center;
-		box-shadow: var(--shadow-sm);
+		font-size: 0.95rem;
 	}
 
-	.result-card h3 {
-		margin: 0 0 0.5rem 0;
-		font-size: 1rem;
-		font-weight: 700;
-		color: var(--color-text-muted);
+	.duration-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.25rem;
 	}
 
-	.result-value {
-		font-size: 2rem;
-		font-weight: 800;
-		color: var(--color-primary);
+	/* Increase gap for weight loss projections */
+	.result-value.weight-loss {
+		gap: 1rem;
+	}
+
+	.formula-note {
 		margin: 0;
-	}
-
-	.result-unit {
-		font-size: 0.875rem;
 		color: var(--color-text-muted);
-		margin-top: 0.25rem;
+		line-height: 1.6;
 	}
 	@media (max-width: 768px) {
 		.calculator-title {
@@ -396,6 +403,17 @@ import ResultValue from "../components/ResultValue.astro";
 			flex-direction: column;
 			align-items: stretch;
 			gap: 0.5rem;
+		}
+
+		/* Stack result grids on small screens */
+		.main-results {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
+		.duration-grid {
+			grid-template-columns: 1fr;
+			gap: 1rem;
 		}
 
 		.slider-value {
@@ -466,8 +484,12 @@ import ResultValue from "../components/ResultValue.astro";
 			});
 
 			// Global unit system changes
-			window.addEventListener("unit-system-change", () => {
-				// Before toggling visibility, convert potato value to target unit with slider-step rounding
+			window.addEventListener("unit-system-change", (e) => {
+				const newSystem = (e as CustomEvent).detail?.value;
+				if (newSystem && newSystem !== this.unitSystem) {
+					this.sharedValues.set("unitSystem", newSystem, { silent: true });
+				}
+				this.syncVisibility();
 				const system = this.unitSystem;
 				const roundTo = (val: number, step: number) => Math.round(val / step) * step;
 				if (system === "metric") {
@@ -573,16 +595,23 @@ import ResultValue from "../components/ResultValue.astro";
 			// Update UI
 			const setNum = (sel: string, val: number) => {
 				const el = document.querySelector(`${sel} .result-value__number`);
-				if (el) (el as HTMLElement).textContent = Math.round(val).toLocaleString();
+				if (!el) return;
+				(el as HTMLElement).textContent = Math.round(val).toLocaleString();
 			};
 			setNum("#total-calories", totalCalories);
-			setNum("#calorie-deficit", deficit);
+			// For deficit: if below 1, show 'none'
+			const deficitEl = document.querySelector(`#calorie-deficit .result-value__number`);
+			if (deficitEl) {
+				(deficitEl as HTMLElement).textContent =
+					deficit < 1 ? "none" : Math.round(deficit).toLocaleString();
+			}
 
 			const setProj = (id: string, val: number) => {
 				const numEl = document.querySelector(`${id} .result-value__number`);
 				const unitEl = document.querySelector(`${id} .result-value__unit`);
 				if (numEl) (numEl as HTMLElement).textContent = val.toFixed(1);
-				if (unitEl) (unitEl as HTMLElement).textContent = system === "imperial" ? "lbs" : "kg";
+				if (unitEl)
+					(unitEl as HTMLElement).textContent = ` ${system === "imperial" ? "lbs" : "kg"}`;
 			};
 			setProj("#three-day-change", d3);
 			setProj("#four-day-change", d4);
