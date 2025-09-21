@@ -67,6 +67,11 @@ function isActivePath(linkPath: string, currentPath: string): boolean {
 					>Muscle</a
 				>
 				<a
+					href="/protein"
+					class={`nav-link ${isActivePath("/protein", currentPath) ? "nav-link-active" : ""}`}
+					>Protein</a
+				>
+				<a
 					href="/potato-hack"
 					class={`nav-link ${isActivePath("/potato-hack", currentPath) ? "nav-link-active" : ""}`}
 					>Potato</a

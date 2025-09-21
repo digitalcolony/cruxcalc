@@ -253,6 +253,10 @@ Simply visit [calc.potatohack.com](https://calc.potatohack.com) and start calcul
 
 This project is open source and available under the [MIT License](LICENSE).
 
+## 🏛️ Project Governance
+
+See the project constitution for governance, quality gates, and change control: [PROJECT_CONSTITUTION.md](PROJECT_CONSTITUTION.md)
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether it's:
