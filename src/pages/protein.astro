@@ -1,0 +1,319 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CalculatorLayout from "../components/CalculatorLayout.astro";
+import InputGroup from "../components/InputGroup.astro";
+import PrecisionRangeSlider from "../components/PrecisionRangeSlider.astro";
+import GlobalUnitToggle from "../components/GlobalUnitToggle.astro";
+import ResultCard from "../components/ResultCard.astro";
+import ResultValue from "../components/ResultValue.astro";
+---
+
+<Layout
+	title="Protein Calculator - Potato Hack Fitness Calculators"
+	description="Daily protein intake guidance for general population, seniors, pregnancy, athletes, and longevity-focused diets."
+	image="/og-potato.png"
+	imageAlt="Protein Calculator"
+	canonical="/protein"
+>
+	<CalculatorLayout
+		title="Protein Calculator"
+		description="Get daily protein recommendations based on multiple guidelines (USA/Canada/UK RDA, Seniors, Pregnancy, Bodybuilding, Longevity)."
+	>
+		<div slot="inputs">
+			<InputGroup label="Units" helpText="Switch between imperial and metric">
+				<GlobalUnitToggle />
+			</InputGroup>
+
+			<div class="weight-inputs imperial-weight" data-unit-group="imperial">
+				<InputGroup label="Weight">
+					<PrecisionRangeSlider
+						id="weight-lbs"
+						min={80}
+						max={400}
+						value={160}
+						unit="lbs"
+						sharedKey="weightLbs"
+					/>
+				</InputGroup>
+			</div>
+
+			<div class="weight-inputs metric-weight" data-unit-group="metric" style="display: none;">
+				<InputGroup label="Weight">
+					<PrecisionRangeSlider
+						id="weight-kg"
+						min={35}
+						max={180}
+						value={73}
+						unit="kg"
+						sharedKey="weightKg"
+					/>
+				</InputGroup>
+			</div>
+
+			<InputGroup
+				label="Daily Calories (optional)"
+				helpText="Used for longevity recommendation (10–12% of calories ÷ 4)"
+			>
+				<PrecisionRangeSlider
+					id="calories"
+					min={1000}
+					max={4500}
+					step={10}
+					value={2000}
+					unit="kcal"
+				/>
+			</InputGroup>
+		</div>
+
+		<div slot="results">
+			<ResultCard title="Daily Protein Recommendations (RDA)" variant="primary">
+				<div class="stacked-results">
+					<div class="stacked-row">
+						<div class="stacked-label">USA</div>
+						<ResultValue id="rec-usa" value="—" unit="g/day" size="xl" color="primary" />
+						<p class="result-subtext">0.8 g/kg/day</p>
+					</div>
+					<div class="stacked-row">
+						<div class="stacked-label">Canada</div>
+						<ResultValue id="rec-canada" value="—" unit="g/day" size="xl" color="primary" />
+						<p class="result-subtext">0.66–0.80 g/kg/day</p>
+					</div>
+					<div class="stacked-row">
+						<div class="stacked-label">United Kingdom</div>
+						<ResultValue id="rec-uk" value="—" unit="g/day" size="xl" color="primary" />
+						<p class="result-subtext">0.75 g/kg/day</p>
+					</div>
+				</div>
+			</ResultCard>
+
+			<ResultCard title="Special Guidelines">
+				<div class="stacked-results">
+					<div class="stacked-row">
+						<div class="stacked-label">Bodybuilding</div>
+						<ResultValue id="rec-bodybuilding" value="—" unit="g/day" size="xl" color="success" />
+						<p class="result-subtext"><span id="rec-bodybuilding-note">1.6–2.2 g/kg</span></p>
+					</div>
+					<div class="stacked-row">
+						<div class="stacked-label">Pregnancy</div>
+						<ResultValue id="rec-pregnancy1" value="—" unit="g/day" size="xl" color="warning" />
+						<p class="result-subtext">1.1 g/kg (pre-pregnancy weight)</p>
+					</div>
+					<div class="stacked-row" id="rec-longevity-row" style="display:none;">
+						<div class="stacked-label">Longevity</div>
+						<ResultValue id="rec-longevity" value="—" unit="g/day" size="xl" />
+						<p class="result-subtext">10–12% of calories ÷ 4</p>
+					</div>
+				</div>
+			</ResultCard>
+		</div>
+	</CalculatorLayout>
+</Layout>
+
+<script src="/reactiveSharedValues.js" is:inline></script>
+<script>
+	// @ts-nocheck
+	// Protein recommendations calculator logic
+	document.addEventListener("DOMContentLoaded", () => {
+		const shared = new (window as any).ReactiveSharedValues();
+		let isSyncingWeight = false;
+
+		const els = {
+			usa: document.querySelector("#rec-usa .result-value__number"),
+			canada: document.querySelector("#rec-canada .result-value__number"),
+			uk: document.querySelector("#rec-uk .result-value__number"),
+			bb: document.querySelector("#rec-bodybuilding .result-value__number"),
+			bbNote: document.getElementById("rec-bodybuilding-note"),
+			preg1: document.querySelector("#rec-pregnancy1 .result-value__number"),
+			long: document.querySelector("#rec-longevity .result-value__number"),
+			longRow: document.getElementById("rec-longevity-row"),
+			calories: document.getElementById("calories"),
+			weightKg: document.getElementById("weight-kg"),
+			weightLbs: document.getElementById("weight-lbs"),
+		};
+
+		function getUnitSystem() {
+			return shared.get("unitSystem") || "imperial";
+		}
+
+		function getWeightKg() {
+			// Prefer shared values as the source of truth so unit-system changes reflect immediately
+			const system = getUnitSystem();
+			if (system === "metric") {
+				const kgShared = parseFloat(shared.get("weightKg"));
+				if (!Number.isNaN(kgShared)) return kgShared;
+				const kgEl = parseFloat(els.weightKg?.value || "NaN");
+				if (!Number.isNaN(kgEl)) return kgEl;
+				return 73;
+			}
+			const lbsShared = parseFloat(shared.get("weightLbs"));
+			const lbs = !Number.isNaN(lbsShared) ? lbsShared : parseFloat(els.weightLbs?.value || "160");
+			return lbs * 0.45359237;
+		}
+
+		function getCalories() {
+			const c = parseFloat(els.calories?.value || "0");
+			return isNaN(c) ? 0 : c;
+		}
+
+		function round(n) {
+			return Math.round(n);
+		}
+
+		function fmtRange(min, max) {
+			return `${round(min)}–${round(max)}`;
+		}
+
+		function updateCalculations() {
+			const kg = getWeightKg();
+			const calories = getCalories();
+
+			// Basic RDAs
+			const usa = 0.8 * kg;
+			const canadaMin = 0.66 * kg;
+			const canadaMax = 0.8 * kg;
+			const uk = 0.75 * kg;
+
+			if (els.usa) els.usa.textContent = String(round(usa));
+			if (els.canada) els.canada.textContent = fmtRange(canadaMin, canadaMax);
+			if (els.uk) els.uk.textContent = String(round(uk));
+
+			// Bodybuilding (always shown)
+			if (els.bb) {
+				els.bb.textContent = fmtRange(1.6 * kg, 2.2 * kg);
+				if (els.bbNote) {
+					els.bbNote.textContent = "1.6–2.2 g/kg";
+				}
+			}
+
+			// Pregnancy (always shown; first guideline)
+			const p1 = 1.1 * kg; // pre-pregnancy weight
+			if (els.preg1) els.preg1.textContent = String(round(p1));
+
+			// Longevity
+			const showLongevity = calories && calories > 0;
+			if (els.longRow) els.longRow.style.display = showLongevity ? "" : "none";
+			if (showLongevity && els.long) {
+				const minG = (calories * 0.1) / 4.0;
+				const maxG = (calories * 0.12) / 4.0;
+				els.long.textContent = fmtRange(minG, maxG);
+			}
+
+			// Quick sanity assertions (T005)
+			try {
+				console.assert(!Number.isNaN(kg) && kg > 0, "Weight (kg) must be positive");
+				console.assert(!Number.isNaN(usa) && usa > 0, "USA RDA must be positive");
+			} catch {}
+		}
+
+		// Initial state
+		updateCalculations();
+
+		// Event wiring
+		// Component-bubbled change events (work across separate SharedValues instances)
+		document.addEventListener("precision-range-change", (e) => {
+			const detail = (e as any)?.detail || {};
+			const id = detail.id;
+			const value = parseFloat(detail.value);
+			// Keep lbs and kg in sync when either slider moves
+			if (!isSyncingWeight) {
+				isSyncingWeight = true;
+				if (id === "weight-lbs" && !Number.isNaN(value)) {
+					const kg = value * 0.45359237;
+					shared.set("weightLbs", value);
+					shared.set("weightKg", Math.round(kg * 10) / 10);
+					setSliderValue("weight-kg", shared.get("weightKg"));
+				} else if (id === "weight-kg" && !Number.isNaN(value)) {
+					const lbs = Math.round(value / 0.453592);
+					shared.set("weightKg", value);
+					shared.set("weightLbs", lbs);
+					setSliderValue("weight-lbs", shared.get("weightLbs"));
+				}
+				isSyncingWeight = false;
+			}
+			updateCalculations();
+		});
+		// Global unit system event broadcast at window/document level
+		function syncSlidersFromShared() {
+			setSliderValue("weight-lbs", shared.get("weightLbs"));
+			setSliderValue("weight-kg", shared.get("weightKg"));
+		}
+
+		window.addEventListener("unit-system-change", () => {
+			// SharedValues will have converted weightLbs/weightKg already; reflect immediately in sliders
+			syncSlidersFromShared();
+			updateCalculations();
+		});
+
+		// Local inputs
+		els.calories?.addEventListener("input", updateCalculations);
+		els.weightKg?.addEventListener("input", updateCalculations);
+		els.weightLbs?.addEventListener("input", updateCalculations);
+	});
+
+	// Helper to refresh a PrecisionRangeSlider UI from SharedValues
+	function refreshSliderFromShared(inputId) {
+		const input = document.getElementById(inputId);
+		if (!input) return;
+		const wrapper = input.closest(".precision-range-wrapper");
+		if (!wrapper) return;
+		wrapper.dispatchEvent(new CustomEvent("refresh-from-shared-values", { bubbles: true }));
+	}
+
+	// Programmatically set a slider's value and trigger its internal UI sync
+	function setSliderValue(inputId, newValue) {
+		if (newValue === undefined || newValue === null || Number.isNaN(Number(newValue))) return;
+		const input = document.getElementById(inputId) as HTMLInputElement | null;
+		if (!input) return;
+		input.value = String(newValue);
+		// Trigger slider to update number field and display without relying on save-to-shared
+		input.dispatchEvent(new Event("input", { bubbles: true }));
+	}
+</script>
+
+<style>
+	/* Left-align all ResultCard content on this page */
+	:global(.result-card__content) {
+		text-align: left;
+	}
+	.stacked-results {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.stacked-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0.5rem 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px dashed var(--color-border);
+	}
+
+	.stacked-row:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	.stacked-label {
+		font-weight: 700;
+		color: var(--color-text);
+		justify-self: start;
+	}
+
+	.result-subtext {
+		grid-column: 1 / -1;
+		margin: 0.25rem 0 0;
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+		text-align: left;
+	}
+
+	/* (Removed guidelines card and related styles) */
+
+	@media (max-width: 768px) {
+		.stacked-row {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
